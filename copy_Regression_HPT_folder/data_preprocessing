@@ -1,0 +1,37 @@
+#!/bin/bash
+echo "STARTED"
+
+module load anaconda
+python create_initial_inputs.py 
+
+cd "data_processing_folder/"
+
+pwd
+
+for case_folder in */
+do
+    cd "$case_folder"
+    echo ${case_folder}
+    
+    for prop_folder in */
+    do
+        cd "$prop_folder"
+        echo ${prop_folder}
+        
+        for model_folder in */
+        do
+            cd "$model_folder"
+            echo ${model_folder}
+            sbatch findTopInputs.sub
+            
+            cd '..'
+            
+        done
+        cd ".."
+        
+    done
+    cd ".."
+    
+done
+    
+echo "COMPLETED"

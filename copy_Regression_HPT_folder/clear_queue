@@ -1,0 +1,15 @@
+#!/bin/bash
+echo "CLEARING"
+
+START_POINT=416835
+END_POINT=416891
+
+ITT_VAR=${START_POINT}
+
+while [ ${ITT_VAR} -lt ${END_POINT} ]; do
+    scancel ${ITT_VAR}
+    echo "${ITT_VAR}"
+    ITT_VAR=$((ITT_VAR+1))
+done
+
+echo "FINISHED"
