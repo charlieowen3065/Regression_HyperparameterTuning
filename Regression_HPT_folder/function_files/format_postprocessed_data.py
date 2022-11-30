@@ -103,81 +103,84 @@ for case in case_use:
             data_prop.loc[i+1] = [mdl, inpFt, rmse, r2, C, e, g, c0, ratio]
             i += 1
         # GPR ---------------------------------------------------------------------------------------------------------------------------------------------------------------
-        print("MID_i: ", i)
-        data_prop.loc[i+1] = ['Models', 'Input Features', 'RMSE', 'R^2', 'Noise', 'SigmaF', 'Length', 'Alpha', 'Training-to-Final Error']
-        i += 1 
-        # GPR_RatQuad
-        filename_temp = data_list[i-1]
-        if filename_temp[-len('GPR_RationalQuadratic_Sorted.csv'):] == 'GPR_RationalQuadratic_Sorted.csv':
-            print('GPR_RatQuad')
-            print('i: ', i)
-            data_temp_full = pd.read_csv(filename_temp)
-            data_temp = data_temp_full.iloc[0,:]
-            mdl = 'GPR Rational Quadratic'
-            inpFt = data_temp['input_features']
-            rmse = data_temp['RMSE']
-            r2 = data_temp['R^2']
-            noise = data_temp['Noise']
-            sigF = data_temp['Sigma_F']
-            l = data_temp['Length']
-            alpha = data_temp['Alpha']
-            ratio = data_temp['avgTR to Final Error']
-            data_prop.loc[i+1] = [mdl, inpFt, rmse, r2, noise, sigF, l, alpha, ratio]
-            i += 1
-        # GPR_RBF
-        filename_temp = data_list[i-1]
-        if filename_temp[-len('GPR_RBF_Sorted.csv'):] == 'GPR_RBF_Sorted.csv':
-            print('GPR_RBF')
-            print('i: ', i)
-            data_temp_full = pd.read_csv(filename_temp)
-            data_temp = data_temp_full.iloc[0,:]
-            mdl = 'GPR RBF'
-            inpFt = data_temp['input_features']
-            rmse = data_temp['RMSE']
-            r2 = data_temp['R^2']
-            noise = data_temp['Noise']
-            sigF = data_temp['Sigma_F']
-            l = data_temp['Length']
-            alpha = 'N/A'
-            ratio = data_temp['avgTR to Final Error']
-            data_prop.loc[i+1] = [mdl, inpFt, rmse, r2, noise, sigF, l, alpha, ratio]
-            i += 1
-        # GPR_Matern3/2
-        filename_temp = data_list[i-1]
-        if filename_temp[-len('GPR_Matern32_Sorted.csv'):] == 'GPR_Matern32_Sorted.csv':
-            print('GPR_Matern32')
-            print('i: ', i)
-            data_temp_full = pd.read_csv(filename_temp)
-            data_temp = data_temp_full.iloc[0,:]
-            mdl = 'GPR Matern 3/2'
-            inpFt = data_temp['input_features']
-            rmse = data_temp['RMSE']
-            r2 = data_temp['R^2']
-            noise = data_temp['Noise']
-            sigF = data_temp['Sigma_F']
-            l = data_temp['Length']
-            alpha = 'N/A'
-            ratio = data_temp['avgTR to Final Error']
-            data_prop.loc[i+1] = [mdl, inpFt, rmse, r2, noise, sigF, l, alpha, ratio]
-            i += 1
-        # GPR_Matern5/2
-        filename_temp = data_list[i-1]
-        if filename_temp[-len('GPR_Matern52_Sorted.csv'):] == 'GPR_Matern52_Sorted.csv':
-            print('GPR_Matern52')
-            print('i: ', i)
-            data_temp_full = pd.read_csv(filename_temp)
-            data_temp = data_temp_full.iloc[0,:]
-            mdl = 'GPR Matern 5/2'
-            inpFt = data_temp['input_features']
-            rmse = data_temp['RMSE']
-            r2 = data_temp['R^2']
-            noise = data_temp['Noise']
-            sigF = data_temp['Sigma_F']
-            l = data_temp['Length']
-            alpha = 'N/A'
-            ratio = data_temp['avgTR to Final Error']
-            data_prop.loc[i+1] = [mdl, inpFt, rmse, r2, noise, sigF, l, alpha, ratio]
-            i += 1
+        try:
+            test_del = data_list[i-1]
+            data_prop.loc[i+1] = ['Models', 'Input Features', 'RMSE', 'R^2', 'Noise', 'SigmaF', 'Length', 'Alpha', 'Training-to-Final Error']
+            i += 1 
+            # GPR_RatQuad
+            filename_temp = data_list[i-1]
+            if filename_temp[-len('GPR_RationalQuadratic_Sorted.csv'):] == 'GPR_RationalQuadratic_Sorted.csv':
+                print('GPR_RatQuad')
+                print('i: ', i)
+                data_temp_full = pd.read_csv(filename_temp)
+                data_temp = data_temp_full.iloc[0,:]
+                mdl = 'GPR Rational Quadratic'
+                inpFt = data_temp['input_features']
+                rmse = data_temp['RMSE']
+                r2 = data_temp['R^2']
+                noise = data_temp['Noise']
+                sigF = data_temp['Sigma_F']
+                l = data_temp['Length']
+                alpha = data_temp['Alpha']
+                ratio = data_temp['avgTR to Final Error']
+                data_prop.loc[i+1] = [mdl, inpFt, rmse, r2, noise, sigF, l, alpha, ratio]
+                i += 1
+            # GPR_RBF
+            filename_temp = data_list[i-1]
+            if filename_temp[-len('GPR_RBF_Sorted.csv'):] == 'GPR_RBF_Sorted.csv':
+                print('GPR_RBF')
+                print('i: ', i)
+                data_temp_full = pd.read_csv(filename_temp)
+                data_temp = data_temp_full.iloc[0,:]
+                mdl = 'GPR RBF'
+                inpFt = data_temp['input_features']
+                rmse = data_temp['RMSE']
+                r2 = data_temp['R^2']
+                noise = data_temp['Noise']
+                sigF = data_temp['Sigma_F']
+                l = data_temp['Length']
+                alpha = 'N/A'
+                ratio = data_temp['avgTR to Final Error']
+                data_prop.loc[i+1] = [mdl, inpFt, rmse, r2, noise, sigF, l, alpha, ratio]
+                i += 1
+            # GPR_Matern3/2
+            filename_temp = data_list[i-1]
+            if filename_temp[-len('GPR_Matern32_Sorted.csv'):] == 'GPR_Matern32_Sorted.csv':
+                print('GPR_Matern32')
+                print('i: ', i)
+                data_temp_full = pd.read_csv(filename_temp)
+                data_temp = data_temp_full.iloc[0,:]
+                mdl = 'GPR Matern 3/2'
+                inpFt = data_temp['input_features']
+                rmse = data_temp['RMSE']
+                r2 = data_temp['R^2']
+                noise = data_temp['Noise']
+                sigF = data_temp['Sigma_F']
+                l = data_temp['Length']
+                alpha = 'N/A'
+                ratio = data_temp['avgTR to Final Error']
+                data_prop.loc[i+1] = [mdl, inpFt, rmse, r2, noise, sigF, l, alpha, ratio]
+                i += 1
+            # GPR_Matern5/2
+            filename_temp = data_list[i-1]
+            if filename_temp[-len('GPR_Matern52_Sorted.csv'):] == 'GPR_Matern52_Sorted.csv':
+                print('GPR_Matern52')
+                print('i: ', i)
+                data_temp_full = pd.read_csv(filename_temp)
+                data_temp = data_temp_full.iloc[0,:]
+                mdl = 'GPR Matern 5/2'
+                inpFt = data_temp['input_features']
+                rmse = data_temp['RMSE']
+                r2 = data_temp['R^2']
+                noise = data_temp['Noise']
+                sigF = data_temp['Sigma_F']
+                l = data_temp['Length']
+                alpha = 'N/A'
+                ratio = data_temp['avgTR to Final Error']
+                data_prop.loc[i+1] = [mdl, inpFt, rmse, r2, noise, sigF, l, alpha, ratio]
+                i += 1
+            except:
+                pass
         
         filename_temp = str(prop_folder)+'_formatted_data.csv'
         data_prop.to_csv(filename_temp)
