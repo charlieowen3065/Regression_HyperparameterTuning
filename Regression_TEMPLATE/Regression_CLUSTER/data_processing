@@ -1,0 +1,47 @@
+#!/bin/bash
+echo "STARTED"
+
+module load anaconda
+
+FILE_COPY_PATH=$(realpath "function_files/data_processing.py")
+
+cd "data_processing_folder/"
+
+pwd
+
+for case_folder in */
+do
+    cd "$case_folder"
+    echo ${case_folder}
+    
+    for prop_folder in */
+    do
+        cd "$prop_folder"
+        echo ${prop_folder}
+        
+        for model_folder in */
+        do 
+            cd "$model_folder"
+            echo ${model_folder}
+            
+            for ftSet_folder in */ 
+            do
+                cp * "$ftSet_folder"
+                cp "$FILE_COPY_PATH" "$ftSet_folder"
+                cd "$ftSet_folder"
+                echo ${ftSet_folder}
+                sbatch data_processing.sub
+                cd ".."
+                
+            done
+            cd '..'
+            
+        done
+        cd ".."
+        
+    done
+    cd ".."
+    
+done
+    
+echo "COMPLETED"

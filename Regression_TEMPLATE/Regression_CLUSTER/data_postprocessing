@@ -1,0 +1,11 @@
+#!/bin/bash
+echo "STARTED"
+
+module load anaconda
+
+cd "function_files/"
+
+python data_postprocessing.py
+python format_postprocessed_data.py
+
+echo "COMPLETED"
