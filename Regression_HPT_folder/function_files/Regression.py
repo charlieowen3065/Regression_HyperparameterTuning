@@ -175,14 +175,14 @@ class Regression():
 
         # GETTING THE MODELS -------------------------------------------------------------------------------------------
         """ SVM MODELS """
-        model_names.append('SVM_linear')
+        model_names.append('SVM_Linear')
         model_list.append(svm.SVR(kernel='linear', C=self.C, epsilon=self.epsilon, coef0=self.coef0))
 
-        model_names.append("SVM_poly2")
+        model_names.append("SVM_Poly2")
         model_list.append(
             svm.SVR(kernel='poly', degree=2, C=self.C, gamma=self.gamma, epsilon=self.epsilon, coef0=self.coef0))
 
-        model_names.append("SVM_poly3")
+        model_names.append("SVM_Poly3")
         model_list.append(
             svm.SVR(kernel='poly', degree=3, C=self.C, gamma=self.gamma, epsilon=self.epsilon, coef0=self.coef0))
 
@@ -193,7 +193,7 @@ class Regression():
         noise = WhiteKernel(noise_level=self.noise)
 
         """ GAUSSIAN MODELS """
-        model_names.append("GPR_rational_quadratic")
+        model_names.append("GPR_RationalQuadratic")
         kernel_use = (RationalQuadratic(length_scale=self.scale_length, alpha=self.alpha) * sig_F_sqrd) + noise
         model_list.append(gaussian_process.GaussianProcessRegressor(kernel=kernel_use))
 
@@ -201,11 +201,11 @@ class Regression():
         kernel_use = (RBF(length_scale=self.scale_length) * sig_F_sqrd) + noise
         model_list.append(gaussian_process.GaussianProcessRegressor(kernel=kernel_use))
 
-        model_names.append("GPR_Matern_3-2")
+        model_names.append("GPR_Matern32")
         kernel_use = (Matern(nu=3 / 2, length_scale=self.scale_length) * sig_F_sqrd) + noise
         model_list.append(gaussian_process.GaussianProcessRegressor(kernel=kernel_use))
 
-        model_names.append("GPR_Matern_5-2")
+        model_names.append("GPR_Matern52")
         kernel_use = (Matern(nu=5 / 2, length_scale=self.scale_length) * sig_F_sqrd) + noise
         model_list.append(gaussian_process.GaussianProcessRegressor(kernel=kernel_use))
 
