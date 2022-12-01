@@ -22,7 +22,9 @@ class data_preprocessing():
         shutil.copyfile(main_path + s +'function_files' + s +'findTopInputs.py', 'findTopInputs.py')
         shutil.copyfile(main_path + s + 'function_files' + s + 'Heatmaps.py', 'Heatmaps.py')
         shutil.copyfile(main_path + s + 'function_files' + s + 'data_processing.py', 'data_processing.py')
-
+        
+        shutil.copyfile(main_path + s +'slurm_scripts' + s +'findTopInputs.sub', 'findTopInputs.sub')
+        shutil.copyfile(main_path + s + 'slurm_scripts' + s + 'data_processing.sub', 'data_processing.sub')
 
         Nk = input_dict['Nk']
         N = input_dict['N']
