@@ -3,6 +3,9 @@ import numpy as np
 run_findTopInputs = True
 parm_var = True
 locData_var = False
+test_train_split_var = False
+# When true, the data is first split into a test/train, then the kF-CV is preformed on the train-data
+# When False, the data is all run into the kF-CV, and there is no test/train split
 N = 1
 Nk = 5
 # Which properties to run
@@ -28,6 +31,9 @@ numTopFeatures = 5
 gridLength = 20
 numZooms = 3
 numLayers = 3
+
+# Test/Train Split
+split_decimal = 0.3  # the amount of data used for testing
 
 # SEEDS ****************************************************************************************************************
 seeds = [1939855286, 407978056, 1280179023, 1518676132, 916062339, 1178283666, 382075401]
