@@ -92,7 +92,7 @@ for case in case_use:
             input_dict['Y_inp'] = Y_inp
             input_dict['X_list'] = X_data
             input_dict['seed'] = seeds[prop_idx]
-            input_dict['tr_ts_seed'] = tr_ts_seed[prop_idx]
+            input_dict['tr_ts_seed'] = tr_ts_seeds[prop_idx]
             input_dict['goodIDs'] = goodIDs_prop
             input_dict['feature_names'] = X_names
             input_dict['hyperparameters'] = hyperparameters
