@@ -1,0 +1,11 @@
+#!/bin/bash
+# filename: run_single_inp_subset.sub
+
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --job-name=data-processing-job
+#SBATCH --output=inp_data.out
+
+echo "START PROCESSING"
+python run_single_inp_subset.py
+echo "PROCESS COMPLETE"
