@@ -27,81 +27,85 @@ for case in case_use:
         data_list = os.listdir()
         data_prop = pd.DataFrame(columns=['MODEL', 'INPUT FEATURES', 'RMSE', 'R^2', 'HP1', 'HP2', 'HP3', 'HP4', 'RATIO'])
         # SVM ---------------------------------------------------------------------------------------------------------------------------------------------------------------
-        data_prop.loc[0] = ['Models', 'Input Features', 'RMSE', 'R^2', 'C', 'Epsilon', 'Gamma', 'Coef0', 'Training-to-Final Error']
-        i = 0
-        # SVM_Linear
-        filename_temp = data_list[i]
-        print("Prop: ", prop_names[prop])
-        if filename_temp[-len('SVM_Linear_Sorted.csv'):] == 'SVM_Linear_Sorted.csv':
-            print('SVM_Linear')
-            print('i: ', i)
-            data_temp_full = pd.read_csv(filename_temp)
-            data_temp = data_temp_full.iloc[0,:]
-            mdl = 'SVM Linear'
-            inpFt = data_temp['input_features']
-            rmse = data_temp['RMSE']
-            r2 = data_temp['R^2']
-            C = data_temp['C']
-            e = data_temp['Epsilon']
-            g = data_temp['Gamma']
-            c0 = 'N/A'
-            ratio = data_temp['avgTR to Final Error']
-            data_prop.loc[i+1] = [mdl, inpFt, rmse, r2, C, e, g, c0, ratio]
-            i += 1
-        # SVM_Poly2
-        filename_temp = data_list[i]
-        if filename_temp[-len('SVM_Poly2_Sorted.csv'):] == 'SVM_Poly2_Sorted.csv':
-            print('SVM_Poly2')
-            print('i: ', i)
-            data_temp_full = pd.read_csv(filename_temp)
-            data_temp = data_temp_full.iloc[0,:]
-            mdl = 'SVM Poly2'
-            inpFt = data_temp['input_features']
-            rmse = data_temp['RMSE']
-            r2 = data_temp['R^2']
-            C = data_temp['C']
-            e = data_temp['Epsilon']
-            g = data_temp['Gamma']
-            c0 = data_temp['Coef0']
-            ratio = data_temp['avgTR to Final Error']
-            data_prop.loc[i+1] = [mdl, inpFt, rmse, r2, C, e, g, c0, ratio]
-            i += 1
-        # SVM_Poly3
-        filename_temp = data_list[i]
-        if filename_temp[-len('SVM_Poly3_Sorted.csv'):] == 'SVM_Poly3_Sorted.csv':
-            print('SVM_Poly3')
-            print('i: ', i)
-            data_temp_full = pd.read_csv(filename_temp)
-            data_temp = data_temp_full.iloc[0,:]
-            mdl = 'SVM Poly3'
-            inpFt = data_temp['input_features']
-            rmse = data_temp['RMSE']
-            r2 = data_temp['R^2']
-            C = data_temp['C']
-            e = data_temp['Epsilon']
-            g = data_temp['Gamma']
-            c0 = data_temp['Coef0']
-            ratio = data_temp['avgTR to Final Error']
-            data_prop.loc[i+1] = [mdl, inpFt, rmse, r2, C, e, g, c0, ratio]
-            i += 1
-        # SVM_RBF
-        filename_temp = data_list[i]
-        if filename_temp[-len('SVM_RBF_Sorted.csv'):] == 'SVM_RBF_Sorted.csv':
-            print('SVM_RBF')
-            print('i: ', i)
-            data_temp_full = pd.read_csv(filename_temp)
-            data_temp = data_temp_full.iloc[0,:]
-            mdl = 'SVM RBF'
-            inpFt = data_temp['input_features']
-            rmse = data_temp['RMSE']
-            r2 = data_temp['R^2']
-            C = data_temp['C']
-            e = data_temp['Epsilon']
-            g = data_temp['Gamma']
-            c0 = 'N/A'
-            ratio = data_temp['avgTR to Final Error']
-            data_prop.loc[i+1] = [mdl, inpFt, rmse, r2, C, e, g, c0, ratio]
-            i += 1
+        try:
+            data_test_del = data_list[i]
+            data_prop.loc[0] = ['Models', 'Input Features', 'RMSE', 'R^2', 'C', 'Epsilon', 'Gamma', 'Coef0', 'Training-to-Final Error']
+            i = 0
+            # SVM_Linear
+            filename_temp = data_list[i]
+            print("Prop: ", prop_names[prop])
+            if filename_temp[-len('SVM_Linear_Sorted.csv'):] == 'SVM_Linear_Sorted.csv':
+                print('SVM_Linear')
+                print('i: ', i)
+                data_temp_full = pd.read_csv(filename_temp)
+                data_temp = data_temp_full.iloc[0,:]
+                mdl = 'SVM Linear'
+                inpFt = data_temp['input_features']
+                rmse = data_temp['RMSE']
+                r2 = data_temp['R^2']
+                C = data_temp['C']
+                e = data_temp['Epsilon']
+                g = data_temp['Gamma']
+                c0 = 'N/A'
+                ratio = data_temp['avgTR to Final Error']
+                data_prop.loc[i+1] = [mdl, inpFt, rmse, r2, C, e, g, c0, ratio]
+                i += 1
+            # SVM_Poly2
+            filename_temp = data_list[i]
+            if filename_temp[-len('SVM_Poly2_Sorted.csv'):] == 'SVM_Poly2_Sorted.csv':
+                print('SVM_Poly2')
+                print('i: ', i)
+                data_temp_full = pd.read_csv(filename_temp)
+                data_temp = data_temp_full.iloc[0,:]
+                mdl = 'SVM Poly2'
+                inpFt = data_temp['input_features']
+                rmse = data_temp['RMSE']
+                r2 = data_temp['R^2']
+                C = data_temp['C']
+                e = data_temp['Epsilon']
+                g = data_temp['Gamma']
+                c0 = data_temp['Coef0']
+                ratio = data_temp['avgTR to Final Error']
+                data_prop.loc[i+1] = [mdl, inpFt, rmse, r2, C, e, g, c0, ratio]
+                i += 1
+            # SVM_Poly3
+            filename_temp = data_list[i]
+            if filename_temp[-len('SVM_Poly3_Sorted.csv'):] == 'SVM_Poly3_Sorted.csv':
+                print('SVM_Poly3')
+                print('i: ', i)
+                data_temp_full = pd.read_csv(filename_temp)
+                data_temp = data_temp_full.iloc[0,:]
+                mdl = 'SVM Poly3'
+                inpFt = data_temp['input_features']
+                rmse = data_temp['RMSE']
+                r2 = data_temp['R^2']
+                C = data_temp['C']
+                e = data_temp['Epsilon']
+                g = data_temp['Gamma']
+                c0 = data_temp['Coef0']
+                ratio = data_temp['avgTR to Final Error']
+                data_prop.loc[i+1] = [mdl, inpFt, rmse, r2, C, e, g, c0, ratio]
+                i += 1
+            # SVM_RBF
+            filename_temp = data_list[i]
+            if filename_temp[-len('SVM_RBF_Sorted.csv'):] == 'SVM_RBF_Sorted.csv':
+                print('SVM_RBF')
+                print('i: ', i)
+                data_temp_full = pd.read_csv(filename_temp)
+                data_temp = data_temp_full.iloc[0,:]
+                mdl = 'SVM RBF'
+                inpFt = data_temp['input_features']
+                rmse = data_temp['RMSE']
+                r2 = data_temp['R^2']
+                C = data_temp['C']
+                e = data_temp['Epsilon']
+                g = data_temp['Gamma']
+                c0 = 'N/A'
+                ratio = data_temp['avgTR to Final Error']
+                data_prop.loc[i+1] = [mdl, inpFt, rmse, r2, C, e, g, c0, ratio]
+                i += 1
+        except:
+            pass
         # GPR ---------------------------------------------------------------------------------------------------------------------------------------------------------------
         try:
             test_del = data_list[i-1]
