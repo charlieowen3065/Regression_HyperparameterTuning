@@ -469,11 +469,38 @@ class Regression():
         else:
             return results, bestPred
 
-    def Regression_singleModel(self, TS_dec, train_test_seed):
+    def Regression_test_singleModel(self, model, X_train, X_test, Y_train, Y_test):
         
-        X = self.X
-        Y = self.Y
+        mdl = model.fit(X_train, Y_train)
+        Yp = mdl.predict(X_test)
         
-        X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=TS_dec, random_state=train_test_seed)
+        rmse, r2, cor = self.mF.getPredMetrics(Y_test, Yp_)
         
+        return Yp, rmse, r2, cor
+    
+    def Regression_test_multProp(self, X_train, X_test, Y_train, Y_test):
         
+        results = dict()
+        
+        Yp_colNames = []
+        Yp_zeros = np.zeros((len(X_test), self.numMdls))
+        for mdl_nm in self.model_names:
+            Yp_colNames.append(mdl_nm)
+        metrics_colNames = ['RMSE', 'R2', 'Cor']
+        
+        Yp_df = pd.DataFrame(data=Yp_zeros, columns=Yp_colNames)
+        metrics_df = pd.DataFrame(columns=metrics_colNames)
+        
+        for model in range(self.numMdls):
+            model_current = self.model_list[model]
+            model_name_current = self.model_names[model]
+        
+            Yp_temp, rmse_temp, r2_temp, cor_temp = Regression_test_singleModel(model_current, X_train, X_test, Y_train, Y_test)
+            
+            Yp_df.iloc[:, model] = Yp_temp
+            metrics_df.loc[model_name_current] = [rmse_temp, r2_temp, cor_temp]
+            
+        results['Yp'] = Yp_df
+        results['metrics'] = metrics_df
+
+        return results
