@@ -24,6 +24,7 @@ case_use = ['org']
 # Combo Array
 maxNumCombos = 2
 combo_array = np.arange(start=2, stop=maxNumCombos+1, step=1)
+num_fts_per_sublist = 100
 
 numTopFeatures = 5
 
