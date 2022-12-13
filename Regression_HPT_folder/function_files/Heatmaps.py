@@ -2717,7 +2717,7 @@ class heatmaps():
 
         return error_array, storage_df
 
-    def runFullGridSearch_GPR_Noise_SigF_Length(self, noise_input_data, sigF_input_data, length_input_data):
+    def runFullGridSearch_GPR_Noise_SigF_Lgiength(self, noise_input_data, sigF_input_data, length_input_data):
 
         HP_data = [[noise_input_data, sigF_input_data, length_input_data]]
 
