@@ -37,6 +37,7 @@ split_decimal = 0.3  # the amount of data used for testing
 
 # SEEDS ****************************************************************************************************************
 seeds = [1939855286, 407978056, 1280179023, 1518676132, 916062339, 1178283666, 382075401]
+tr_ts_seeds = [0, 0, 0, 0, 0, 0, 0]
 
 # Hyperparamter Ranges *************************************************************************************************
 prop_names = ["Relative_Density", "Modulus", "Yield_Strength", "Work_Hardening_Exponent", "Elongation_to_Fracture",
