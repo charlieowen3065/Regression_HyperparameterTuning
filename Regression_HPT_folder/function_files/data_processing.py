@@ -127,37 +127,59 @@ elif model_use[7]:  # Matern 5/2
     ht.runFullGridSearch_GPR_Noise_SigF_Length(noise_input_data, sigF_input_data, length_input_data)
 
 if test_train_split_var:
-    sorted_data_df = pd.read_csv("0-Data_"+model_name+"_Sorted.csv")
-    best_model_data = sorted_data_df.iloc[0,:]
-    
+
     if model_type == 'SVM':
-        C = best_model_data['C']
-        Epsilon = best_model_data['Epsilon']
-        Coef0 = best_model_data['Coef0']
-        Gamma = best_model_data['Gamma']
-        
-        Alpha = 'N/A'
-        Scale_Length = 'N/A'
-        Noise = 'N/A'
-        Sigma_F = 'N/A'
-        
-    if model_type == 'GPR':
-        if model_use[4]:
-            Alpha = best_model_data['Alpha']
-        Scale_Length = best_model_data['Length']
-        Noise = best_model_data['Noise']
-        Sigma_F = best_model_data['Sigma_F']
-        
-        C = 'N/A'
-        Epsilon = 'N/A'
-        Coef0 = 'N/A'
-        Gamma = 'N/A'
+        col_names = ['RMSE', 'R2', 'Cor', 'C', 'Epsilon', 'Gamma', 'Coef0']
+    elif model_type == 'GPR':
+        col_names = ['RMSE', 'R2', 'Cor', 'Noise', 'Length', 'SigmaF', 'Alpha']
     
-    reg = Regression(X_input, Y_input, models_use=model_use, seed=seed, RemoveNaN=False, 
-                     C=C, epsilon=Epsilon, gamma=Gamma, coef0=Coef0, noise=Noise, sigma_F=Sigma_F, scale_length=Scale_Length, alpha=Alpha)
+    top_models_df = pd.DataFrame(columns=col_names)
     
-    results = Regression_test_multProp(X_train, X_test, Y_train, Y_test)
+    for i in range(5):
+        sorted_data_df = pd.read_csv("0-Data_"+model_name+"_Sorted.csv")
+        best_model_data = sorted_data_df.iloc[i,:]
         
-
-
+        if model_type == 'SVM':
+            C = best_model_data['C']
+            Epsilon = best_model_data['Epsilon']
+            Coef0 = best_model_data['Coef0']
+            Gamma = best_model_data['Gamma']
+            
+            Alpha = 'N/A'
+            Scale_Length = 'N/A'
+            Noise = 'N/A'
+            Sigma_F = 'N/A'
+            
+        if model_type == 'GPR':
+            if model_use[4]:
+                Alpha = best_model_data['Alpha']
+            Scale_Length = best_model_data['Length']
+            Noise = best_model_data['Noise']
+            Sigma_F = best_model_data['Sigma_F']
+            
+            C = 'N/A'
+            Epsilon = 'N/A'
+            Coef0 = 'N/A'
+            Gamma = 'N/A'
+        
+        reg = Regression(X_input, Y_input, models_use=model_use, seed=seed, RemoveNaN=False, 
+                         C=C, epsilon=Epsilon, gamma=Gamma, coef0=Coef0, noise=Noise, sigma_F=Sigma_F, scale_length=Scale_Length, alpha=Alpha)
+        
+        results = Regression_test_multProp(X_train, X_test, Y_train, Y_test)
+        
+        rmse_temp = results['metrics'][model_name][0]
+        r2_temp = results['metrics'][model_name][1]
+        cor_temp = results['metrics'][model_name][2]
+        
+        if model_type == 'SVM':
+            row_data = [rmse_temp, r2_temp, cor_temp, C, Epsilon, Gamma, Coef0]
+        if model_type == 'GPR':
+            row_data = [rmse_temp, r2_temp, cor_temp, Noise, Scale_Length, Sigma_F, Alpha]
+        
+        top_models_df.loc[str(i)]  = row_data
+    
+    top_models_df = top_models_df.sort_values(by=["RMSE"], ascending=True)
+    top_models_df.to_csv('Best_Models.csv')
+    
+    
 os.chdir('..')
