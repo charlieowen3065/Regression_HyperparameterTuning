@@ -23,7 +23,8 @@ do
         do 
             cd "$model_folder"
             echo ${model_folder}
-            
+            python combine_and_determine_top_inp_fts.py
+			
             for ftSet_folder in */ 
             do
                 cp * "$ftSet_folder"
