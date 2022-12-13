@@ -26,8 +26,8 @@ sys.path.append(os.path.abspath(current_path))
 # ******************************************************************************************************************** #
 
 
-X_input = np.genfromtxt('feature_data.csv', delimiter=',')
-Y_input = input_dict['Y_inp']
+X_int = np.genfromtxt('feature_data.csv', delimiter=',')
+Y_int = input_dict['Y_inp']
 model_use = input_dict['models_use']
 model_type = input_dict['model_type']
 model_name = input_dict['model_name']
@@ -43,6 +43,17 @@ hyperparameters = input_dict['hyperparameters']
 test_train_split_var = input_dict['test_train_split_var']
 split_decimal = input_dict['split_decimal']
 tr_ts_seed = input_dict['tr_ts_seed']
+
+# For Test-Train Splitting
+if test_train_split_var:
+    X_train, X_test, Y_train, Y_test = test_train_split(X_int, Y_int, test_size=split_decimal, random_state=tr_ts_seed)
+    
+    X_input = X_train
+    Y_input = Y_train
+else:
+    X_input = X_int
+    Y_input = Y_int
+
 
 ht = heatmaps(X_input, Y_input,
               N=N, Nk=Nk,
@@ -124,13 +135,29 @@ if test_train_split_var:
         Epsilon = best_model_data['Epsilon']
         Coef0 = best_model_data['Coef0']
         Gamma = best_model_data['Gamma']
-    
+        
+        Alpha = 'N/A'
+        Scale_Length = 'N/A'
+        Noise = 'N/A'
+        Sigma_F = 'N/A'
+        
     if model_type == 'GPR':
         if model_use[4]:
             Alpha = best_model_data['Alpha']
         Scale_Length = best_model_data['Length']
         Noise = best_model_data['Noise']
         Sigma_F = best_model_data['Sigma_F']
+        
+        C = 'N/A'
+        Epsilon = 'N/A'
+        Coef0 = 'N/A'
+        Gamma = 'N/A'
+    
+    reg = Regression(X_input, Y_input, models_use=model_use, seed=seed, RemoveNaN=False, 
+                     C=C, epsilon=Epsilon, gamma=Gamma, coef0=Coef0, noise=Noise, sigma_F=Sigma_F, scale_length=Scale_Length, alpha=Alpha)
+    
+    results = Regression_test_multProp(X_train, X_test, Y_train, Y_test)
+        
 
 
 os.chdir('..')
