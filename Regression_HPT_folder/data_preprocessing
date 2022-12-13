@@ -23,7 +23,18 @@ do
             cd "$model_folder"
             echo ${model_folder}
             sbatch findTopInputs.sub
-            
+            python format_input_data.py
+            cd input_feature_set_folder
+
+            for ft_folder in */
+            do
+              cd "$ft_folder"
+              sbatch run_single_inp_subset.sub
+              cd '..'
+            done
+
+            cd '..'
+			
             cd '..'
             
         done
