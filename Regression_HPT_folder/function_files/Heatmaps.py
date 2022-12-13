@@ -1758,7 +1758,251 @@ class heatmaps():
     """ TRY 2 """
     # IDEA: Sort all models by which hyperparameters effect them, then create individaul scripts for each case
 
-    # CASE I: SVM - C, Epsilon, Gamma -- Linear, RBF
+    # CASE I: SVM - C, Epsilon -- Linear
+    def runSingleGridSearch_SVM_C_Epsilon(self, C_range, epsilon_range, fig_idx):
+        """ INPUTS, METHOD, AND OUTPUTS """
+        """
+        Inputs:
+        1) C_range: range for the C-Hyperparameter
+        2) epsilon_range: range for the epsilon-Hyperparameter
+        3) gamma_input: gamma to be used in the regression run
+        4) models_use: logical array for regression class which tell the function which model-types to run
+        5) mdl_name: name of the chosen model - used in the recall of data
+        6) metric: should be 'r2', 'rmse', or 'cor' - determines which metric to use for comparisons
+        7) heatmap_title: string that will in the title of the main heatmap (the one that shows just the metric data)
+        8) figure_name: string indicating the current subset of heatmap:
+            i.e. Fig 1     = original heatmap
+                 Fig 1.2   = heatmap of the second best output from the original
+                 Fig 1.2.3 = heatmap of the third best output from the second best output from the original.
+            The number of digits represents what zoom-in layer the image is from
+        9) output_type: 
+        Method:
+        First, the function runs setup. This starts with creating lists for the row and column names, which will be the C
+            and epsilon values, respectivly. Then, the three (3) matrices that will store the data are initalized. 
+            These are:
+            1) the metric data, which wills store the data one the metrics alone, 
+            2) the ratio of average testing metric data to average training metric data (each will be the average from the
+                Nk-CV splits),
+            3) and the ratio of the final testing metric to the average training metric data (where the final is from the
+                combonation of all Nk-splits - and is the value in the first (1) matrix - and the average is again the 
+                average of the kFold splits)
+            The data is then iterated over both the C and Epsilon ranges and a regression is run using (C, epsilon, gamma).
+            The data final metric data and the average values will then be recalled and the ratios made. The data will then
+            be stored.
+
+        Outputs:
+        1) metric_data: matrix holding all of the metric data from the test
+        """
+
+        # INPUTS FROM CLASS ATRIBUTES ----------------------------------------------------------------------------------
+        X_use = self.X_inp
+        Y_use = self.Y_inp
+        removeNaN_var = self.RemoveNaN_var
+        goodIDs = self.goodIDs
+        seed = self.seed
+        models_use = self.models_use
+        mdl_name = self.mdl_name
+
+        # SETS UP FINAL STORAGE DATAFRAME ------------------------------------------------------------------------------
+        df_col_names = ['Figure', 'RMSE', 'R^2', 'Cor', 'C', 'Epsilon', 'Coef0', 'Gamma',
+                        'Average Training-RMSE', 'Average Training-R^2', 'Average Training-Cor',
+                        'avgTR to avgTS', 'avgTR to Final Error']
+        df_numRows = len(C_range) * len(epsilon_range) * len(gamma_range)
+        storage_df = pd.DataFrame(data=np.zeros((df_numRows, len(df_col_names))), columns=df_col_names)
+
+        # SETS UP STORAGE FOR EACH HEATMAP-CSV -------------------------------------------------------------------------
+        C_names = []
+        e_names = []
+        numC = len(C_range)
+        numE = len(epsilon_range)
+
+        # Row and column names for the heatmap
+        for C_i in range(numC):
+            C_names.append("C=" + str("%.6f" % C_range[C_i]))
+        for e_i in range(numE):
+            e_names.append("e=" + str("%.6f" % epsilon_range[e_i]))
+
+        total_points = numC * numE
+
+        # SETS UP STORAGE FOR COLLECTED DATA ---------------------------------------------------------------------------
+        error_array = np.zeros((numC, numE))
+        r2_array = np.zeros((numC, numE))
+        tr_error_array = np.zeros((numC, numE))
+        tr_r2_array = np.zeros((numC, numE))
+        ratio_trAvg_tsAvg_array = np.zeros((numC, numE))
+        ratio_trAvg_array_final = np.zeros((numC, numE))
+
+        # RUNS GRID SEARCH ---------------------------------------------------------------------------------------------
+        place_counter = 1
+        for C_idx in range(numC):
+            C = C_range[C_idx]
+            for e_idx in range(numE):
+                epsilon = epsilon_range[e_idx]
+
+                # Runs Regressions using current [C, epsilon]
+                reg = Regression(X_use, Y_use,
+                                 C=C, epsilon=epsilon,
+                                 Nk=5, N=1, goodIDs=goodIDs, seed=seed,
+                                 RemoveNaN=removeNaN_var, StandardizeX=True, models_use=models_use, giveKFdata=True)
+                results, bestPred, kFold_data = reg.RegressionCVMult()
+
+                # Extracts data
+                error = float(results['rmse'].loc[str(mdl_name)])
+                avg_tr_error = np.mean(list(kFold_data['tr']['results']['variation_#1']['rmse'][str(mdl_name)]))
+                avg_ts_error = np.mean(list(kFold_data['ts']['results']['variation_#1']['rmse'][str(mdl_name)]))
+                ratio_trAvg_tsAvg = float(avg_ts_error / avg_tr_error)
+                ratio_trAvg_final = float(error / avg_tr_error)
+
+                rmse = error
+                r2 = float(results['r2'].loc[str(mdl_name)])
+                cor = float(results['cor'].loc[str(mdl_name)])
+
+                avg_tr_rmse = float(
+                    np.mean(list(kFold_data['tr']['results']['variation_#1']['rmse'][str(mdl_name)])))
+                avg_tr_r2 = float(np.mean(list(kFold_data['tr']['results']['variation_#1']['r2'][str(mdl_name)])))
+                avg_tr_cor = float(np.mean(list(kFold_data['tr']['results']['variation_#1']['cor'][str(mdl_name)])))
+
+                # Puts data into correct array
+                error_array[C_idx, e_idx] = error
+                r2_array[C_idx, e_idx] = r2
+                tr_error_array[C_idx, e_idx] = avg_tr_error
+                tr_r2_array[C_idx, e_idx] = avg_tr_r2
+                ratio_trAvg_tsAvg_array[C_idx, e_idx] = ratio_trAvg_tsAvg
+                ratio_trAvg_array_final[C_idx, e_idx] = ratio_trAvg_final
+
+                # Puts data into storage array
+                storage_df.loc[place_counter - 1] = [fig_idx, rmse, r2, cor, C, epsilon, 'N/A', 'N/A',
+                                                     avg_tr_rmse, avg_tr_r2, avg_tr_cor,
+                                                     ratio_trAvg_tsAvg, ratio_trAvg_final]
+                place_counter += 1
+
+                print("C: " + str(C) + ", e: " + str(epsilon) + ", ceof0: " + str('N/A') + ", gamma: " + str(
+                    'N/A') + " (" + str(place_counter) + "/" + str(total_points) + ")" + " || Error: "+str(error)+", R^2: "+str(r2))
+
+        # SAVES HEATMAPS AS CSV-FILES ----------------------------------------------------------------------------------
+        if self.save_csv_files == True:
+        
+            error_current = error_array[:, :]
+            R2_current = r2_array[:, :]
+            tr_error_current = tr_error_array[:, :]
+            tr_r2_current = tr_r2_array[:, :]
+            trAvg_tsAvg_current = ratio_trAvg_tsAvg_array[:, :]
+            trAvg_final_current = ratio_trAvg_array_final[:, :]
+
+            # Initialization of dataframes
+            data_zeros = np.zeros((numC + 1, numE + 1))
+            error_data_df = pd.DataFrame(data=data_zeros)
+            R2_data_df = pd.DataFrame(data=data_zeros)
+            tr_error_data_df = pd.DataFrame(data=data_zeros)
+            tr_r2_data_df = pd.DataFrame(data=data_zeros)
+            trAvg_tsAvg_data_df = pd.DataFrame(data=data_zeros)
+            trAvg_final_data_df = pd.DataFrame(data=data_zeros)
+
+            # File Names
+            error_file_name = str(mdl_name) + " - Error Data - " + str(fig_idx) + ".csv"
+            r2_file_name = str(mdl_name) + " - R2 Data - " + str(fig_idx) + ".csv"
+            tr_error_file_name = str(mdl_name) + " - Training-Error Data - " + str(fig_idx) + ".csv"
+            tr_r2_file_name = str(mdl_name) + " - Training-R2 Data - " + str(fig_idx) + ".csv"
+            trAvg_tsAvg_file_name = str(mdl_name) + " - avgTR to avgTS - " + str(fig_idx) + ".csv"
+            trAvg_final_file_name = str(mdl_name) + " - avgTR to Final - " + str(fig_idx) + ".csv"
+
+            # Error Data
+            error_data_df.iloc[0, 1:] = C_names
+            error_data_df.iloc[1:, 0] = e_names
+            error_data_df.iloc[1:, 1:] = error_current
+            error_data_df.to_csv(error_file_name)
+
+            # R^2 Data
+            R2_data_df.iloc[0, 1:] = C_names
+            R2_data_df.iloc[1:, 0] = e_names
+            R2_data_df.iloc[1:, 1:] = R2_current
+            R2_data_df.to_csv(r2_file_name)
+
+            # Training-Error Data
+            tr_error_data_df.iloc[0, 1:] = C_names
+            tr_error_data_df.iloc[1:, 0] = e_names
+            tr_error_data_df.iloc[1:, 1:] = tr_error_current
+            tr_error_data_df.to_csv(tr_error_file_name)
+
+            # Training-R^2 Data
+            tr_r2_data_df.iloc[0, 1:] = C_names
+            tr_r2_data_df.iloc[1:, 0] = e_names
+            tr_r2_data_df.iloc[1:, 1:] = tr_r2_current
+            tr_r2_data_df.to_csv(tr_r2_file_name)
+
+            # Average training to average testing error
+            trAvg_tsAvg_data_df.iloc[0, 1:] = C_names
+            trAvg_tsAvg_data_df.iloc[1:, 0] = e_names
+            trAvg_tsAvg_data_df.iloc[1:, 1:] = trAvg_tsAvg_current
+            trAvg_tsAvg_data_df.to_csv(trAvg_tsAvg_file_name)
+
+            # Average training to final error
+            trAvg_final_data_df.iloc[0, 1:] = C_names
+            trAvg_final_data_df.iloc[1:, 0] = e_names
+            trAvg_final_data_df.iloc[1:, 1:] = trAvg_final_current
+            trAvg_final_data_df.to_csv(trAvg_final_file_name)
+
+        return error_array, storage_df
+
+    def runFullGridSearch_SVM_C_Epsilon(self, C_input_data, epsilon_input_data):
+
+        HP_data = [[C_input_data, epsilon_input_data]]
+
+        fig_idx_list = self.figureNumbers(self.numLayers, self.numZooms)
+
+        final_storage_df_list = []
+
+        fig_counter = 0
+        for layer in range(self.numLayers):
+            HP_layer_data = []
+            for position_idx in range(len(HP_data)):
+                print("Figure: ", fig_idx_list[fig_counter])
+                print("Current Layer: ", layer + 1)
+                print("Current Position: ", position_idx + 1)
+
+                HP_data_current = HP_data[position_idx]
+
+                # Sets up C and Epsilon ranges
+                C_data = HP_data_current[0]
+                epsilon_data = HP_data_current[1]
+                gamma_data = HP_data_current[2]
+                C_range = np.linspace(C_data[0], C_data[1], self.gridLength)
+                epsilon_range = np.linspace(epsilon_data[0], epsilon_data[1], self.gridLength)
+
+                # Runs the heatmap with the current C & Epsilon ranges
+                error_matrix, storage_df_temp = self.runSingleGridSearch_SVM_C_Epsilon(C_range, epsilon_range, fig_idx_list[fig_counter])
+
+                # Gets the new ranges from the error-matrix
+                HP_new_list, Index_Values = self.determineTopHPs_2HP(error_matrix, C_range, epsilon_range, self.numZooms)
+
+                if layer == self.numLayers - 1:
+                    final_storage_df_list.append(storage_df_temp)
+
+                for i in HP_new_list:
+                    HP_layer_data.append(i)
+
+                fig_counter += 1
+
+            HP_data = HP_layer_data
+
+        # Initalizes the final storage of the data on the final layer
+        storage_df_current = pd.DataFrame(columns=['Figure', 'RMSE', 'R^2', 'Cor', 'C', 'Epsilon', 'Coef0', 'Gamma',
+                                                   'Average Training-RMSE', 'Average Training-R^2',
+                                                   'Average Training-Cor',
+                                                   'avgTR to avgTS', 'avgTR to Final Error'])
+        for i in range(len(final_storage_df_list)):
+            storage_df_new = pd.concat([storage_df_current, final_storage_df_list[i]])
+            storage_df_current = storage_df_new
+
+        storage_df_unsorted = storage_df_current
+        storage_df_sorted = storage_df_unsorted.sort_values(by=["RMSE"], ascending=True)
+        if self.save_csv_files == True:
+            storage_df_unsorted.to_csv('0-Data_' + str(self.mdl_name) + '_Unsorted.csv')
+            storage_df_sorted.to_csv('0-Data_' + str(self.mdl_name) + '_Sorted.csv')
+
+        return storage_df_unsorted, storage_df_sorted
+
+    # CASE II: SVM - C, Epsilon, Gamma -- RBF
     def runSingleGridSearch_SVM_C_Epsilon_Gamma(self, C_range, epsilon_range, gamma_range, fig_idx):
         """ INPUTS, METHOD, AND OUTPUTS """
         """
@@ -2023,7 +2267,7 @@ class heatmaps():
 
         return storage_df_unsorted, storage_df_sorted
 
-    # CASE II: SVM - C, Epsilon, Gamma, Coef0 -- Poly2, Poly3
+    # CASE III: SVM - C, Epsilon, Gamma, Coef0 -- Poly2, Poly3
     def runSingleGridSearch_SVM_C_Epsilon_Gamma_Coef0(self, C_range, epsilon_range, gamma_range, coef0_range, fig_idx):
         """ INPUTS, METHOD, AND OUTPUTS """
         """
@@ -2310,7 +2554,7 @@ class heatmaps():
 
         return storage_df_unsorted, storage_df_sorted
 
-    # CASE III: GPR - Noise, SigF, Length -- RBF, Matern 3/2, Matern 5/2
+    # CASE IV: GPR - Noise, SigF, Length -- RBF, Matern 3/2, Matern 5/2
     def runSingleGridSearch_GPR_Noise_SigF_Length(self, noise_range, sigF_range, length_range, fig_idx):
 
         # INPUTS FROM CLASS ATRIBUTES ----------------------------------------------------------------------------------
@@ -2535,7 +2779,7 @@ class heatmaps():
 
         return storage_df_unsorted, storage_df_sorted
 
-    # CASE IV: GPR - Noise, SigF, Length, Alpha -- Rational Quadratic
+    # CASE V: GPR - Noise, SigF, Length, Alpha -- Rational Quadratic
     def runSingleGridSearch_GPR_Noise_SigF_Length_Alpha(self, noise_range, sigF_range, length_range, alpha_range, fig_idx):
 
         # INPUTS FROM CLASS ATRIBUTES ----------------------------------------------------------------------------------
