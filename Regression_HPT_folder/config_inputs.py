@@ -1,7 +1,7 @@
 import numpy as np
 
 run_findTopInputs = True
-parm_var = True
+parm_var = False
 locData_var = False
 test_train_split_var = False
 # When true, the data is first split into a test/train, then the kF-CV is preformed on the train-data
@@ -103,28 +103,27 @@ full_HP_list[str(prop_names[prop])] = dict()
 mdl = 0
 full_HP_list[str(prop_names[prop])][str(model_names[mdl])] = dict()
 full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["C"] = (0.001, 200)
-full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["e"] = (0.00001, 1)
-full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["g"] = (0.001, 2)
+full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["e"] = (0.00001, 0.8)
 # * SVM Poly2
 mdl = 1
 full_HP_list[str(prop_names[prop])][str(model_names[mdl])] = dict()
 full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["C"] = (0.001, 200)
-full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["e"] = (0.00001, 1)
+full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["e"] = (0.00001, 0.75)
 full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["g"] = (0.001, 2)
 full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["c0"] = (0.001, 10)
 # * SVM Poly3
 mdl = 2
 full_HP_list[str(prop_names[prop])][str(model_names[mdl])] = dict()
 full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["C"] = (0.001, 200)
-full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["e"] = (0.00001, 1)
+full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["e"] = (0.00001, 0.75)
 full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["g"] = (0.001, 2)
 full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["c0"] = (0.001, 10)
 # * SVM RBF
 mdl = 3
 full_HP_list[str(prop_names[prop])][str(model_names[mdl])] = dict()
 full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["C"] = (0.001, 200)
-full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["e"] = (0.00001, 1)
-full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["g"] = (0.001, 2)
+full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["e"] = (0.00001, 0.6)
+full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["g"] = (0.001, 0.8)
 # * GPR RatQuad
 mdl = 4
 full_HP_list[str(prop_names[prop])][str(model_names[mdl])] = dict()
@@ -265,27 +264,27 @@ full_HP_list[str(prop_names[prop])] = dict()
 mdl = 0
 full_HP_list[str(prop_names[prop])][str(model_names[mdl])] = dict()
 full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["C"] = (0.001, 200)
-full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["e"] = (0.00001, 1)
+full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["e"] = (0.00001, 0.2)
 full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["g"] = (0.001, 2)
 # * SVM Poly2
 mdl = 1
 full_HP_list[str(prop_names[prop])][str(model_names[mdl])] = dict()
 full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["C"] = (0.001, 200)
-full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["e"] = (0.00001, 1)
+full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["e"] = (0.00001, 0.2)
 full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["g"] = (0.001, 2)
 full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["c0"] = (0.001, 10)
 # * SVM Poly3
 mdl = 2
 full_HP_list[str(prop_names[prop])][str(model_names[mdl])] = dict()
 full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["C"] = (0.001, 200)
-full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["e"] = (0.00001, 1)
+full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["e"] = (0.00001, 0.2)
 full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["g"] = (0.001, 2)
 full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["c0"] = (0.001, 10)
 # * SVM RBF
 mdl = 3
 full_HP_list[str(prop_names[prop])][str(model_names[mdl])] = dict()
 full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["C"] = (0.001, 200)
-full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["e"] = (0.00001, 1)
+full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["e"] = (0.00001, 0.2)
 full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["g"] = (0.001, 2)
 # * GPR RatQuad
 mdl = 4
@@ -331,7 +330,7 @@ full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["c0"] = (0.001, 10)
 # * SVM Poly3
 mdl = 2
 full_HP_list[str(prop_names[prop])][str(model_names[mdl])] = dict()
-full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["C"] = (0.001, 200)
+full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["C"] = (0.001, 50)
 full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["e"] = (0.00001, 1)
 full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["g"] = (0.001, 2)
 full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["c0"] = (0.001, 10)
@@ -340,7 +339,7 @@ mdl = 3
 full_HP_list[str(prop_names[prop])][str(model_names[mdl])] = dict()
 full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["C"] = (0.001, 200)
 full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["e"] = (0.00001, 1)
-full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["g"] = (0.001, 2)
+full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["g"] = (0.001, 0.4)
 # * GPR RatQuad
 mdl = 4
 full_HP_list[str(prop_names[prop])][str(model_names[mdl])] = dict()
@@ -351,19 +350,19 @@ full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["alpha"] = (0.001, 10
 # * GPR RBF
 mdl = 5
 full_HP_list[str(prop_names[prop])][str(model_names[mdl])] = dict()
-full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["noise"] = (0.001, 200)
+full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["noise"] = (0.001, 50)
 full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["sigmaF"] = (0.00001, 1)
 full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["scale_length"] = (0.00001, 1)
 # * GPR Matern 3/2
 mdl = 6
 full_HP_list[str(prop_names[prop])][str(model_names[mdl])] = dict()
-full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["noise"] = (0.001, 200)
+full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["noise"] = (0.001, 50)
 full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["sigmaF"] = (0.00001, 1)
 full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["scale_length"] = (0.00001, 1)
 # * GPR Matern 5/2
 mdl = 7
 full_HP_list[str(prop_names[prop])][str(model_names[mdl])] = dict()
-full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["noise"] = (0.001, 200)
+full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["noise"] = (0.001, 50)
 full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["sigmaF"] = (0.00001, 1)
 full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["scale_length"] = (0.00001, 1)
 # Uniform Elongation from MAX ------------------------------------------------------------------------------------------
@@ -380,12 +379,12 @@ mdl = 1
 full_HP_list[str(prop_names[prop])][str(model_names[mdl])] = dict()
 full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["C"] = (0.001, 200)
 full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["e"] = (0.00001, 1)
-full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["g"] = (0.001, 2)
+full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["g"] = (0.001, 0.5)
 full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["c0"] = (0.001, 10)
 # * SVM Poly3
 mdl = 2
 full_HP_list[str(prop_names[prop])][str(model_names[mdl])] = dict()
-full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["C"] = (0.001, 200)
+full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["C"] = (0.001, 50)
 full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["e"] = (0.00001, 1)
 full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["g"] = (0.001, 2)
 full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["c0"] = (0.001, 10)
@@ -394,7 +393,7 @@ mdl = 3
 full_HP_list[str(prop_names[prop])][str(model_names[mdl])] = dict()
 full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["C"] = (0.001, 200)
 full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["e"] = (0.00001, 1)
-full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["g"] = (0.001, 2)
+full_HP_list[str(prop_names[prop])][str(model_names[mdl])]["g"] = (0.001, 0.8)
 # * GPR RatQuad
 mdl = 4
 full_HP_list[str(prop_names[prop])][str(model_names[mdl])] = dict()
