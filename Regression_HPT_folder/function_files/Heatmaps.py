@@ -1807,7 +1807,7 @@ class heatmaps():
         df_col_names = ['Figure', 'RMSE', 'R^2', 'Cor', 'C', 'Epsilon', 'Coef0', 'Gamma',
                         'Average Training-RMSE', 'Average Training-R^2', 'Average Training-Cor',
                         'avgTR to avgTS', 'avgTR to Final Error']
-        df_numRows = len(C_range) * len(epsilon_range) * len(gamma_range)
+        df_numRows = len(C_range) * len(epsilon_range)
         storage_df = pd.DataFrame(data=np.zeros((df_numRows, len(df_col_names))), columns=df_col_names)
 
         # SETS UP STORAGE FOR EACH HEATMAP-CSV -------------------------------------------------------------------------
@@ -1965,7 +1965,6 @@ class heatmaps():
                 # Sets up C and Epsilon ranges
                 C_data = HP_data_current[0]
                 epsilon_data = HP_data_current[1]
-                gamma_data = HP_data_current[2]
                 C_range = np.linspace(C_data[0], C_data[1], self.gridLength)
                 epsilon_range = np.linspace(epsilon_data[0], epsilon_data[1], self.gridLength)
 
@@ -2717,7 +2716,7 @@ class heatmaps():
 
         return error_array, storage_df
 
-    def runFullGridSearch_GPR_Noise_SigF_Lgiength(self, noise_input_data, sigF_input_data, length_input_data):
+    def runFullGridSearch_GPR_Noise_SigF_Length(self, noise_input_data, sigF_input_data, length_input_data):
 
         HP_data = [[noise_input_data, sigF_input_data, length_input_data]]
 
