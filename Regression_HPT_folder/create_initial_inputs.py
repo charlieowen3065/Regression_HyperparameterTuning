@@ -24,6 +24,8 @@ input_dict['gridLength'] = gridLength
 input_dict['main_path'] = main_path
 input_dict['combo_array'] = combo_array
 input_dict['numTopFeatures'] = numTopFeatures
+input_dict['test_train_split_var'] = test_train_split_var
+input_dict['split_decimal'] = split_decimal
 model_use_logArray = np.identity(len(model_names))
 
 # ******************************************************************************************************************** #
@@ -81,14 +83,17 @@ for case in case_use:
                 X_data.append(locData)
             models_use_current = model_use_logArray[mdl_idx, :]
             model_type_current = model_types[mdl_idx]
-
+            model_name_current = model_names[mdl_idx]
+    
             input_dict['Y_inp'] = Y_inp
             input_dict['X_list'] = X_data
             input_dict['seed'] = seeds[prop_idx]
+            input_dict['tr_ts_seed'] = tr_ts_seed[prop_idx]
             input_dict['goodIDs'] = goodIDs_prop
             input_dict['feature_names'] = X_names
             input_dict['hyperparameters'] = hyperparameters
             input_dict['models_use'] = models_use_current
+            input_dict['model_name'] = model_name_current
             input_dict['model_type'] = model_type_current
 
             parm_use = parmData
