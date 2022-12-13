@@ -28,10 +28,62 @@ num_fts_per_sublist = 100
 
 numTopFeatures = 5
 
+prop_names = ["Relative_Density", "Modulus", "Yield_Strength", "Work_Hardening_Exponent", "Elongation_to_Fracture",
+              "Uniform_Elongation_from_MAX", "Tensile_Strength_from_MAX"]
+model_names = ['SVM_Linear', 'SVM_Poly2', "SVM_Poly3", 'SVM_RBF',
+               "GPR_RationalQuadratic", "GPR_RBF", "GPR_Matern32", "GPR_Matern52"]
+model_types = ['SVM', 'SVM', 'SVM', 'SVM', 'GPR', 'GPR', 'GPR', 'GPR']
+
 # For Heatmaps
-gridLength = 20
-numZooms = 3
-numLayers = 3
+heatmap_inputs = dict()
+heatmap_inputs['gridLength'] = dict()
+heatmap_inputs['numZooms'] = dict()
+heatmap_inputs['numLayers'] = dict()
+# SVM_Linear
+mdl = 0
+heatmap_inputs['gridLength'][model_names[mdl]] = 20
+heatmap_inputs['numZooms'][model_names[mdl]] = 2
+heatmap_inputs['numLayers'][model_names[mdl]] = 3
+# SVM_Poly2
+mdl = 1
+heatmap_inputs['gridLength'][model_names[mdl]] = 10
+heatmap_inputs['numZooms'][model_names[mdl]] = 2
+heatmap_inputs['numLayers'][model_names[mdl]] = 4
+# SVM_Poly3
+mdl = 2
+heatmap_inputs['gridLength'][model_names[mdl]] = 10
+heatmap_inputs['numZooms'][model_names[mdl]] = 2
+heatmap_inputs['numLayers'][model_names[mdl]] = 4
+# SVM_RBF
+mdl = 3
+heatmap_inputs['gridLength'][model_names[mdl]] = 20
+heatmap_inputs['numZooms'][model_names[mdl]] = 2
+heatmap_inputs['numLayers'][model_names[mdl]] = 3
+# GPR_RatQuad
+mdl = 4
+heatmap_inputs['gridLength'][model_names[mdl]] = 10
+heatmap_inputs['numZooms'][model_names[mdl]] = 2
+heatmap_inputs['numLayers'][model_names[mdl]] = 4
+# GPR_RBF
+mdl = 5
+heatmap_inputs['gridLength'][model_names[mdl]] = 20
+heatmap_inputs['numZooms'][model_names[mdl]] = 2
+heatmap_inputs['numLayers'][model_names[mdl]] = 3
+# GPR_Matern32
+mdl = 6
+heatmap_inputs['gridLength'][model_names[mdl]] = 20
+heatmap_inputs['numZooms'][model_names[mdl]] = 2
+heatmap_inputs['numLayers'][model_names[mdl]] = 3
+# GPR_Matern52
+mdl = 7
+heatmap_inputs['gridLength'][model_names[mdl]] = 20
+heatmap_inputs['numZooms'][model_names[mdl]] = 2
+heatmap_inputs['numLayers'][model_names[mdl]] = 3
+
+
+#gridLength = 20
+#numZooms = 2
+#numLayers = 3
 
 # Test/Train Split
 split_decimal = 0.3  # the amount of data used for testing
@@ -41,11 +93,7 @@ seeds = [1939855286, 407978056, 1280179023, 1518676132, 916062339, 1178283666, 3
 tr_ts_seeds = [0, 0, 0, 0, 0, 0, 0]
 
 # Hyperparamter Ranges *************************************************************************************************
-prop_names = ["Relative_Density", "Modulus", "Yield_Strength", "Work_Hardening_Exponent", "Elongation_to_Fracture",
-              "Uniform_Elongation_from_MAX", "Tensile_Strength_from_MAX"]
-model_names = ['SVM_Linear', 'SVM_Poly2', "SVM_Poly3", 'SVM_RBF',
-               "GPR_RationalQuadratic", "GPR_RBF", "GPR_Matern32", "GPR_Matern52"]
-model_types = ['SVM', 'SVM', 'SVM', 'SVM', 'GPR', 'GPR', 'GPR', 'GPR']
+
 
 full_HP_list = dict()
 # Relative Density -----------------------------------------------------------------------------------------------------
