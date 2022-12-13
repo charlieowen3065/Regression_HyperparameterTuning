@@ -129,7 +129,7 @@ elif model_use[7]:  # Matern 5/2
 if test_train_split_var:
 
     if model_type == 'SVM':
-        col_names = ['RMSE', 'R2', 'Cor', 'C', 'Epsilon', 'Gamma', 'Coef0']
+        col_names = ['RMSE', 'R2', 'Cor', 'C', 'Epsilon', 'Gamma', 'Coef0', 'kF-Training-RMSE', 'kF-Training-R2', 'kF-Training-Cor']
     elif model_type == 'GPR':
         col_names = ['RMSE', 'R2', 'Cor', 'Noise', 'Length', 'SigmaF', 'Alpha']
     
@@ -138,6 +138,11 @@ if test_train_split_var:
     for i in range(5):
         sorted_data_df = pd.read_csv("0-Data_"+model_name+"_Sorted.csv")
         best_model_data = sorted_data_df.iloc[i,:]
+        
+        BM_RMSE = best_model_data['RMSE']
+        BM_R2 = best_model_data['R2']
+        BM_Cor = best_model_data['cor']
+        
         
         if model_type == 'SVM':
             C = best_model_data['C']
@@ -172,9 +177,9 @@ if test_train_split_var:
         cor_temp = results['metrics'][model_name][2]
         
         if model_type == 'SVM':
-            row_data = [rmse_temp, r2_temp, cor_temp, C, Epsilon, Gamma, Coef0]
+            row_data = [rmse_temp, r2_temp, cor_temp, C, Epsilon, Gamma, Coef0, BM_RMSE, BM_R2, BM_Cor]
         if model_type == 'GPR':
-            row_data = [rmse_temp, r2_temp, cor_temp, Noise, Scale_Length, Sigma_F, Alpha]
+            row_data = [rmse_temp, r2_temp, cor_temp, Noise, Scale_Length, Sigma_F, Alpha, BM_RMSE, BM_R2, BM_Cor]
         
         top_models_df.loc[str(i)]  = row_data
     
