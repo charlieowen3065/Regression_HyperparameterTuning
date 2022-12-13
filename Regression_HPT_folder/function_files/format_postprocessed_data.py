@@ -179,8 +179,8 @@ for case in case_use:
                 ratio = data_temp['avgTR to Final Error']
                 data_prop.loc[i+1] = [mdl, inpFt, rmse, r2, noise, sigF, l, alpha, ratio]
                 i += 1
-            except:
-                pass
+        except:
+            pass
         
         filename_temp = str(prop_folder)+'_formatted_data.csv'
         data_prop.to_csv(filename_temp)
