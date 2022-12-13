@@ -77,7 +77,7 @@ while count < Ncombos-1:
     sublist = []
     subnames = []
     for i in range(num_fts_per_sublist):
-        print("COUNT: ", count)
+        #print("COUNT: ", count)
         if count != Ncombos:
             sublist.append(X_full_list[count])
             subnames.append(X_names_list[count])
