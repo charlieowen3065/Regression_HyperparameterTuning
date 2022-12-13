@@ -22,7 +22,6 @@ do
         do
             cd "$model_folder"
             echo ${model_folder}
-            sbatch findTopInputs.sub
             python format_input_data.py
             cd input_feature_set_folder
 
