@@ -46,26 +46,31 @@ for case in os.listdir():
             for ft in filter(os.path.isdir, os.listdir()):
                 if ft != '__pycache__':
                     os.chdir(ft)
-                    os.chdir('Heatmaps')
-    
+                    
                     ft_use = ft
                     ft_use = ft_use.replace("-('", '')
                     ft_use = ft_use.replace("')", "")
                     ft_use = ft_use.replace("', '", '_and_')
                     ft_final = ft_use[1:]
-    
-                    filename_sorted = '0-Data_'+str(mdl[2:])+'_Sorted.csv'
-                    #print("FILE: ", filename_sorted)
-                    if filename_sorted in os.listdir():
-                        dest_path = m_path + s + 'data_postprocessing_folder' + s + 'raw_data' + s + case + s + prop + s + mdl
-                        i_use = str("%01d" % (i))
-                        filename_new = str(i_use)+"_"+str(mdl)+"_"+str(ft_final)+".csv"
-                        shutil.copyfile(filename_sorted, dest_path+s+filename_new)
+                    
+                    if 'Heatmaps' in os.listdir():
+                        os.chdir('Heatmaps')
+        
+                        filename_sorted = '0-Data_'+str(mdl[2:])+'_Sorted.csv'
+                        #print("FILE: ", filename_sorted)
+                        if filename_sorted in os.listdir():
+                            dest_path = m_path + s + 'data_postprocessing_folder' + s + 'raw_data' + s + case + s + prop + s + mdl
+                            i_use = str("%01d" % (i))
+                            filename_new = str(i_use)+"_"+str(mdl)+"_"+str(ft_final)+".csv"
+                            shutil.copyfile(filename_sorted, dest_path+s+filename_new)
+                        else:
+                            print(str(mdl)+" - "+str(ft_use)+" is not completed")
+        
+                        i += 1
+                        os.chdir('..')
                     else:
-                        print(str(mdl)+" - "+str(ft_use)+" is not completed")
-    
-                    i += 1
-                    os.chdir('../..')
+                        print(str(mdl)+" - "+str(ft_use)+" not started")
+                    os.chdir('..')
             os.chdir('..')
 
         os.chdir('..')
