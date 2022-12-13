@@ -9,6 +9,7 @@ import sklearn
 from sklearn import svm, tree, linear_model, metrics, pipeline, preprocessing
 from sklearn import gaussian_process
 from sklearn.gaussian_process.kernels import Matern, WhiteKernel, ConstantKernel, RationalQuadratic, RBF
+from sklearn.model_selection import train_test_split
 from scipy.stats import iqr
 
 # IMPORT FUNCTIONS FROM "FUNCTION_FILES"****************************************************************************** #
@@ -143,7 +144,6 @@ class Regression():
             tr_idx, ts_idx = self.mF.getKfoldSplits(self.X, Nk=Nk, seed=seed[i])
             self.train_idx.append(tr_idx)
             self.test_idx.append(ts_idx)
-
 
     def getModels(self):
         """ METHODS, INPUTS, & OUTPUTS"""
@@ -468,3 +468,12 @@ class Regression():
             return results, bestPred, kFold_data
         else:
             return results, bestPred
+
+    def Regression_singleModel(self, TS_dec, train_test_seed):
+        
+        X = self.X
+        Y = self.Y
+        
+        X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=TS_dec, random_state=train_test_seed)
+        
+        
