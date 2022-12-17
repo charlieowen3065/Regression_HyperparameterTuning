@@ -474,7 +474,7 @@ class Regression():
         mdl = model.fit(X_train, Y_train)
         Yp = mdl.predict(X_test)
         
-        rmse, r2, cor = self.mF.getPredMetrics(Y_test, Yp_)
+        rmse, r2, cor = self.mF.getPredMetrics(Y_test, Yp)
         
         return Yp, rmse, r2, cor
     

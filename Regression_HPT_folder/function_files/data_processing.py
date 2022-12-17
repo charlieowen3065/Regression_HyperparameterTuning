@@ -46,7 +46,7 @@ tr_ts_seed = input_dict['tr_ts_seed']
 
 # For Test-Train Splitting
 if test_train_split_var:
-    X_train, X_test, Y_train, Y_test = test_train_split(X_int, Y_int, test_size=split_decimal, random_state=tr_ts_seed)
+    X_train, X_test, Y_train, Y_test = train_test_split(X_int, Y_int, test_size=split_decimal, random_state=tr_ts_seed)
     
     X_input = X_train
     Y_input = Y_train
@@ -170,7 +170,7 @@ if test_train_split_var:
         reg = Regression(X_input, Y_input, models_use=model_use, seed=seed, RemoveNaN=False, 
                          C=C, epsilon=Epsilon, gamma=Gamma, coef0=Coef0, noise=Noise, sigma_F=Sigma_F, scale_length=Scale_Length, alpha=Alpha)
         
-        results = Regression_test_multProp(X_train, X_test, Y_train, Y_test)
+        results = reg.Regression_test_multProp(X_train, X_test, Y_train, Y_test)
         
         rmse_temp = results['metrics'][model_name][0]
         r2_temp = results['metrics'][model_name][1]
