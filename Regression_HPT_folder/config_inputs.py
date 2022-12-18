@@ -44,41 +44,57 @@ mdl = 0
 heatmap_inputs['gridLength'][model_names[mdl]] = 20
 heatmap_inputs['numZooms'][model_names[mdl]] = 2
 heatmap_inputs['numLayers'][model_names[mdl]] = 3
+heatmap_inputs['decimal_points_int'][model_names[mdl]] = 0.1
+heatmap_inputs['decimal_points_top'][model_names[mdl]] = 0.1
 # SVM_Poly2
 mdl = 1
 heatmap_inputs['gridLength'][model_names[mdl]] = 10
 heatmap_inputs['numZooms'][model_names[mdl]] = 2
 heatmap_inputs['numLayers'][model_names[mdl]] = 4
+heatmap_inputs['decimal_points_int'][model_names[mdl]] = 0.1
+heatmap_inputs['decimal_points_top'][model_names[mdl]] = 0.1
 # SVM_Poly3
 mdl = 2
 heatmap_inputs['gridLength'][model_names[mdl]] = 10
 heatmap_inputs['numZooms'][model_names[mdl]] = 2
 heatmap_inputs['numLayers'][model_names[mdl]] = 4
+heatmap_inputs['decimal_points_int'][model_names[mdl]] = 0.1
+heatmap_inputs['decimal_points_top'][model_names[mdl]] = 0.1
 # SVM_RBF
 mdl = 3
 heatmap_inputs['gridLength'][model_names[mdl]] = 20
 heatmap_inputs['numZooms'][model_names[mdl]] = 2
 heatmap_inputs['numLayers'][model_names[mdl]] = 3
+heatmap_inputs['decimal_points_int'][model_names[mdl]] = 0.1
+heatmap_inputs['decimal_points_top'][model_names[mdl]] = 0.1
 # GPR_RatQuad
 mdl = 4
 heatmap_inputs['gridLength'][model_names[mdl]] = 10
 heatmap_inputs['numZooms'][model_names[mdl]] = 2
 heatmap_inputs['numLayers'][model_names[mdl]] = 4
+heatmap_inputs['decimal_points_int'][model_names[mdl]] = 0.1
+heatmap_inputs['decimal_points_top'][model_names[mdl]] = 0.1
 # GPR_RBF
 mdl = 5
 heatmap_inputs['gridLength'][model_names[mdl]] = 20
 heatmap_inputs['numZooms'][model_names[mdl]] = 2
 heatmap_inputs['numLayers'][model_names[mdl]] = 3
+heatmap_inputs['decimal_points_int'][model_names[mdl]] = 0.1
+heatmap_inputs['decimal_points_top'][model_names[mdl]] = 0.1
 # GPR_Matern32
 mdl = 6
 heatmap_inputs['gridLength'][model_names[mdl]] = 20
 heatmap_inputs['numZooms'][model_names[mdl]] = 2
 heatmap_inputs['numLayers'][model_names[mdl]] = 3
+heatmap_inputs['decimal_points_int'][model_names[mdl]] = 0.1
+heatmap_inputs['decimal_points_top'][model_names[mdl]] = 0.1
 # GPR_Matern52
 mdl = 7
 heatmap_inputs['gridLength'][model_names[mdl]] = 20
 heatmap_inputs['numZooms'][model_names[mdl]] = 2
 heatmap_inputs['numLayers'][model_names[mdl]] = 3
+heatmap_inputs['decimal_points_int'][model_names[mdl]] = 0.1
+heatmap_inputs['decimal_points_top'][model_names[mdl]] = 0.1
 
 
 #gridLength = 20

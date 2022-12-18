@@ -36,6 +36,8 @@ numZooms = input_dict['numZooms']
 N = input_dict['N']
 Nk = input_dict['Nk']
 gridLength = input_dict['gridLength']
+decimal_points_int = input_dict['decimal_points_int']
+decimal_points_top = input_dict['decimal_points_top']
 seed = input_dict['seed']
 goodIds = input_dict['goodIDs']
 hyperparameters = input_dict['hyperparameters']
@@ -58,6 +60,7 @@ else:
 ht = heatmaps(X_input, Y_input,
               N=N, Nk=Nk,
               numLayers=numLayers, numZooms=numZooms, gridLength=gridLength,
+              decimal_points_int=decimal_points_int, decimal_points_top=decimal_points_top,
               RemoveNaN=True, goodIDs=goodIds, seed=seed, models_use=model_use)
 
 if 'Heatmaps' in os.listdir():
@@ -70,7 +73,7 @@ if model_use[0]:  # LINEAR
     C_input_data = hyperparameters['C']
     epsilon_input_data = hyperparameters['e']
 
-    ht.runFullGridSearch_SVM_C_Epsilon(C_input_data, epsilon_input_data)
+    ht.runFullGridSearch_AL_SVM_C_Epsilon(C_input_data, epsilon_input_data)
 
 elif model_use[1]:  # POLY-2
     C_input_data = hyperparameters['C']
@@ -78,7 +81,7 @@ elif model_use[1]:  # POLY-2
     gamma_input_data = hyperparameters['g']
     coef0_input_data = hyperparameters['c0']
 
-    ht.runFullGridSearch_SVM_C_Epsilon_Gamma_Coef0(C_input_data, epsilon_input_data, gamma_input_data, coef0_input_data)
+    ht.runFullGridSearch_AL_SVM_C_Epsilon_Gamma_Coef0(C_input_data, epsilon_input_data, gamma_input_data, coef0_input_data)
 
 elif model_use[2]:  # POLY-3
     C_input_data = hyperparameters['C']
@@ -86,14 +89,14 @@ elif model_use[2]:  # POLY-3
     gamma_input_data = hyperparameters['g']
     coef0_input_data = hyperparameters['c0']
 
-    ht.runFullGridSearch_SVM_C_Epsilon_Gamma_Coef0(C_input_data, epsilon_input_data, gamma_input_data, coef0_input_data)
+    ht.runFullGridSearch_AL_SVM_C_Epsilon_Gamma_Coef0(C_input_data, epsilon_input_data, gamma_input_data, coef0_input_data)
 
 elif model_use[3]:  # RBF
     C_input_data = hyperparameters['C']
     epsilon_input_data = hyperparameters['e']
     gamma_input_data = hyperparameters['g']
 
-    ht.runFullGridSearch_SVM_C_Epsilon_Gamma(C_input_data, epsilon_input_data, gamma_input_data)
+    ht.runFullGridSearch_AL_SVM_C_Epsilon_Gamma(C_input_data, epsilon_input_data, gamma_input_data)
 
 # -------------------------------------- GPR --------------------------------------------------------------------------#
 
@@ -103,28 +106,28 @@ elif model_use[4]:  # RatQuad
     length_input_data = hyperparameters['scale_length']
     alpha_input_data = hyperparameters['alpha']
 
-    ht.runFullGridSearch_GPR_Noise_SigF_Length_Alpha(noise_input_data, sigF_input_data, length_input_data, alpha_input_data)
+    ht.runFullGridSearch_AL_GPR_Noise_SigF_Length_Alpha(noise_input_data, sigF_input_data, length_input_data, alpha_input_data)
 
 elif model_use[5]:  # RBF
     noise_input_data = hyperparameters['noise']
     sigF_input_data = hyperparameters['sigmaF']
     length_input_data = hyperparameters['scale_length']
 
-    ht.runFullGridSearch_GPR_Noise_SigF_Length(noise_input_data, sigF_input_data, length_input_data)
+    ht.runFullGridSearch_AL_GPR_Noise_SigF_Length(noise_input_data, sigF_input_data, length_input_data)
 
 elif model_use[6]:  # Matern 3/2
     noise_input_data = hyperparameters['noise']
     sigF_input_data = hyperparameters['sigmaF']
     length_input_data = hyperparameters['scale_length']
 
-    ht.runFullGridSearch_GPR_Noise_SigF_Length(noise_input_data, sigF_input_data, length_input_data)
+    ht.runFullGridSearch_AL_GPR_Noise_SigF_Length(noise_input_data, sigF_input_data, length_input_data)
 
 elif model_use[7]:  # Matern 5/2
     noise_input_data = hyperparameters['noise']
     sigF_input_data = hyperparameters['sigmaF']
     length_input_data = hyperparameters['scale_length']
 
-    ht.runFullGridSearch_GPR_Noise_SigF_Length(noise_input_data, sigF_input_data, length_input_data)
+    ht.runFullGridSearch_AL_GPR_Noise_SigF_Length(noise_input_data, sigF_input_data, length_input_data)
 
 if test_train_split_var:
 
@@ -137,7 +140,7 @@ if test_train_split_var:
     
     for i in range(5):
         sorted_data_df = pd.read_csv("0-Data_"+model_name+"_Sorted.csv")
-        best_model_data = sorted_data_df.iloc[i,:]
+        best_model_data = sorted_data_df.iloc[i, :]
         
         BM_RMSE = best_model_data['RMSE']
         BM_R2 = best_model_data['R2']
@@ -181,7 +184,7 @@ if test_train_split_var:
         if model_type == 'GPR':
             row_data = [rmse_temp, r2_temp, cor_temp, Noise, Scale_Length, Sigma_F, Alpha, BM_RMSE, BM_R2, BM_Cor]
         
-        top_models_df.loc[str(i)]  = row_data
+        top_models_df.loc[str(i)] = row_data
     
     top_models_df = top_models_df.sort_values(by=["RMSE"], ascending=True)
     top_models_df.to_csv('Best_Models.csv')

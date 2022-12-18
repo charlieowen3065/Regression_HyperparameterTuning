@@ -88,6 +88,8 @@ for case in case_use:
             gridLength = heatmap_inputs['gridLength'][mdl_current]
             numZooms = heatmap_inputs['numZooms'][mdl_current]
             numLayers = heatmap_inputs['numLayers'][mdl_current]
+            decimal_points_int = heatmap_inputs['decimal_points_int'][mdl_current]
+            decimal_points_top = heatmap_inputs['decimal_points_top'][mdl_current]
     
             input_dict['Y_inp'] = Y_inp
             input_dict['X_list'] = X_data
@@ -102,6 +104,8 @@ for case in case_use:
             input_dict['gridLength'] = gridLength
             input_dict['numZooms'] = numZooms
             input_dict['numLayers'] = numLayers
+            input_dict['decimal_points_int'] = decimal_points_int
+            input_dict['decimal_points_top'] = decimal_points_top
 
             parm_use = parmData
             locData_use = locData
