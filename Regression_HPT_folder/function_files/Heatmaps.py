@@ -3353,6 +3353,1230 @@ class heatmaps():
         return error_array, storage_sorted_df
 
 
-    #def runSingleGridSearch_SVM_C_Epsilon(self, C_range, epsilon_range, fig_idx):
+
+    # CASE I: SVM - C, Epsilon -- Linear
+    def runSingleGridSearch_AL_SVM_C_Epsilon(self, C_range, epsilon_range, fig_idx):
+        num_HPs = 2
+
+        # INPUTS FROM CLASS ATRIBUTES ----------------------------------------------------------------------------------
+        X_use = self.X_inp
+        Y_use = self.Y_inp
+        removeNaN_var = self.RemoveNaN_var
+        goodIDs = self.goodIDs
+        seed = self.seed
+        models_use = self.models_use
+        mdl_name = self.mdl_name
+        decimal_points_int = self.decimal_points_int
+        decimal_points_top = self.decimal_points_top
+
+        """ PART I: Initial Calculations """
+        numC = len(C_range)
+        numE = len(epsilon_range)
+
+        Npts = numC * numE
+        num_points = Npts * decimal_points_int
+
+        indices = np.linspace(0, 19, int(num_points ** (1 / num_HPs)), dtype=int)
+        points = [(i, j) for i in indices for j in indices]
+        Npts_calc = len(points)
+
+        model_inputs = np.zeros((Npts_calc, 2))
+        model_outputs = np.zeros((Npts_calc, 1))
+
+        count = 0
+        for C_idx in range(numC):
+            C = C_range[C_idx]
+            for e_idx in range(numE):
+                epsilon = epsilon_range[e_idx]
+
+                index_current = tuple((C_idx, e_idx))
+                if index_current in indices:
+                    reg = Regression(X_use, Y_use,
+                                     C=C, epsilon=epsilon,
+                                     Nk=5, N=1, goodIDs=goodIDs, seed=seed,
+                                     RemoveNaN=removeNaN_var, StandardizeX=True, models_use=models_use, giveKFdata=True)
+                    results, bestPred, kFold_data = reg.RegressionCVMult()
+
+                    error = float(results['rmse'].loc[str(mdl_name)])
+
+                    model_inputs[count, 0] = C
+                    model_inputs[count, 1] = epsilon
+                    model_outputs[count, 0] = error
+
+                    count += 1
+                    print("Count: ", count)
+
+        kernel_use = Matern(nu=3 / 2)
+        model = gaussian_process.GaussianProcessRegressor(kernel=kernel_use)
+        model.fit(model_inputs, model_outputs)
+
+        """ PART II: Predictions """
+        pred_error_array = np.zeros((numC, numE))
+        pred_std_array = np.zeros((numC, numE))
+        pred_min_error_array = np.zeros((numC, numE))
+
+        X_ts = np.zeros((1, 2))
+        pred_error_df = pd.DataFrame(columns=['Min-Error', 'C', 'Epsilon'])
+        counter = 0
+        for C_idx in range(numC):
+            C = C_range[C_idx]
+            for e_idx in range(numE):
+                epsilon = epsilon_range[e_idx]
+
+                X_ts[0, :] = [C, epsilon]
+                error_pred, error_std = model.predict(X_ts, return_std=True)
+                min_error = (error_pred[0] - error_std[0] * 0.1)
+
+                pred_error_df.loc[counter] = [min_error, C, epsilon]
+                counter += 1
+
+                pred_error_array[C_idx, e_idx] = error_pred
+                pred_std_array[C_idx, e_idx] = error_std
+                pred_min_error_array[C_idx, e_idx] = min_error
+
+        pred_error_df_sorted = pred_error_df.sort_values(by=['Min-Error'], ascending=True)
+
+        """ PART III: Running best points """
+        num_calc_points = int(Npts * decimal_points_top)
+
+        df_col_names = ['Figure', 'RMSE', 'R^2', 'Cor', 'C', 'Epsilon', 'Coef0', 'Gamma',
+                        'Average Training-RMSE', 'Average Training-R^2', 'Average Training-Cor',
+                        'avgTR to avgTS', 'avgTR to Final Error']
+        df_numRows = num_calc_points
+        storage_df = pd.DataFrame(data=np.zeros((df_numRows, len(df_col_names))), columns=df_col_names)
+
+        for pt in range(num_calc_points):
+            C = pred_error_df_sorted.iloc[pt, 1]
+            epsilon = pred_error_df_sorted.iloc[pt, 2]
+
+            reg = Regression(X_use, Y_use,
+                             C=C, epsilon=epsilon,
+                             Nk=5, N=1, goodIDs=goodIDs, seed=seed,
+                             RemoveNaN=removeNaN_var, StandardizeX=True, models_use=models_use, giveKFdata=True)
+            results, bestPred, kFold_data = reg.RegressionCVMult()
+
+            # Extracts data
+            error = float(results['rmse'].loc[str(mdl_name)])
+            avg_tr_error = np.mean(list(kFold_data['tr']['results']['variation_#1']['rmse'][str(mdl_name)]))
+            avg_ts_error = np.mean(list(kFold_data['ts']['results']['variation_#1']['rmse'][str(mdl_name)]))
+            ratio_trAvg_tsAvg = float(avg_ts_error / avg_tr_error)
+            ratio_trAvg_final = float(error / avg_tr_error)
+
+            rmse = error
+            r2 = float(results['r2'].loc[str(mdl_name)])
+            cor = float(results['cor'].loc[str(mdl_name)])
+
+            avg_tr_rmse = float(
+                np.mean(list(kFold_data['tr']['results']['variation_#1']['rmse'][str(mdl_name)])))
+            avg_tr_r2 = float(np.mean(list(kFold_data['tr']['results']['variation_#1']['r2'][str(mdl_name)])))
+            avg_tr_cor = float(np.mean(list(kFold_data['tr']['results']['variation_#1']['cor'][str(mdl_name)])))
+
+            # Puts data into storage array
+            storage_df.loc[pt] = [fig_idx, rmse, r2, cor, C, epsilon, 'N/A', 'N/A',
+                                  avg_tr_rmse, avg_tr_r2, avg_tr_cor,
+                                  ratio_trAvg_tsAvg, ratio_trAvg_final]
+
+            print("C: " + str(C) + ", e: " + str(epsilon) + ", ceof0: " + str('N/A') + ", gamma: " + str(
+                'N/A') + " (" + str(pt + 1) + "/" + str(num_calc_points) + ")" + " || Error: " + str(
+                error) + ", R^2: " + str(r2))
+
+        storage_sorted_df = storage_df.sort_values(by=['RMSE'], ascending=True)
+
+        """ TEMP: Create 'Error Array' """
+        """
+        This should only be thought of as a temporay fix as to not have to replace the current
+        'determineTopHPs_XHP' functions. To do so, an array is created that holds double the maximum
+        error from the 'storage_df' error values, and then the values that are found in PART III are put
+        in their proper place in this array. This is done to ensure that the top values (the ones that would
+        be picked up by the 'determineTopHPs_XHP') are still the best ones in this new array
+        """
+        rmse_list = list(storage_df['RMSE'])
+        max_rmse = np.max(rmse_list)
+        rmse_bad_input = 2 * max_rmse
+
+        # Create list of good HP-pairs
+        tup_list = []
+        num_rows_df = len(storage_df['RMSE'])
+        for i in range(num_rows_df):
+            C_temp = storage_df['C'][i]
+            e_temp = storage_df['Epsilon'][i]
+            tup_list.append(tuple((C_temp, e_temp)))
+
+        error_array = np.zeros((numC, numE))
+
+        for C_idx in range(numC):
+            C = C_range[C_idx]
+            for e_idx in range(numE):
+                e = epsilon_range[e_idx]
+
+                if tuple((C, e)) not in tup_list:
+                    error_temp = rmse_bad_input
+                else:
+                    error_temp = float(storage_df.loc[(storage_df['C'] == C) & (storage_df['Epsilon'] == e)]['RMSE'])
+
+                error_array[C_idx, e_idx] = error_temp
+
+        return error_array, storage_sorted_df
+
+    def runFullGridSearch_AL_SVM_C_Epsilon(self, C_input_data, epsilon_input_data):
+
+        HP_data = [[C_input_data, epsilon_input_data]]
+
+        fig_idx_list = self.figureNumbers(self.numLayers, self.numZooms)
+
+        final_storage_df_list = []
+
+        fig_counter = 0
+        for layer in range(self.numLayers):
+            HP_layer_data = []
+            for position_idx in range(len(HP_data)):
+                print("Figure: ", fig_idx_list[fig_counter])
+                print("Current Layer: ", layer + 1)
+                print("Current Position: ", position_idx + 1)
+
+                HP_data_current = HP_data[position_idx]
+
+                # Sets up C and Epsilon ranges
+                C_data = HP_data_current[0]
+                epsilon_data = HP_data_current[1]
+                C_range = np.linspace(C_data[0], C_data[1], self.gridLength)
+                epsilon_range = np.linspace(epsilon_data[0], epsilon_data[1], self.gridLength)
+
+                # Runs the heatmap with the current C & Epsilon ranges
+                error_matrix, storage_df_temp = self.runSingleGridSearch_AL_SVM_C_Epsilon(C_range, epsilon_range,
+                                                                                       fig_idx_list[fig_counter])
+
+                # Gets the new ranges from the error-matrix
+                HP_new_list, Index_Values = self.determineTopHPs_2HP(error_matrix, C_range, epsilon_range,
+                                                                     self.numZooms)
+
+                if layer == self.numLayers - 1:
+                    final_storage_df_list.append(storage_df_temp)
+
+                for i in HP_new_list:
+                    HP_layer_data.append(i)
+
+                fig_counter += 1
+
+            HP_data = HP_layer_data
+
+        # Initalizes the final storage of the data on the final layer
+        storage_df_current = pd.DataFrame(columns=['Figure', 'RMSE', 'R^2', 'Cor', 'C', 'Epsilon', 'Coef0', 'Gamma',
+                                                   'Average Training-RMSE', 'Average Training-R^2',
+                                                   'Average Training-Cor',
+                                                   'avgTR to avgTS', 'avgTR to Final Error'])
+        for i in range(len(final_storage_df_list)):
+            storage_df_new = pd.concat([storage_df_current, final_storage_df_list[i]])
+            storage_df_current = storage_df_new
+
+        storage_df_unsorted = storage_df_current
+        storage_df_sorted = storage_df_unsorted.sort_values(by=["RMSE"], ascending=True)
+        if self.save_csv_files == True:
+            storage_df_unsorted.to_csv('0-Data_' + str(self.mdl_name) + '_Unsorted.csv')
+            storage_df_sorted.to_csv('0-Data_' + str(self.mdl_name) + '_Sorted.csv')
+
+        return storage_df_unsorted, storage_df_sorted
+
+    # CASE II: SVM - C, Epsilon, Gamma -- RBF
+    def runSingleGridSearch_AL_SVM_C_Epsilon_Gamma(self, C_range, epsilon_range, gamma_range, fig_idx):
+        num_HPs = 3
+
+        # INPUTS FROM CLASS ATRIBUTES ----------------------------------------------------------------------------------
+        X_use = self.X_inp
+        Y_use = self.Y_inp
+        removeNaN_var = self.RemoveNaN_var
+        goodIDs = self.goodIDs
+        seed = self.seed
+        models_use = self.models_use
+        mdl_name = self.mdl_name
+        decimal_points_int = self.decimal_points_int
+        decimal_points_top = self.decimal_points_top
+
+        """ PART I: Initial Calculations """
+        numC = len(C_range)
+        numE = len(epsilon_range)
+        numG = len(gamma_range)
+
+        Npts = numC * numE * numG
+        num_points = Npts * decimal_points_int
+
+        indices = np.linspace(0, 19, int(num_points ** (1 / num_HPs)), dtype=int)
+        points = [(i, j, k) for i in indices for j in indices for k in indices]
+        Npts_calc = len(points)
+
+        model_inputs = np.zeros((Npts_calc, 3))
+        model_outputs = np.zeros((Npts_calc, 1))
+
+        count = 0
+        for C_idx in range(numC):
+            C = C_range[C_idx]
+            for e_idx in range(numE):
+                epsilon = epsilon_range[e_idx]
+                for g_idx in range(numG):
+                    gamma = gamma_range[g_idx]
+
+                    index_current = tuple((C_idx, e_idx, g_idx))
+                    if index_current in indices:
+                        reg = Regression(X_use, Y_use,
+                                         C=C, epsilon=epsilon, gamma=gamma,
+                                         Nk=5, N=1, goodIDs=goodIDs, seed=seed,
+                                         RemoveNaN=removeNaN_var, StandardizeX=True, models_use=models_use, giveKFdata=True)
+                        results, bestPred, kFold_data = reg.RegressionCVMult()
+
+                        error = float(results['rmse'].loc[str(mdl_name)])
+
+                        model_inputs[count, 0] = C
+                        model_inputs[count, 1] = epsilon
+                        model_inputs[count, 2] = gamma
+                        model_outputs[count, 0] = error
+
+                        count += 1
+                        print("Count: ", count)
+
+        kernel_use = Matern(nu=3 / 2)
+        model = gaussian_process.GaussianProcessRegressor(kernel=kernel_use)
+        model.fit(model_inputs, model_outputs)
+
+        """ PART II: Predictions """
+        pred_error_array = np.zeros((numC, numE, numG))
+        pred_std_array = np.zeros((numC, numE, numG))
+        pred_min_error_array = np.zeros((numC, numE, numG))
+
+        X_ts = np.zeros((1, 3))
+        pred_error_df = pd.DataFrame(columns=['Min-Error', 'C', 'Epsilon', 'Gamma'])
+        counter = 0
+        for C_idx in range(numC):
+            C = C_range[C_idx]
+            for e_idx in range(numE):
+                epsilon = epsilon_range[e_idx]
+                for g_idx in range(numG):
+                    gamma = gamma_range[g_idx]
+
+                    X_ts[0, :] = [C, epsilon, gamma]
+                    error_pred, error_std = model.predict(X_ts, return_std=True)
+                    min_error = (error_pred[0] - error_std[0] * 0.1)
+
+                    pred_error_df.loc[counter] = [min_error, C, epsilon, gamma]
+                    counter += 1
+
+                    pred_error_array[C_idx, e_idx, g_idx] = error_pred
+                    pred_std_array[C_idx, e_idx, g_idx] = error_std
+                    pred_min_error_array[C_idx, e_idx, g_idx] = min_error
+
+        pred_error_df_sorted = pred_error_df.sort_values(by=['Min-Error'], ascending=True)
+
+        """ PART III: Running best points """
+        num_calc_points = int(Npts * decimal_points_top)
+
+        df_col_names = ['Figure', 'RMSE', 'R^2', 'Cor', 'C', 'Epsilon', 'Coef0', 'Gamma',
+                        'Average Training-RMSE', 'Average Training-R^2', 'Average Training-Cor',
+                        'avgTR to avgTS', 'avgTR to Final Error']
+        df_numRows = num_calc_points
+        storage_df = pd.DataFrame(data=np.zeros((df_numRows, len(df_col_names))), columns=df_col_names)
+
+        for pt in range(num_calc_points):
+            C = pred_error_df_sorted.iloc[pt, 1]
+            epsilon = pred_error_df_sorted.iloc[pt, 2]
+            gamma = pred_error_df_sorted.iloc[pt, 3]
+
+            reg = Regression(X_use, Y_use,
+                             C=C, epsilon=epsilon, gamma=gamma,
+                             Nk=5, N=1, goodIDs=goodIDs, seed=seed,
+                             RemoveNaN=removeNaN_var, StandardizeX=True, models_use=models_use, giveKFdata=True)
+            results, bestPred, kFold_data = reg.RegressionCVMult()
+
+            # Extracts data
+            error = float(results['rmse'].loc[str(mdl_name)])
+            avg_tr_error = np.mean(list(kFold_data['tr']['results']['variation_#1']['rmse'][str(mdl_name)]))
+            avg_ts_error = np.mean(list(kFold_data['ts']['results']['variation_#1']['rmse'][str(mdl_name)]))
+            ratio_trAvg_tsAvg = float(avg_ts_error / avg_tr_error)
+            ratio_trAvg_final = float(error / avg_tr_error)
+
+            rmse = error
+            r2 = float(results['r2'].loc[str(mdl_name)])
+            cor = float(results['cor'].loc[str(mdl_name)])
+
+            avg_tr_rmse = float(
+                np.mean(list(kFold_data['tr']['results']['variation_#1']['rmse'][str(mdl_name)])))
+            avg_tr_r2 = float(np.mean(list(kFold_data['tr']['results']['variation_#1']['r2'][str(mdl_name)])))
+            avg_tr_cor = float(np.mean(list(kFold_data['tr']['results']['variation_#1']['cor'][str(mdl_name)])))
+
+            # Puts data into storage array
+            storage_df.loc[pt] = [fig_idx, rmse, r2, cor, C, epsilon, 'N/A', gamma,
+                                  avg_tr_rmse, avg_tr_r2, avg_tr_cor,
+                                  ratio_trAvg_tsAvg, ratio_trAvg_final]
+
+            print("C: " + str(C) + ", e: " + str(epsilon) + ", ceof0: " + str('N/A') + ", gamma: " + str(
+                gamma) + " (" + str(pt + 1) + "/" + str(num_calc_points) + ")" + " || Error: " + str(
+                error) + ", R^2: " + str(r2))
+
+        storage_sorted_df = storage_df.sort_values(by=['RMSE'], ascending=True)
+
+        """ TEMP: Create 'Error Array' """
+        """
+        This should only be thought of as a temporay fix as to not have to replace the current
+        'determineTopHPs_XHP' functions. To do so, an array is created that holds double the maximum
+        error from the 'storage_df' error values, and then the values that are found in PART III are put
+        in their proper place in this array. This is done to ensure that the top values (the ones that would
+        be picked up by the 'determineTopHPs_XHP') are still the best ones in this new array
+        """
+        rmse_list = list(storage_df['RMSE'])
+        max_rmse = np.max(rmse_list)
+        rmse_bad_input = 2 * max_rmse
+
+        # Create list of good HP-pairs
+        tup_list = []
+        num_rows_df = len(storage_df['RMSE'])
+        for i in range(num_rows_df):
+            C_temp = storage_df['C'][i]
+            e_temp = storage_df['Epsilon'][i]
+            g_temp = storage_df['Gamma'][i]
+            tup_list.append(tuple((C_temp, e_temp, g_temp)))
+
+        error_array = np.zeros((numC, numE, numG))
+
+        for C_idx in range(numC):
+            C = C_range[C_idx]
+            for e_idx in range(numE):
+                e = epsilon_range[e_idx]
+                for g_idx in range(numG):
+                    gamma = gamma_range[g_idx]
+
+                    if tuple((C, e, gamma)) not in tup_list:
+                        error_temp = rmse_bad_input
+                    else:
+                        error_temp = float(storage_df.loc[(storage_df['C'] == C) & (storage_df['Epsilon'] == e) & (storage_df['Gamma'] == gamma)]['RMSE'])
+
+                    error_array[C_idx, e_idx, g_idx] = error_temp
+
+        return error_array, storage_sorted_df
+
+    def runFullGridSearch_AL_SVM_C_Epsilon_Gamma(self, C_input_data, epsilon_input_data, gamma_input_data):
+
+        HP_data = [[C_input_data, epsilon_input_data, gamma_input_data]]
+
+        fig_idx_list = self.figureNumbers(self.numLayers, self.numZooms)
+
+        final_storage_df_list = []
+
+        # GETS GAMMA VALUE ---------------------------------------------------------------------------------------------
+        goodIds = self.goodIDs
+        Y_inp = self.Y_inp
+        Y_use = [Y_inp[i] for i in range(len(Y_inp)) if goodIds[i]]
+
+        fig_counter = 0
+        for layer in range(self.numLayers):
+            HP_layer_data = []
+            for position_idx in range(len(HP_data)):
+                print("Figure: ", fig_idx_list[fig_counter])
+                print("Current Layer: ", layer + 1)
+                print("Current Position: ", position_idx + 1)
+
+                HP_data_current = HP_data[position_idx]
+
+                # Sets up C and Epsilon ranges
+                C_data = HP_data_current[0]
+                epsilon_data = HP_data_current[1]
+                gamma_data = HP_data_current[2]
+                C_range = np.linspace(C_data[0], C_data[1], self.gridLength)
+                epsilon_range = np.linspace(epsilon_data[0], epsilon_data[1], self.gridLength)
+                gamma_range = np.linspace(gamma_data[0], gamma_data[1], self.gridLength)
+
+                # Runs the heatmap with the current C & Epsilon ranges
+                error_matrix, storage_df_temp = self.runSingleGridSearch_AL_SVM_C_Epsilon_Gamma(C_range, epsilon_range,
+                                                                                             gamma_range,
+                                                                                             fig_idx_list[
+                                                                                                 fig_counter])
+
+                # Gets the new ranges from the error-matrix
+                HP_new_list, Index_Values = self.determineTopHPs_3HP(error_matrix, C_range, epsilon_range,
+                                                                     gamma_range,
+                                                                     self.numZooms)
+
+                if layer == self.numLayers - 1:
+                    final_storage_df_list.append(storage_df_temp)
+
+                for i in HP_new_list:
+                    HP_layer_data.append(i)
+
+                fig_counter += 1
+
+            HP_data = HP_layer_data
+
+        # Initalizes the final storage of the data on the final layer
+        storage_df_current = pd.DataFrame(columns=['Figure', 'RMSE', 'R^2', 'Cor', 'C', 'Epsilon', 'Coef0', 'Gamma',
+                                                   'Average Training-RMSE', 'Average Training-R^2',
+                                                   'Average Training-Cor',
+                                                   'avgTR to avgTS', 'avgTR to Final Error'])
+        for i in range(len(final_storage_df_list)):
+            storage_df_new = pd.concat([storage_df_current, final_storage_df_list[i]])
+            storage_df_current = storage_df_new
+
+        storage_df_unsorted = storage_df_current
+        storage_df_sorted = storage_df_unsorted.sort_values(by=["RMSE"], ascending=True)
+        if self.save_csv_files == True:
+            storage_df_unsorted.to_csv('0-Data_' + str(self.mdl_name) + '_Unsorted.csv')
+            storage_df_sorted.to_csv('0-Data_' + str(self.mdl_name) + '_Sorted.csv')
+
+        return storage_df_unsorted, storage_df_sorted
+
+    # CASE III: SVM - C, Epsilon, Gamma, Coef0 -- Poly2, Poly3
+    def runSingleGridSearch_AL_SVM_C_Epsilon_Gamma_Coef0(self, C_range, epsilon_range, gamma_range, coef0_range, fig_idx):
+        num_HPs = 4
+
+        # INPUTS FROM CLASS ATRIBUTES ----------------------------------------------------------------------------------
+        X_use = self.X_inp
+        Y_use = self.Y_inp
+        removeNaN_var = self.RemoveNaN_var
+        goodIDs = self.goodIDs
+        seed = self.seed
+        models_use = self.models_use
+        mdl_name = self.mdl_name
+        decimal_points_int = self.decimal_points_int
+        decimal_points_top = self.decimal_points_top
+
+        """ PART I: Initial Calculations """
+        numC = len(C_range)
+        numE = len(epsilon_range)
+        numG = len(gamma_range)
+        numC0 = len(coef0_range)
+
+        Npts = numC * numE * numG * numC0
+        num_points = Npts * decimal_points_int
+
+        indices = np.linspace(0, 19, int(num_points ** (1 / num_HPs)), dtype=int)
+        points = [(i, j, k, l) for i in indices for j in indices for k in indices for l in indices]
+        Npts_calc = len(points)
+
+        model_inputs = np.zeros((Npts_calc, 4))
+        model_outputs = np.zeros((Npts_calc, 1))
+
+        count = 0
+        for C_idx in range(numC):
+            C = C_range[C_idx]
+            for e_idx in range(numE):
+                epsilon = epsilon_range[e_idx]
+                for g_idx in range(numG):
+                    gamma = gamma_range[g_idx]
+                    for c0_idx in range(numC0):
+                        c0 = coef0_range[c0_idx]
+
+                        index_current = tuple((C_idx, e_idx, g_idx, c0_idx))
+                        if index_current in indices:
+                            reg = Regression(X_use, Y_use,
+                                             C=C, epsilon=epsilon, gamma=gamma, coef0=c0,
+                                             Nk=5, N=1, goodIDs=goodIDs, seed=seed,
+                                             RemoveNaN=removeNaN_var, StandardizeX=True, models_use=models_use,
+                                             giveKFdata=True)
+                            results, bestPred, kFold_data = reg.RegressionCVMult()
+
+                            error = float(results['rmse'].loc[str(mdl_name)])
+
+                            model_inputs[count, 0] = C
+                            model_inputs[count, 1] = epsilon
+                            model_inputs[count, 2] = gamma
+                            model_inputs[count, 3] = c0
+                            model_outputs[count, 0] = error
+
+                            count += 1
+                            print("Count: ", count)
+
+        kernel_use = Matern(nu=3 / 2)
+        model = gaussian_process.GaussianProcessRegressor(kernel=kernel_use)
+        model.fit(model_inputs, model_outputs)
+
+        """ PART II: Predictions """
+        pred_error_array = np.zeros((numC, numE, numG, numC0))
+        pred_std_array = np.zeros((numC, numE, numG, numC0))
+        pred_min_error_array = np.zeros((numC, numE, numG, numC0))
+
+        X_ts = np.zeros((1, 4))
+        pred_error_df = pd.DataFrame(columns=['Min-Error', 'C', 'Epsilon', 'Gamma', 'Coef0'])
+        counter = 0
+        for C_idx in range(numC):
+            C = C_range[C_idx]
+            for e_idx in range(numE):
+                epsilon = epsilon_range[e_idx]
+                for g_idx in range(numG):
+                    gamma = gamma_range[g_idx]
+                    for c0_idx in range(numC0):
+                        c0 = coef0_range[c0_idx]
+
+                        X_ts[0, :] = [C, epsilon, gamma, c0]
+                        error_pred, error_std = model.predict(X_ts, return_std=True)
+                        min_error = (error_pred[0] - error_std[0] * 0.1)
+
+                        pred_error_df.loc[counter] = [min_error, C, epsilon, gamma, c0]
+                        counter += 1
+
+                        pred_error_array[C_idx, e_idx, g_idx, c0_idx] = error_pred
+                        pred_std_array[C_idx, e_idx, g_idx, c0_idx] = error_std
+                        pred_min_error_array[C_idx, e_idx, g_idx, c0_idx] = min_error
+
+        pred_error_df_sorted = pred_error_df.sort_values(by=['Min-Error'], ascending=True)
+
+        """ PART III: Running best points """
+        num_calc_points = int(Npts * decimal_points_top)
+
+        df_col_names = ['Figure', 'RMSE', 'R^2', 'Cor', 'C', 'Epsilon', 'Coef0', 'Gamma',
+                        'Average Training-RMSE', 'Average Training-R^2', 'Average Training-Cor',
+                        'avgTR to avgTS', 'avgTR to Final Error']
+        df_numRows = num_calc_points
+        storage_df = pd.DataFrame(data=np.zeros((df_numRows, len(df_col_names))), columns=df_col_names)
+
+        for pt in range(num_calc_points):
+            C = pred_error_df_sorted.iloc[pt, 1]
+            epsilon = pred_error_df_sorted.iloc[pt, 2]
+            gamma = pred_error_df_sorted.iloc[pt, 3]
+            c0 = pred_error_df_sorted.iloc[pt, 4]
+
+            reg = Regression(X_use, Y_use,
+                             C=C, epsilon=epsilon, gamma=gamma, coef0=c0,
+                             Nk=5, N=1, goodIDs=goodIDs, seed=seed,
+                             RemoveNaN=removeNaN_var, StandardizeX=True, models_use=models_use, giveKFdata=True)
+            results, bestPred, kFold_data = reg.RegressionCVMult()
+
+            # Extracts data
+            error = float(results['rmse'].loc[str(mdl_name)])
+            avg_tr_error = np.mean(list(kFold_data['tr']['results']['variation_#1']['rmse'][str(mdl_name)]))
+            avg_ts_error = np.mean(list(kFold_data['ts']['results']['variation_#1']['rmse'][str(mdl_name)]))
+            ratio_trAvg_tsAvg = float(avg_ts_error / avg_tr_error)
+            ratio_trAvg_final = float(error / avg_tr_error)
+
+            rmse = error
+            r2 = float(results['r2'].loc[str(mdl_name)])
+            cor = float(results['cor'].loc[str(mdl_name)])
+
+            avg_tr_rmse = float(
+                np.mean(list(kFold_data['tr']['results']['variation_#1']['rmse'][str(mdl_name)])))
+            avg_tr_r2 = float(np.mean(list(kFold_data['tr']['results']['variation_#1']['r2'][str(mdl_name)])))
+            avg_tr_cor = float(np.mean(list(kFold_data['tr']['results']['variation_#1']['cor'][str(mdl_name)])))
+
+            # Puts data into storage array
+            storage_df.loc[pt] = [fig_idx, rmse, r2, cor, C, epsilon, c0, gamma,
+                                  avg_tr_rmse, avg_tr_r2, avg_tr_cor,
+                                  ratio_trAvg_tsAvg, ratio_trAvg_final]
+
+            print("C: " + str(C) + ", e: " + str(epsilon) + ", ceof0: " + str(c0) + ", gamma: " + str(
+                gamma) + " (" + str(pt + 1) + "/" + str(num_calc_points) + ")" + " || Error: " + str(
+                error) + ", R^2: " + str(r2))
+
+        storage_sorted_df = storage_df.sort_values(by=['RMSE'], ascending=True)
+
+        """ TEMP: Create 'Error Array' """
+        """
+        This should only be thought of as a temporay fix as to not have to replace the current
+        'determineTopHPs_XHP' functions. To do so, an array is created that holds double the maximum
+        error from the 'storage_df' error values, and then the values that are found in PART III are put
+        in their proper place in this array. This is done to ensure that the top values (the ones that would
+        be picked up by the 'determineTopHPs_XHP') are still the best ones in this new array
+        """
+        rmse_list = list(storage_df['RMSE'])
+        max_rmse = np.max(rmse_list)
+        rmse_bad_input = 2 * max_rmse
+
+        # Create list of good HP-pairs
+        tup_list = []
+        num_rows_df = len(storage_df['RMSE'])
+        for i in range(num_rows_df):
+            C_temp = storage_df['C'][i]
+            e_temp = storage_df['Epsilon'][i]
+            g_temp = storage_df['Gamma'][i]
+            c0_temp = storage_df['Coef0'][i]
+            tup_list.append(tuple((C_temp, e_temp, g_temp, c0_temp)))
+
+        error_array = np.zeros((numC, numE, numG, numC0))
+
+        for C_idx in range(numC):
+            C = C_range[C_idx]
+            for e_idx in range(numE):
+                e = epsilon_range[e_idx]
+                for g_idx in range(numG):
+                    gamma = gamma_range[g_idx]
+                    for c0_idx in range(numC0):
+                        c0 = coef0_range[c0_idx]
+
+                        if tuple((C, e, gamma, c0)) not in tup_list:
+                            error_temp = rmse_bad_input
+                        else:
+                            error_temp = float(storage_df.loc[(storage_df['C'] == C) & (storage_df['Epsilon'] == e) & (
+                                        storage_df['Gamma'] == gamma) & (storage_df['Coef0'] == c0)]['RMSE'])
+
+                        error_array[C_idx, e_idx, g_idx, c0_idx] = error_temp
+
+        return error_array, storage_sorted_df
+
+    def runFullGridSearch_AL_SVM_C_Epsilon_Gamma_Coef0(self, C_input_data, epsilon_input_data, gamma_input_data,
+                                                    coef0_input_data):
+
+        HP_data = [[C_input_data, epsilon_input_data, gamma_input_data, coef0_input_data]]
+
+        fig_idx_list = self.figureNumbers(self.numLayers, self.numZooms)
+
+        final_storage_df_list = []
+
+        # GETS GAMMA VALUE ---------------------------------------------------------------------------------------------
+        goodIds = self.goodIDs
+        Y_inp = self.Y_inp
+        Y_use = [Y_inp[i] for i in range(len(Y_inp)) if goodIds[i]]
+
+        fig_counter = 0
+        for layer in range(self.numLayers):
+            HP_layer_data = []
+            for position_idx in range(len(HP_data)):
+                print("Figure: ", fig_idx_list[fig_counter])
+                print("Current Layer: ", layer + 1)
+                print("Current Position: ", position_idx + 1)
+
+                HP_data_current = HP_data[position_idx]
+
+                # Sets up C and Epsilon ranges
+                C_data = HP_data_current[0]
+                epsilon_data = HP_data_current[1]
+                gamma_data = HP_data_current[2]
+                coef0_data = HP_data_current[3]
+                C_range = np.linspace(C_data[0], C_data[1], self.gridLength)
+                epsilon_range = np.linspace(epsilon_data[0], epsilon_data[1], self.gridLength)
+                gamma_range = np.linspace(gamma_data[0], gamma_data[1], self.gridLength)
+                coef0_range = np.linspace(coef0_data[0], coef0_data[1], self.gridLength)
+
+                # Runs the heatmap with the current C & Epsilon ranges
+                error_matrix, storage_df_temp = self.runSingleGridSearch_AL_SVM_C_Epsilon_Gamma_Coef0(C_range,
+                                                                                                   epsilon_range,
+                                                                                                   gamma_range,
+                                                                                                   coef0_range,
+                                                                                                   fig_idx_list[
+                                                                                                       fig_counter])
+
+                # Gets the new ranges from the error-matrix
+                HP_new_list, Index_Values = self.determineTopHPs_4HP(error_matrix, C_range, epsilon_range,
+                                                                     gamma_range, coef0_range,
+                                                                     self.numZooms)
+
+                if layer == self.numLayers - 1:
+                    final_storage_df_list.append(storage_df_temp)
+
+                for i in HP_new_list:
+                    HP_layer_data.append(i)
+
+                fig_counter += 1
+
+            HP_data = HP_layer_data
+
+        # Initalizes the final storage of the data on the final layer
+        storage_df_current = pd.DataFrame(columns=['Figure', 'RMSE', 'R^2', 'Cor', 'C', 'Epsilon', 'Coef0', 'Gamma',
+                                                   'Average Training-RMSE', 'Average Training-R^2',
+                                                   'Average Training-Cor',
+                                                   'avgTR to avgTS', 'avgTR to Final Error'])
+        for i in range(len(final_storage_df_list)):
+            storage_df_new = pd.concat([storage_df_current, final_storage_df_list[i]])
+            storage_df_current = storage_df_new
+
+        storage_df_unsorted = storage_df_current
+        storage_df_sorted = storage_df_unsorted.sort_values(by=["RMSE"], ascending=True)
+        if self.save_csv_files == True:
+            storage_df_unsorted.to_csv('0-Data_' + str(self.mdl_name) + '_Unsorted.csv')
+            storage_df_sorted.to_csv('0-Data_' + str(self.mdl_name) + '_Sorted.csv')
+
+        return storage_df_unsorted, storage_df_sorted
+
+    # CASE IV: GPR - Noise, SigF, Length -- RBF, Matern 3/2, Matern 5/2
+    def runSingleGridSearch_AL_GPR_Noise_SigF_Length(self, noise_range, sigF_range, length_range, fig_idx):
+        num_HPs = 3
+
+        # INPUTS FROM CLASS ATRIBUTES ----------------------------------------------------------------------------------
+        X_use = self.X_inp
+        Y_use = self.Y_inp
+        removeNaN_var = self.RemoveNaN_var
+        goodIDs = self.goodIDs
+        seed = self.seed
+        models_use = self.models_use
+        mdl_name = self.mdl_name
+        decimal_points_int = self.decimal_points_int
+        decimal_points_top = self.decimal_points_top
+
+        """ PART I: Initial Calculations """
+        numN = len(noise_range)
+        numS = len(sigF_range)
+        numL = len(length_range)
+
+        Npts = numN * numS * numL
+        num_points = Npts * decimal_points_int
+
+        indices = np.linspace(0, 19, int(num_points ** (1 / num_HPs)), dtype=int)
+        points = [(i, j, k) for i in indices for j in indices for k in indices]
+        Npts_calc = len(points)
+
+        model_inputs = np.zeros((Npts_calc, 3))
+        model_outputs = np.zeros((Npts_calc, 1))
+
+        count = 0
+        for n_idx in range(numN):
+            noise = noise_range[n_idx]
+            for s_idx in range(numS):
+                sigF = sigF_range[s_idx]
+                for l_idx in range(numL):
+                    length = length_range[l_idx]
+
+                    index_current = tuple((n_idx, s_idx, l_idx))
+                    if index_current in indices:
+                        reg = Regression(X_use, Y_use,
+                                         noise=noise, sigma_F=sigF, scale_length=length,
+                                         Nk=5, N=1, goodIDs=goodIDs, seed=seed,
+                                         RemoveNaN=removeNaN_var, StandardizeX=True, models_use=models_use,
+                                         giveKFdata=True)
+                        results, bestPred, kFold_data = reg.RegressionCVMult()
+
+                        error = float(results['rmse'].loc[str(mdl_name)])
+
+                        model_inputs[count, 0] = noise
+                        model_inputs[count, 1] = sigF
+                        model_inputs[count, 2] = length
+                        model_outputs[count, 0] = error
+
+                        count += 1
+                        print("Count: ", count)
+
+        kernel_use = Matern(nu=3 / 2)
+        model = gaussian_process.GaussianProcessRegressor(kernel=kernel_use)
+        model.fit(model_inputs, model_outputs)
+
+        """ PART II: Predictions """
+        pred_error_array = np.zeros((numN, numS, numL))
+        pred_std_array = np.zeros((numN, numS, numL))
+        pred_min_error_array = np.zeros((numN, numS, numL))
+
+        X_ts = np.zeros((1, 3))
+        pred_error_df = pd.DataFrame(columns=['Min-Error', 'Noise', 'SigmaF', 'Length'])
+        counter = 0
+        for n_idx in range(numN):
+            noise = noise_range[n_idx]
+            for s_idx in range(numS):
+                sigF = sigF_range[s_idx]
+                for l_idx in range(numL):
+                    length = length_range[l_idx]
+
+                    X_ts[0, :] = [noise, sigF, length]
+                    error_pred, error_std = model.predict(X_ts, return_std=True)
+                    min_error = (error_pred[0] - error_std[0] * 0.1)
+
+                    pred_error_df.loc[counter] = [min_error, noise, sigF, length]
+                    counter += 1
+
+                    pred_error_array[n_idx, s_idx, l_idx] = error_pred
+                    pred_std_array[n_idx, s_idx, l_idx] = error_std
+                    pred_min_error_array[n_idx, s_idx, l_idx] = min_error
+
+        pred_error_df_sorted = pred_error_df.sort_values(by=['Min-Error'], ascending=True)
+
+        """ PART III: Running best points """
+        num_calc_points = int(Npts * decimal_points_top)
+
+        df_col_names = ['Figure', 'RMSE', 'R^2', 'Cor', 'Noise', 'Sigma_F', 'Length',
+                        'Average Training-RMSE', 'Average Training-R^2', 'Average Training-Cor',
+                        'avgTR to avgTS', 'avgTR to Final Error']
+        df_numRows = num_calc_points
+        storage_df = pd.DataFrame(data=np.zeros((df_numRows, len(df_col_names))), columns=df_col_names)
+
+        for pt in range(num_calc_points):
+            noise = pred_error_df_sorted.iloc[pt, 1]
+            sigF = pred_error_df_sorted.iloc[pt, 2]
+            length = pred_error_df_sorted.iloc[pt, 3]
+
+            reg = Regression(X_use, Y_use,
+                             noise=noise, sigma_F=sigF, scale_length=length,
+                             Nk=5, N=1, goodIDs=goodIDs, seed=seed,
+                             RemoveNaN=removeNaN_var, StandardizeX=True, models_use=models_use, giveKFdata=True)
+            results, bestPred, kFold_data = reg.RegressionCVMult()
+
+            # Extracts data
+            error = float(results['rmse'].loc[str(mdl_name)])
+            avg_tr_error = np.mean(list(kFold_data['tr']['results']['variation_#1']['rmse'][str(mdl_name)]))
+            avg_ts_error = np.mean(list(kFold_data['ts']['results']['variation_#1']['rmse'][str(mdl_name)]))
+            ratio_trAvg_tsAvg = float(avg_ts_error / avg_tr_error)
+            ratio_trAvg_final = float(error / avg_tr_error)
+
+            rmse = error
+            r2 = float(results['r2'].loc[str(mdl_name)])
+            cor = float(results['cor'].loc[str(mdl_name)])
+
+            avg_tr_rmse = float(
+                np.mean(list(kFold_data['tr']['results']['variation_#1']['rmse'][str(mdl_name)])))
+            avg_tr_r2 = float(np.mean(list(kFold_data['tr']['results']['variation_#1']['r2'][str(mdl_name)])))
+            avg_tr_cor = float(np.mean(list(kFold_data['tr']['results']['variation_#1']['cor'][str(mdl_name)])))
+
+            # Puts data into storage array
+            storage_df.loc[pt] = [fig_idx, rmse, r2, cor, noise, sigF, length,
+                                  avg_tr_rmse, avg_tr_r2, avg_tr_cor,
+                                  ratio_trAvg_tsAvg, ratio_trAvg_final]
+
+            print("noise: " + str(noise) + ", sigF: " + str(sigF) + ", length: " + str(length) + " (" + str(
+                pt+1) + "/" + str(num_calc_points) + ")")
+
+        storage_sorted_df = storage_df.sort_values(by=['RMSE'], ascending=True)
+
+        """ TEMP: Create 'Error Array' """
+        """
+        This should only be thought of as a temporay fix as to not have to replace the current
+        'determineTopHPs_XHP' functions. To do so, an array is created that holds double the maximum
+        error from the 'storage_df' error values, and then the values that are found in PART III are put
+        in their proper place in this array. This is done to ensure that the top values (the ones that would
+        be picked up by the 'determineTopHPs_XHP') are still the best ones in this new array
+        """
+        rmse_list = list(storage_df['RMSE'])
+        max_rmse = np.max(rmse_list)
+        rmse_bad_input = 2 * max_rmse
+
+        # Create list of good HP-pairs
+        tup_list = []
+        num_rows_df = len(storage_df['RMSE'])
+        for i in range(num_rows_df):
+            noise_temp = storage_df['Noise'][i]
+            sigF_temp = storage_df['Sigma_F'][i]
+            length_temp = storage_df['Length'][i]
+            tup_list.append(tuple((noise_temp, sigF_temp, length_temp)))
+
+        error_array = np.zeros((numN, numS, numL))
+
+        for n_idx in range(numN):
+            noise = noise_range[n_idx]
+            for s_idx in range(numS):
+                sigF = sigF_range[s_idx]
+                for l_idx in range(numL):
+                    length = length_range[l_idx]
+
+                    if tuple((noise, sigF, length)) not in tup_list:
+                        error_temp = rmse_bad_input
+                    else:
+                        error_temp = float(storage_df.loc[(storage_df['Noise'] == noise) & (storage_df['Sigma_F'] == sigF) & (
+                                    storage_df['Length'] == length)]['RMSE'])
+
+                    error_array[n_idx, s_idx, l_idx] = error_temp
+
+        return error_array, storage_sorted_df
+
+    def runFullGridSearch_AL_GPR_Noise_SigF_Length(self, noise_input_data, sigF_input_data, length_input_data):
+
+        HP_data = [[noise_input_data, sigF_input_data, length_input_data]]
+
+        fig_idx_list = self.figureNumbers(self.numLayers, self.numZooms)
+
+        final_storage_df_list = []
+
+        fig_counter = 0
+        for layer in range(self.numLayers):
+            HP_layer_data = []
+            for position_idx in range(len(HP_data)):
+                print("Figure: ", fig_idx_list[fig_counter])
+                print("Current Layer: ", layer + 1)
+                print("Current Position: ", position_idx + 1)
+
+                HP_data_current = HP_data[position_idx]
+
+                # Sets up C and Epsilon ranges
+                noise_data = HP_data_current[0]
+                sigF_data = HP_data_current[1]
+                length_data = HP_data_current[2]
+                noise_range = np.linspace(noise_data[0], noise_data[1], self.gridLength)
+                sigF_range = np.linspace(sigF_data[0], sigF_data[1], self.gridLength)
+                length_range = np.linspace(length_data[0], length_data[1], self.gridLength)
+
+                # Runs the heatmap with the current Noise, Sigma_F, & Scale-Length ranges
+                error_matrix, storage_df_temp = self.runSingleGridSearch_AL_GPR_Noise_SigF_Length(noise_range,
+                                                                                               sigF_range,
+                                                                                               length_range,
+                                                                                               fig_idx_list[
+                                                                                                   fig_counter])
+
+                # Gets the new ranges from the error-matrix
+                HP_new_list, Index_Values = self.determineTopHPs_3HP(error_matrix, noise_range, sigF_range,
+                                                                     length_range, self.numZooms)
+
+                if layer == self.numLayers - 1:
+                    final_storage_df_list.append(storage_df_temp)
+
+                for i in HP_new_list:
+                    HP_layer_data.append(i)
+
+                fig_counter += 1
+
+            HP_data = HP_layer_data
+
+        # Initalizes the final storage of the data on the final layer
+        storage_df_current = pd.DataFrame(columns=['Figure', 'RMSE', 'R^2', 'Cor', 'Noise', 'Sigma_F', 'Length',
+                                                   'Average Training-RMSE', 'Average Training-R^2',
+                                                   'Average Training-Cor',
+                                                   'avgTR to avgTS', 'avgTR to Final Error'])
+
+        for i in range(len(final_storage_df_list)):
+            storage_df_new = pd.concat([storage_df_current, final_storage_df_list[i]])
+            storage_df_current = storage_df_new
+
+        storage_df_unsorted = storage_df_current
+        storage_df_sorted = storage_df_unsorted.sort_values(by=["RMSE"], ascending=True)
+        if self.save_csv_files == True:
+            storage_df_unsorted.to_csv('0-Data_' + str(self.mdl_name) + '_Unsorted.csv')
+            storage_df_sorted.to_csv('0-Data_' + str(self.mdl_name) + '_Sorted.csv')
+
+        return storage_df_unsorted, storage_df_sorted
+
+    # CASE V: GPR - Noise, SigF, Length, Alpha -- Rational Quadratic
+    def runSingleGridSearch_AL_GPR_Noise_SigF_Length_Alpha(self, noise_range, sigF_range, length_range, alpha_range, fig_idx):
+        num_HPs = 4
+
+        # INPUTS FROM CLASS ATRIBUTES ----------------------------------------------------------------------------------
+        X_use = self.X_inp
+        Y_use = self.Y_inp
+        removeNaN_var = self.RemoveNaN_var
+        goodIDs = self.goodIDs
+        seed = self.seed
+        models_use = self.models_use
+        mdl_name = self.mdl_name
+        decimal_points_int = self.decimal_points_int
+        decimal_points_top = self.decimal_points_top
+
+        """ PART I: Initial Calculations """
+        numN = len(noise_range)
+        numS = len(sigF_range)
+        numL = len(length_range)
+        numA = len(alpha_range)
+
+        Npts = numN * numS * numL * numA
+        num_points = Npts * decimal_points_int
+
+        indices = np.linspace(0, 19, int(num_points ** (1 / num_HPs)), dtype=int)
+        points = [(i, j, k, l) for i in indices for j in indices for k in indices for l in indices]
+        Npts_calc = len(points)
+
+        model_inputs = np.zeros((Npts_calc, 4))
+        model_outputs = np.zeros((Npts_calc, 1))
+
+        count = 0
+        for n_idx in range(numN):
+            noise = noise_range[n_idx]
+            for s_idx in range(numS):
+                sigF = sigF_range[s_idx]
+                for l_idx in range(numL):
+                    length = length_range[l_idx]
+                    for a_idx in range(numA):
+                        alpha = alpha_range[a_idx]
+
+                        index_current = tuple((n_idx, s_idx, l_idx))
+                        if index_current in indices:
+                            reg = Regression(X_use, Y_use,
+                                             noise=noise, sigma_F=sigF, scale_length=length, alpha=alpha,
+                                             Nk=5, N=1, goodIDs=goodIDs, seed=seed,
+                                             RemoveNaN=removeNaN_var, StandardizeX=True, models_use=models_use,
+                                             giveKFdata=True)
+                            results, bestPred, kFold_data = reg.RegressionCVMult()
+
+                            error = float(results['rmse'].loc[str(mdl_name)])
+
+                            model_inputs[count, 0] = noise
+                            model_inputs[count, 1] = sigF
+                            model_inputs[count, 2] = length
+                            model_inputs[count, 3] = alpha
+                            model_outputs[count, 0] = error
+
+                            count += 1
+                            print("Count: ", count)
+
+        kernel_use = Matern(nu=3 / 2)
+        model = gaussian_process.GaussianProcessRegressor(kernel=kernel_use)
+        model.fit(model_inputs, model_outputs)
+
+        """ PART II: Predictions """
+        pred_error_array = np.zeros((numN, numS, numL, numA))
+        pred_std_array = np.zeros((numN, numS, numL, numA))
+        pred_min_error_array = np.zeros((numN, numS, numL, numA))
+
+        X_ts = np.zeros((1, 3))
+        pred_error_df = pd.DataFrame(columns=['Min-Error', 'Noise', 'SigmaF', 'Length', 'Alpha'])
+        counter = 0
+        for n_idx in range(numN):
+            noise = noise_range[n_idx]
+            for s_idx in range(numS):
+                sigF = sigF_range[s_idx]
+                for l_idx in range(numL):
+                    length = length_range[l_idx]
+                    for a_idx in range(numA):
+                        alpha = alpha_range[a_idx]
+
+                        X_ts[0, :] = [noise, sigF, length, alpha]
+                        error_pred, error_std = model.predict(X_ts, return_std=True)
+                        min_error = (error_pred[0] - error_std[0] * 0.1)
+
+                        pred_error_df.loc[counter] = [min_error, noise, sigF, length, alpha]
+                        counter += 1
+
+                        pred_error_array[n_idx, s_idx, l_idx, a_idx] = error_pred
+                        pred_std_array[n_idx, s_idx, l_idx, a_idx] = error_std
+                        pred_min_error_array[n_idx, s_idx, l_idx, a_idx] = min_error
+
+        pred_error_df_sorted = pred_error_df.sort_values(by=['Min-Error'], ascending=True)
+
+        """ PART III: Running best points """
+        num_calc_points = int(Npts * decimal_points_top)
+
+        df_col_names = ['Figure', 'RMSE', 'R^2', 'Cor', 'Noise', 'Sigma_F', 'Length', 'Alpha',
+                        'Average Training-RMSE', 'Average Training-R^2', 'Average Training-Cor',
+                        'avgTR to avgTS', 'avgTR to Final Error']
+        df_numRows = num_calc_points
+        storage_df = pd.DataFrame(data=np.zeros((df_numRows, len(df_col_names))), columns=df_col_names)
+
+        for pt in range(num_calc_points):
+            noise = pred_error_df_sorted.iloc[pt, 1]
+            sigF = pred_error_df_sorted.iloc[pt, 2]
+            length = pred_error_df_sorted.iloc[pt, 3]
+            alpha = pred_error_df_sorted.iloc[pt, 4]
+
+            reg = Regression(X_use, Y_use,
+                             noise=noise, sigma_F=sigF, scale_length=length, alpha=alpha,
+                             Nk=5, N=1, goodIDs=goodIDs, seed=seed,
+                             RemoveNaN=removeNaN_var, StandardizeX=True, models_use=models_use, giveKFdata=True)
+            results, bestPred, kFold_data = reg.RegressionCVMult()
+
+            # Extracts data
+            error = float(results['rmse'].loc[str(mdl_name)])
+            avg_tr_error = np.mean(list(kFold_data['tr']['results']['variation_#1']['rmse'][str(mdl_name)]))
+            avg_ts_error = np.mean(list(kFold_data['ts']['results']['variation_#1']['rmse'][str(mdl_name)]))
+            ratio_trAvg_tsAvg = float(avg_ts_error / avg_tr_error)
+            ratio_trAvg_final = float(error / avg_tr_error)
+
+            rmse = error
+            r2 = float(results['r2'].loc[str(mdl_name)])
+            cor = float(results['cor'].loc[str(mdl_name)])
+
+            avg_tr_rmse = float(
+                np.mean(list(kFold_data['tr']['results']['variation_#1']['rmse'][str(mdl_name)])))
+            avg_tr_r2 = float(np.mean(list(kFold_data['tr']['results']['variation_#1']['r2'][str(mdl_name)])))
+            avg_tr_cor = float(np.mean(list(kFold_data['tr']['results']['variation_#1']['cor'][str(mdl_name)])))
+
+            # Puts data into storage array
+            storage_df.loc[pt] = [fig_idx, rmse, r2, cor, noise, sigF, length, alpha,
+                                  avg_tr_rmse, avg_tr_r2, avg_tr_cor,
+                                  ratio_trAvg_tsAvg, ratio_trAvg_final]
+
+            print("noise: " + str(noise) + ", sigF: " + str(sigF) + ", length: " + str(length) + ", alpha: " + str(
+                alpha) + " (" + str(
+                pt+1) + "/" + str(num_calc_points) + ")")
+
+        storage_sorted_df = storage_df.sort_values(by=['RMSE'], ascending=True)
+
+        """ TEMP: Create 'Error Array' """
+        """
+        This should only be thought of as a temporay fix as to not have to replace the current
+        'determineTopHPs_XHP' functions. To do so, an array is created that holds double the maximum
+        error from the 'storage_df' error values, and then the values that are found in PART III are put
+        in their proper place in this array. This is done to ensure that the top values (the ones that would
+        be picked up by the 'determineTopHPs_XHP') are still the best ones in this new array
+        """
+        rmse_list = list(storage_df['RMSE'])
+        max_rmse = np.max(rmse_list)
+        rmse_bad_input = 2 * max_rmse
+
+        # Create list of good HP-pairs
+        tup_list = []
+        num_rows_df = len(storage_df['RMSE'])
+        for i in range(num_rows_df):
+            noise_temp = storage_df['Noise'][i]
+            sigF_temp = storage_df['Sigma_F'][i]
+            length_temp = storage_df['Length'][i]
+            alpha_temp = storage_df['Alpha'][i]
+            tup_list.append(tuple((noise_temp, sigF_temp, length_temp, alpha_temp)))
+
+        error_array = np.zeros((numN, numS, numL, numA))
+
+        for n_idx in range(numN):
+            noise = noise_range[n_idx]
+            for s_idx in range(numS):
+                sigF = sigF_range[s_idx]
+                for l_idx in range(numL):
+                    length = length_range[l_idx]
+                    for a_idx in range(numA):
+                        alpha = alpha_range[a_idx]
+
+                        if tuple((noise, sigF, length)) not in tup_list:
+                            error_temp = rmse_bad_input
+                        else:
+                            error_temp = float(
+                                storage_df.loc[(storage_df['Noise'] == noise) & (storage_df['Sigma_F'] == sigF) & (
+                                        storage_df['Length'] == length) & (storage_df['Alpha'] == alpha)]['RMSE'])
+
+                        error_array[n_idx, s_idx, l_idx, a_idx] = error_temp
+
+        return error_array, storage_sorted_df
+
+    def runFullGridSearch_AL_GPR_Noise_SigF_Length_Alpha(self, noise_input_data, sigF_input_data, length_input_data,
+                                                      alpha_input_data):
+
+        HP_data = [[noise_input_data, sigF_input_data, length_input_data, alpha_input_data]]
+
+        fig_idx_list = self.figureNumbers(self.numLayers, self.numZooms)
+
+        final_storage_df_list = []
+
+        fig_counter = 0
+        for layer in range(self.numLayers):
+            HP_layer_data = []
+            for position_idx in range(len(HP_data)):
+                print("Figure: ", fig_idx_list[fig_counter])
+                print("Current Layer: ", layer + 1)
+                print("Current Position: ", position_idx + 1)
+
+                HP_data_current = HP_data[position_idx]
+
+                # Sets up C and Epsilon ranges
+                noise_data = HP_data_current[0]
+                sigF_data = HP_data_current[1]
+                length_data = HP_data_current[2]
+                alpha_data = HP_data_current[3]
+                noise_range = np.linspace(noise_data[0], noise_data[1], self.gridLength)
+                sigF_range = np.linspace(sigF_data[0], sigF_data[1], self.gridLength)
+                length_range = np.linspace(length_data[0], length_data[1], self.gridLength)
+                alpha_range = np.linspace(alpha_data[0], alpha_data[1], self.gridLength)
+
+                # Runs the heatmap with the current Noise, Sigma_F, & Scale-Length ranges
+                error_matrix, storage_df_temp = self.runSingleGridSearch_AL_GPR_Noise_SigF_Length_Alpha(noise_range,
+                                                                                                     sigF_range,
+                                                                                                     length_range,
+                                                                                                     alpha_range,
+                                                                                                     fig_idx_list[
+                                                                                                         fig_counter])
+
+                # Gets the new ranges from the error-matrix
+                HP_new_list, Index_Values = self.determineTopHPs_4HP(error_matrix, noise_range, sigF_range,
+                                                                     length_range, alpha_range, self.numZooms)
+
+                if layer == self.numLayers - 1:
+                    final_storage_df_list.append(storage_df_temp)
+
+                for i in HP_new_list:
+                    HP_layer_data.append(i)
+
+                fig_counter += 1
+
+            HP_data = HP_layer_data
+
+        # Initalizes the final storage of the data on the final layer
+        storage_df_current = pd.DataFrame(
+            columns=['Figure', 'RMSE', 'R^2', 'Cor', 'Noise', 'Sigma_F', 'Length', 'Alpha',
+                     'Average Training-RMSE', 'Average Training-R^2',
+                     'Average Training-Cor',
+                     'avgTR to avgTS', 'avgTR to Final Error'])
+
+        for i in range(len(final_storage_df_list)):
+            storage_df_new = pd.concat([storage_df_current, final_storage_df_list[i]])
+            storage_df_current = storage_df_new
+
+        storage_df_unsorted = storage_df_current
+        storage_df_sorted = storage_df_unsorted.sort_values(by=["RMSE"], ascending=True)
+        if self.save_csv_files == True:
+            storage_df_unsorted.to_csv('0-Data_' + str(self.mdl_name) + '_Unsorted.csv')
+            storage_df_sorted.to_csv('0-Data_' + str(self.mdl_name) + '_Sorted.csv')
+
+        return storage_df_unsorted, storage_df_sorted
+
+
 
 
