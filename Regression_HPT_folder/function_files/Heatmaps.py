@@ -3390,7 +3390,7 @@ class heatmaps():
                 epsilon = epsilon_range[e_idx]
 
                 index_current = tuple((C_idx, e_idx))
-                if index_current in indices:
+                if index_current in points:
                     reg = Regression(X_use, Y_use,
                                      C=C, epsilon=epsilon,
                                      Nk=5, N=1, goodIDs=goodIDs, seed=seed,
@@ -3616,7 +3616,7 @@ class heatmaps():
                     gamma = gamma_range[g_idx]
 
                     index_current = tuple((C_idx, e_idx, g_idx))
-                    if index_current in indices:
+                    if index_current in points:
                         reg = Regression(X_use, Y_use,
                                          C=C, epsilon=epsilon, gamma=gamma,
                                          Nk=5, N=1, goodIDs=goodIDs, seed=seed,
@@ -3862,7 +3862,7 @@ class heatmaps():
                         c0 = coef0_range[c0_idx]
 
                         index_current = tuple((C_idx, e_idx, g_idx, c0_idx))
-                        if index_current in indices:
+                        if index_current in points:
                             reg = Regression(X_use, Y_use,
                                              C=C, epsilon=epsilon, gamma=gamma, coef0=c0,
                                              Nk=5, N=1, goodIDs=goodIDs, seed=seed,
@@ -4119,7 +4119,7 @@ class heatmaps():
                     length = length_range[l_idx]
 
                     index_current = tuple((n_idx, s_idx, l_idx))
-                    if index_current in indices:
+                    if index_current in points:
                         reg = Regression(X_use, Y_use,
                                          noise=noise, sigma_F=sigF, scale_length=length,
                                          Nk=5, N=1, goodIDs=goodIDs, seed=seed,
@@ -4362,7 +4362,7 @@ class heatmaps():
                         alpha = alpha_range[a_idx]
 
                         index_current = tuple((n_idx, s_idx, l_idx))
-                        if index_current in indices:
+                        if index_current in points:
                             reg = Regression(X_use, Y_use,
                                              noise=noise, sigma_F=sigF, scale_length=length, alpha=alpha,
                                              Nk=5, N=1, goodIDs=goodIDs, seed=seed,

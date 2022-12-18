@@ -39,6 +39,8 @@ heatmap_inputs = dict()
 heatmap_inputs['gridLength'] = dict()
 heatmap_inputs['numZooms'] = dict()
 heatmap_inputs['numLayers'] = dict()
+heatmap_inputs['decimal_points_int'] = dict()
+heatmap_inputs['decimal_points_top'] = dict()
 # SVM_Linear
 mdl = 0
 heatmap_inputs['gridLength'][model_names[mdl]] = 20
