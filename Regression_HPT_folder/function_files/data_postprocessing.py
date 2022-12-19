@@ -17,7 +17,7 @@ for case in case_use:
     os.chdir('Case_'+case)
     i = 0
     for prop in props_to_run:
-        prop_folder = str(i)+"-"+prop_names[prop]
+        prop_folder = str(prop)+"-"+prop_names[prop]
         os.mkdir(prop_folder)
         os.chdir(prop_folder)
         j = 0
@@ -93,7 +93,7 @@ for case in case_use:
     os.mkdir('all_props')
     i = 0
     for prop in props_to_run:
-        prop_folder = str(i)+"-"+prop_names[prop]
+        prop_folder = str(prop)+"-"+prop_names[prop]
         os.mkdir(prop_folder)
         i += 1
     os.chdir('..')
@@ -106,7 +106,7 @@ for case in case_use:
     i = 0
     counter = 1
     for prop in props_to_run:
-        prop_folder = str(i)+"-"+prop_names[prop]
+        prop_folder = str(prop)+"-"+prop_names[prop]
         os.chdir(prop_folder)
         i+=1
         j = 0

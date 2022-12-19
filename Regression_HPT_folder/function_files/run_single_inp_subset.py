@@ -49,7 +49,19 @@ current_path = os.getcwd()
 
 X_list = input_set['features']
 X_full_list = []
-X_names = input_set['names']
+X_names_inp = input_set['names']
+
+if parm_var:
+    X_names = []
+    for i in range(len(X_names_inp)):
+        X_names_temp = X_names_inp[i]
+        X_names_new = []
+        for n in X_names_temp:
+            X_names_new.append(n)
+        X_names_new.append('Parm')
+        X_names.append(tuple(X_names_new))
+else:
+    X_names = X_names_inp
 
 NftSets = len(X_list)
 
@@ -66,6 +78,10 @@ for i in range(NftSets):
         X_use = np.concatenate(ft_set, axis=1)
     else:
         print("ERROR IN FEATURE-SET LENGTH ~ Charlie")
+
+    if parm_var:
+        X_use = np.concatenate([X_use, parm], axis=1)
+
     X_full_list.append(X_use)
     print(str(i + 1) + "/" + str(NftSets) + ": ", ft_names)
 

@@ -3516,6 +3516,10 @@ class heatmaps():
 
                 error_array[C_idx, e_idx] = error_temp
 
+
+        filename = fig_idx+" - Sorted.csv"
+        storage_sorted_df.to_csv(filename)
+
         return error_array, storage_sorted_df
 
     def runFullGridSearch_AL_SVM_C_Epsilon(self, C_input_data, epsilon_input_data):
@@ -3748,6 +3752,9 @@ class heatmaps():
                         error_temp = float(storage_df.loc[(storage_df['C'] == C) & (storage_df['Epsilon'] == e) & (storage_df['Gamma'] == gamma)]['RMSE'])
 
                     error_array[C_idx, e_idx, g_idx] = error_temp
+
+        filename = fig_idx + " - Sorted.csv"
+        storage_sorted_df.to_csv(filename)
 
         return error_array, storage_sorted_df
 
@@ -4004,6 +4011,9 @@ class heatmaps():
 
                         error_array[C_idx, e_idx, g_idx, c0_idx] = error_temp
 
+        filename = fig_idx + " - Sorted.csv"
+        storage_sorted_df.to_csv(filename)
+
         return error_array, storage_sorted_df
 
     def runFullGridSearch_AL_SVM_C_Epsilon_Gamma_Coef0(self, C_input_data, epsilon_input_data, gamma_input_data,
@@ -4253,6 +4263,9 @@ class heatmaps():
 
                     error_array[n_idx, s_idx, l_idx] = error_temp
 
+        filename = fig_idx + " - Sorted.csv"
+        storage_sorted_df.to_csv(filename)
+
         return error_array, storage_sorted_df
 
     def runFullGridSearch_AL_GPR_Noise_SigF_Length(self, noise_input_data, sigF_input_data, length_input_data):
@@ -4390,7 +4403,7 @@ class heatmaps():
         pred_std_array = np.zeros((numN, numS, numL, numA))
         pred_min_error_array = np.zeros((numN, numS, numL, numA))
 
-        X_ts = np.zeros((1, 3))
+        X_ts = np.zeros((1, 4))
         pred_error_df = pd.DataFrame(columns=['Min-Error', 'Noise', 'SigmaF', 'Length', 'Alpha'])
         counter = 0
         for n_idx in range(numN):
@@ -4504,6 +4517,9 @@ class heatmaps():
                                         storage_df['Length'] == length) & (storage_df['Alpha'] == alpha)]['RMSE'])
 
                         error_array[n_idx, s_idx, l_idx, a_idx] = error_temp
+
+        filename = fig_idx + " - Sorted.csv"
+        storage_sorted_df.to_csv(filename)
 
         return error_array, storage_sorted_df
 

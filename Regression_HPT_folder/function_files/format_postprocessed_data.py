@@ -28,6 +28,7 @@ for case in case_use:
         data_prop = pd.DataFrame(columns=['MODEL', 'INPUT FEATURES', 'RMSE', 'R^2', 'HP1', 'HP2', 'HP3', 'HP4', 'RATIO'])
         # SVM ---------------------------------------------------------------------------------------------------------------------------------------------------------------
         try:
+            i = 0
             data_test_del = data_list[i]
             data_prop.loc[0] = ['Models', 'Input Features', 'RMSE', 'R^2', 'C', 'Epsilon', 'Gamma', 'Coef0', 'Training-to-Final Error']
             i = 0

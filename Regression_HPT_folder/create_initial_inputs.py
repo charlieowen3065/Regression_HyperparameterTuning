@@ -26,6 +26,8 @@ input_dict['combo_array'] = combo_array
 input_dict['numTopFeatures'] = numTopFeatures
 input_dict['test_train_split_var'] = test_train_split_var
 input_dict['split_decimal'] = split_decimal
+input_dict['Parm_var'] = parm_var
+input_dict['LocData_var'] = locData_var
 model_use_logArray = np.identity(len(model_names))
 
 # ******************************************************************************************************************** #
@@ -75,12 +77,7 @@ for case in case_use:
             hyperparameters = full_HP_list[str(prop_current)][str(mdl_current)]
             X_names = feature_name_list[case][prop_keys[prop_idx]]
             X_data = feature_set_list[case][prop_keys[prop_idx]]
-            if parm_var == True:
-                X_names.append('Parm')
-                X_data.append(parmData)
-            if locData_var == True:
-                X_names.append('locData')
-                X_data.append(locData)
+
             models_use_current = model_use_logArray[mdl_idx, :]
             model_type_current = model_types[mdl_idx]
             model_name_current = model_names[mdl_idx]

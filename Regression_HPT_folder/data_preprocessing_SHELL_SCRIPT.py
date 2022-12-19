@@ -19,8 +19,13 @@ if findTopInpts_var == True:
             model_list = os.listdir()
             for model in model_list:
                 os.chdir(model)
-                exec(open("./findTopInputs.py").read())
-                os.chdir('..')
+                exec(open("./format_input_data.py").read())
+                os.chdir('input_feature_set_folder')
+                for ft in filter(os.path.isdir, os.listdir()):
+                    os.chdir(ft)
+                    exec(open("./run_single_inp_subset.py").read())
+                    os.chdir('..')
+                os.chdir('../..')
 
             os.chdir('..')
         os.chdir('..')
