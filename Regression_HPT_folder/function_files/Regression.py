@@ -82,7 +82,7 @@ class Regression():
         if RemoveNaN == True:
             X_original, self.Y = self.mF.RemoveNaN(X_inp, Y_inp, goodIds=goodIDs)
         else:
-            X_original, self.Y = self.X_inp, self.Y_inp
+            X_original, self.Y = X_inp, Y_inp
 
         if StandardizeX == True:
             scaler = preprocessing.StandardScaler()
@@ -473,7 +473,10 @@ class Regression():
         
         mdl = model.fit(X_train, Y_train)
         Yp = mdl.predict(X_test)
-        
+
+        shape_use = Y_test.shape
+        Yp.shape = shape_use
+
         rmse, r2, cor = self.mF.getPredMetrics(Y_test, Yp)
         
         return Yp, rmse, r2, cor
@@ -495,10 +498,10 @@ class Regression():
             model_current = self.model_list[model]
             model_name_current = self.model_names[model]
         
-            Yp_temp, rmse_temp, r2_temp, cor_temp = Regression_test_singleModel(model_current, X_train, X_test, Y_train, Y_test)
+            Yp_temp, rmse_temp, r2_temp, cor_temp = self.Regression_test_singleModel(model_current, X_train, X_test, Y_train, Y_test)
             
             Yp_df.iloc[:, model] = Yp_temp
-            metrics_df.loc[model_name_current] = [rmse_temp, r2_temp, cor_temp]
+            metrics_df.loc[model_name_current] = [rmse_temp[0], r2_temp[0], cor_temp]
             
         results['Yp'] = Yp_df
         results['metrics'] = metrics_df

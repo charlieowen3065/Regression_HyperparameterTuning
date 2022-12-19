@@ -19,6 +19,7 @@ main_path = input_dict['main_path']
 current_path = os.getcwd()
 sys.path.append(os.path.abspath(main_path+'/function_files/'))
 from miscFunctions import *
+mf = miscFunctions()
 from Regression import *
 from Heatmaps import *
 sys.path.append(os.path.abspath(current_path))
@@ -48,20 +49,29 @@ tr_ts_seed = input_dict['tr_ts_seed']
 
 # For Test-Train Splitting
 if test_train_split_var:
-    X_train, X_test, Y_train, Y_test = train_test_split(X_int, Y_int, test_size=split_decimal, random_state=tr_ts_seed)
+
+    X_noNaN, Y_noNaN = mf.RemoveNaN(X_int, Y_int, goodIds=goodIds)
+
+    X_train, X_test, Y_train, Y_test = train_test_split(X_noNaN, Y_noNaN, test_size=split_decimal, random_state=tr_ts_seed)
     
     X_input = X_train
     Y_input = Y_train
+
+    ht = heatmaps(X_input, Y_input,
+                  N=N, Nk=Nk,
+                  numLayers=numLayers, numZooms=numZooms, gridLength=gridLength,
+                  decimal_points_int=decimal_points_int, decimal_points_top=decimal_points_top,
+                  RemoveNaN=False, goodIDs=None, seed=seed, models_use=model_use)
+
 else:
     X_input = X_int
     Y_input = Y_int
 
-
-ht = heatmaps(X_input, Y_input,
-              N=N, Nk=Nk,
-              numLayers=numLayers, numZooms=numZooms, gridLength=gridLength,
-              decimal_points_int=decimal_points_int, decimal_points_top=decimal_points_top,
-              RemoveNaN=True, goodIDs=goodIds, seed=seed, models_use=model_use)
+    ht = heatmaps(X_input, Y_input,
+                  N=N, Nk=Nk,
+                  numLayers=numLayers, numZooms=numZooms, gridLength=gridLength,
+                  decimal_points_int=decimal_points_int, decimal_points_top=decimal_points_top,
+                  RemoveNaN=True, goodIDs=goodIds, seed=seed, models_use=model_use)
 
 if 'Heatmaps' in os.listdir():
     shutil.rmtree('Heatmaps')
@@ -134,20 +144,20 @@ if test_train_split_var:
     if model_type == 'SVM':
         col_names = ['RMSE', 'R2', 'Cor', 'C', 'Epsilon', 'Gamma', 'Coef0',
                      'kF-Training-RMSE', 'kF-Training-R2', 'kF-Training-Cor',
-                     'Average Training to Final Training Ratio']
+                     'Average-Training-to-Final-Training-Ratio']
     elif model_type == 'GPR':
         col_names = ['RMSE', 'R2', 'Cor', 'Noise', 'Length', 'SigmaF', 'Alpha',
                      'kF-Training-RMSE', 'kF-Training-R2', 'kF-Training-Cor',
-                     'Average Training to Final Training Ratio']
+                     'Average-Training-to-Final-Training-Ratio']
     
     top_models_df = pd.DataFrame(columns=col_names)
     
-    for i in range(5):
+    for i in range(2):
         sorted_data_df = pd.read_csv("0-Data_"+model_name+"_Sorted.csv")
         best_model_data = sorted_data_df.iloc[i, :]
         
         BM_RMSE = best_model_data['RMSE']
-        BM_R2 = best_model_data['R2']
+        BM_R2 = best_model_data['R^2']
         BM_Cor = best_model_data['Cor']
         BM_avgTR_to_finalTR_Error = best_model_data['avgTR to Final Error']
         
@@ -177,14 +187,14 @@ if test_train_split_var:
             Coef0 = 1
             Gamma = 1
         
-        reg = Regression(X_input, Y_input, models_use=model_use, seed=seed, RemoveNaN=False, 
+        reg = Regression(X_test, Y_test, models_use=model_use, seed=seed, RemoveNaN=False,
                          C=C, epsilon=Epsilon, gamma=Gamma, coef0=Coef0, noise=Noise, sigma_F=Sigma_F, scale_length=Scale_Length, alpha=Alpha)
         
         results = reg.Regression_test_multProp(X_train, X_test, Y_train, Y_test)
         
-        rmse_temp = results['metrics'][model_name][0]
-        r2_temp = results['metrics'][model_name][1]
-        cor_temp = results['metrics'][model_name][2]
+        rmse_temp = results['metrics'].loc[model_name]["RMSE"]
+        r2_temp = results['metrics'].loc[model_name]["R2"]
+        cor_temp = results['metrics'].loc[model_name]["Cor"]
         
         if model_type == 'SVM':
             row_data = [rmse_temp, r2_temp, cor_temp, C, Epsilon, Gamma, Coef0, BM_RMSE, BM_R2, BM_Cor, BM_avgTR_to_finalTR_Error]

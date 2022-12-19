@@ -3405,10 +3405,11 @@ class heatmaps():
                     model_outputs[count, 0] = error
 
                     count += 1
-                    print("Count: ", count)
+                    if count % 100 == 0:
+                        print("Count: ", count)
 
         kernel_use = Matern(nu=3 / 2)
-        model = gaussian_process.GaussianProcessRegressor(kernel=kernel_use)
+        model = gaussian_process.GaussianProcessRegressor(kernel=kernel_use, copy_X_train=False)
         model.fit(model_inputs, model_outputs)
 
         """ PART II: Predictions """
@@ -3637,10 +3638,11 @@ class heatmaps():
                         model_outputs[count, 0] = error
 
                         count += 1
-                        print("Count: ", count)
+                        if count % 250 == 0:
+                            print("Count: ", count)
 
         kernel_use = Matern(nu=3 / 2)
-        model = gaussian_process.GaussianProcessRegressor(kernel=kernel_use)
+        model = gaussian_process.GaussianProcessRegressor(kernel=kernel_use, copy_X_train=False)
         model.fit(model_inputs, model_outputs)
 
         """ PART II: Predictions """
@@ -3889,10 +3891,11 @@ class heatmaps():
                             model_outputs[count, 0] = error
 
                             count += 1
-                            print("Count: ", count)
+                            if count % 500 == 0:
+                                print("Count: ", count)
 
         kernel_use = Matern(nu=3 / 2)
-        model = gaussian_process.GaussianProcessRegressor(kernel=kernel_use)
+        model = gaussian_process.GaussianProcessRegressor(kernel=kernel_use, copy_X_train=False)
         model.fit(model_inputs, model_outputs)
 
         """ PART II: Predictions """
@@ -4149,10 +4152,11 @@ class heatmaps():
                         model_outputs[count, 0] = error
 
                         count += 1
-                        print("Count: ", count)
+                        if count % 250 == 0:
+                            print("Count: ", count)
 
         kernel_use = Matern(nu=3 / 2)
-        model = gaussian_process.GaussianProcessRegressor(kernel=kernel_use)
+        model = gaussian_process.GaussianProcessRegressor(kernel=kernel_use, copy_X_train=False)
         model.fit(model_inputs, model_outputs)
 
         """ PART II: Predictions """
@@ -4397,10 +4401,11 @@ class heatmaps():
                             model_outputs[count, 0] = error
 
                             count += 1
-                            print("Count: ", count)
+                            if count % 500 == 0:
+                                print("Count: ", count)
 
         kernel_use = Matern(nu=3 / 2)
-        model = gaussian_process.GaussianProcessRegressor(kernel=kernel_use)
+        model = gaussian_process.GaussianProcessRegressor(kernel=kernel_use, copy_X_train=False)
         model.fit(model_inputs, model_outputs)
 
         """ PART II: Predictions """

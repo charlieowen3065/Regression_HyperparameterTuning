@@ -13,16 +13,17 @@ for case in os.listdir():
             model_dir = os.getcwd()
             exec(open("./combine_and_determine_top_inp_fts.py").read())
             for feature in filter(os.path.isdir, os.listdir()):
-                os.chdir(feature)
+                if feature != 'input_feature_set_folder':
+                    os.chdir(feature)
 
-                feature_dir = os.getcwd()
-                shutil.copyfile(model_dir+s+'Heatmaps.py', feature_dir+s+'Heatmaps.py')
-                shutil.copyfile(model_dir + s + 'input_file', feature_dir + s + 'input_file')
-                shutil.copyfile(model_dir + s + 'data_processing.py', feature_dir + s + 'data_processing.py')
+                    feature_dir = os.getcwd()
+                    shutil.copyfile(model_dir+s+'Heatmaps.py', feature_dir+s+'Heatmaps.py')
+                    shutil.copyfile(model_dir + s + 'input_file', feature_dir + s + 'input_file')
+                    shutil.copyfile(model_dir + s + 'data_processing.py', feature_dir + s + 'data_processing.py')
 
-                exec(open("./data_processing.py").read())
+                    exec(open("./data_processing.py").read())
 
-                os.chdir('..')
+                    os.chdir('..')
             os.chdir('..')
         os.chdir('..')
     os.chdir('..')
