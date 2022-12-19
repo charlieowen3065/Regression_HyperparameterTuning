@@ -3427,7 +3427,7 @@ class heatmaps():
 
                 X_ts[0, :] = [C, epsilon]
                 error_pred, error_std = model.predict(X_ts, return_std=True)
-                min_error = (error_pred[0] - error_std[0] * 0.1)
+                min_error = (error_pred[0] - error_std[0])
 
                 pred_error_df.loc[counter] = [min_error, C, epsilon]
                 counter += 1
@@ -3662,7 +3662,7 @@ class heatmaps():
 
                     X_ts[0, :] = [C, epsilon, gamma]
                     error_pred, error_std = model.predict(X_ts, return_std=True)
-                    min_error = (error_pred[0] - error_std[0] * 0.1)
+                    min_error = (error_pred[0] - error_std[0])
 
                     pred_error_df.loc[counter] = [min_error, C, epsilon, gamma]
                     counter += 1
@@ -3917,7 +3917,7 @@ class heatmaps():
 
                         X_ts[0, :] = [C, epsilon, gamma, c0]
                         error_pred, error_std = model.predict(X_ts, return_std=True)
-                        min_error = (error_pred[0] - error_std[0] * 0.1)
+                        min_error = (error_pred[0] - error_std[0])
 
                         pred_error_df.loc[counter] = [min_error, C, epsilon, gamma, c0]
                         counter += 1
@@ -4176,7 +4176,7 @@ class heatmaps():
 
                     X_ts[0, :] = [noise, sigF, length]
                     error_pred, error_std = model.predict(X_ts, return_std=True)
-                    min_error = (error_pred[0] - error_std[0] * 0.1)
+                    min_error = (error_pred[0] - error_std[0])
 
                     pred_error_df.loc[counter] = [min_error, noise, sigF, length]
                     counter += 1
@@ -4427,7 +4427,7 @@ class heatmaps():
 
                         X_ts[0, :] = [noise, sigF, length, alpha]
                         error_pred, error_std = model.predict(X_ts, return_std=True)
-                        min_error = (error_pred[0] - error_std[0] * 0.1)
+                        min_error = (error_pred[0] - error_std[0])
 
                         pred_error_df.loc[counter] = [min_error, noise, sigF, length, alpha]
                         counter += 1
