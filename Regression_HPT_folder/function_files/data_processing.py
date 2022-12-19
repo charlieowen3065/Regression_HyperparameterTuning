@@ -132,9 +132,13 @@ elif model_use[7]:  # Matern 5/2
 if test_train_split_var:
 
     if model_type == 'SVM':
-        col_names = ['RMSE', 'R2', 'Cor', 'C', 'Epsilon', 'Gamma', 'Coef0', 'kF-Training-RMSE', 'kF-Training-R2', 'kF-Training-Cor']
+        col_names = ['RMSE', 'R2', 'Cor', 'C', 'Epsilon', 'Gamma', 'Coef0',
+                     'kF-Training-RMSE', 'kF-Training-R2', 'kF-Training-Cor',
+                     'Average Training to Final Training Ratio']
     elif model_type == 'GPR':
-        col_names = ['RMSE', 'R2', 'Cor', 'Noise', 'Length', 'SigmaF', 'Alpha']
+        col_names = ['RMSE', 'R2', 'Cor', 'Noise', 'Length', 'SigmaF', 'Alpha',
+                     'kF-Training-RMSE', 'kF-Training-R2', 'kF-Training-Cor',
+                     'Average Training to Final Training Ratio']
     
     top_models_df = pd.DataFrame(columns=col_names)
     
@@ -144,7 +148,8 @@ if test_train_split_var:
         
         BM_RMSE = best_model_data['RMSE']
         BM_R2 = best_model_data['R2']
-        BM_Cor = best_model_data['cor']
+        BM_Cor = best_model_data['Cor']
+        BM_avgTR_to_finalTR_Error = best_model_data['avgTR to Final Error']
         
         
         if model_type == 'SVM':
@@ -153,22 +158,24 @@ if test_train_split_var:
             Coef0 = best_model_data['Coef0']
             Gamma = best_model_data['Gamma']
             
-            Alpha = 'N/A'
-            Scale_Length = 'N/A'
-            Noise = 'N/A'
-            Sigma_F = 'N/A'
+            Alpha = 1
+            Scale_Length = 1
+            Noise = 1
+            Sigma_F = 1
             
         if model_type == 'GPR':
             if model_use[4]:
                 Alpha = best_model_data['Alpha']
+            else:
+                Alpha = 1
             Scale_Length = best_model_data['Length']
             Noise = best_model_data['Noise']
             Sigma_F = best_model_data['Sigma_F']
             
-            C = 'N/A'
-            Epsilon = 'N/A'
-            Coef0 = 'N/A'
-            Gamma = 'N/A'
+            C = 1
+            Epsilon = 1
+            Coef0 = 1
+            Gamma = 1
         
         reg = Regression(X_input, Y_input, models_use=model_use, seed=seed, RemoveNaN=False, 
                          C=C, epsilon=Epsilon, gamma=Gamma, coef0=Coef0, noise=Noise, sigma_F=Sigma_F, scale_length=Scale_Length, alpha=Alpha)
@@ -180,9 +187,9 @@ if test_train_split_var:
         cor_temp = results['metrics'][model_name][2]
         
         if model_type == 'SVM':
-            row_data = [rmse_temp, r2_temp, cor_temp, C, Epsilon, Gamma, Coef0, BM_RMSE, BM_R2, BM_Cor]
+            row_data = [rmse_temp, r2_temp, cor_temp, C, Epsilon, Gamma, Coef0, BM_RMSE, BM_R2, BM_Cor, BM_avgTR_to_finalTR_Error]
         if model_type == 'GPR':
-            row_data = [rmse_temp, r2_temp, cor_temp, Noise, Scale_Length, Sigma_F, Alpha, BM_RMSE, BM_R2, BM_Cor]
+            row_data = [rmse_temp, r2_temp, cor_temp, Noise, Scale_Length, Sigma_F, Alpha, BM_RMSE, BM_R2, BM_Cor, BM_avgTR_to_finalTR_Error]
         
         top_models_df.loc[str(i)] = row_data
     

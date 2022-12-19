@@ -3368,6 +3368,7 @@ class heatmaps():
         mdl_name = self.mdl_name
         decimal_points_int = self.decimal_points_int
         decimal_points_top = self.decimal_points_top
+        gridLength = self.gridLength
 
         """ PART I: Initial Calculations """
         numC = len(C_range)
@@ -3376,7 +3377,7 @@ class heatmaps():
         Npts = numC * numE
         num_points = Npts * decimal_points_int
 
-        indices = np.linspace(0, 19, int(num_points ** (1 / num_HPs)), dtype=int)
+        indices = np.linspace(0, gridLength-1, int(num_points ** (1 / num_HPs)), dtype=int)
         points = [(i, j) for i in indices for j in indices]
         Npts_calc = len(points)
 
@@ -3595,6 +3596,7 @@ class heatmaps():
         mdl_name = self.mdl_name
         decimal_points_int = self.decimal_points_int
         decimal_points_top = self.decimal_points_top
+        gridLength = self.gridLength
 
         """ PART I: Initial Calculations """
         numC = len(C_range)
@@ -3604,7 +3606,7 @@ class heatmaps():
         Npts = numC * numE * numG
         num_points = Npts * decimal_points_int
 
-        indices = np.linspace(0, 19, int(num_points ** (1 / num_HPs)), dtype=int)
+        indices = np.linspace(0, gridLength-1, int(num_points ** (1 / num_HPs)), dtype=int)
         points = [(i, j, k) for i in indices for j in indices for k in indices]
         Npts_calc = len(points)
 
@@ -3841,6 +3843,7 @@ class heatmaps():
         mdl_name = self.mdl_name
         decimal_points_int = self.decimal_points_int
         decimal_points_top = self.decimal_points_top
+        gridLength = self.gridLength
 
         """ PART I: Initial Calculations """
         numC = len(C_range)
@@ -3851,7 +3854,7 @@ class heatmaps():
         Npts = numC * numE * numG * numC0
         num_points = Npts * decimal_points_int
 
-        indices = np.linspace(0, 19, int(num_points ** (1 / num_HPs)), dtype=int)
+        indices = np.linspace(0, gridLength-1, int(num_points ** (1 / num_HPs)), dtype=int)
         points = [(i, j, k, l) for i in indices for j in indices for k in indices for l in indices]
         Npts_calc = len(points)
 
@@ -4104,6 +4107,7 @@ class heatmaps():
         mdl_name = self.mdl_name
         decimal_points_int = self.decimal_points_int
         decimal_points_top = self.decimal_points_top
+        gridLength = self.gridLength
 
         """ PART I: Initial Calculations """
         numN = len(noise_range)
@@ -4113,7 +4117,7 @@ class heatmaps():
         Npts = numN * numS * numL
         num_points = Npts * decimal_points_int
 
-        indices = np.linspace(0, 19, int(num_points ** (1 / num_HPs)), dtype=int)
+        indices = np.linspace(0, gridLength-1, int(num_points ** (1 / num_HPs)), dtype=int)
         points = [(i, j, k) for i in indices for j in indices for k in indices]
         Npts_calc = len(points)
 
@@ -4347,6 +4351,7 @@ class heatmaps():
         mdl_name = self.mdl_name
         decimal_points_int = self.decimal_points_int
         decimal_points_top = self.decimal_points_top
+        gridLength = self.gridLength
 
         """ PART I: Initial Calculations """
         numN = len(noise_range)
@@ -4357,7 +4362,7 @@ class heatmaps():
         Npts = numN * numS * numL * numA
         num_points = Npts * decimal_points_int
 
-        indices = np.linspace(0, 19, int(num_points ** (1 / num_HPs)), dtype=int)
+        indices = np.linspace(0, gridLength-1, int(num_points ** (1 / num_HPs)), dtype=int)
         points = [(i, j, k, l) for i in indices for j in indices for k in indices for l in indices]
         Npts_calc = len(points)
 

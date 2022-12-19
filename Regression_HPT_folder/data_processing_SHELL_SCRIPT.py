@@ -11,6 +11,7 @@ for case in os.listdir():
         for model in os.listdir():
             os.chdir(model)
             model_dir = os.getcwd()
+            exec(open("./combine_and_determine_top_inp_fts.py").read())
             for feature in filter(os.path.isdir, os.listdir()):
                 os.chdir(feature)
 

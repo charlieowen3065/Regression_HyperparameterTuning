@@ -3,7 +3,7 @@ import numpy as np
 run_findTopInputs = True
 parm_var = False
 locData_var = False
-test_train_split_var = False
+test_train_split_var = True
 # When true, the data is first split into a test/train, then the kF-CV is preformed on the train-data
 # When False, the data is all run into the kF-CV, and there is no test/train split
 N = 1
