@@ -67,14 +67,16 @@ ht = heatmaps(X1, Y, numLayers=numLayers, numZooms=numZooms, Nk=5, N=1, gridLeng
               RemoveNaN=True, goodIDs=goodIDs, seed=seed,
               decimal_points_int=0.1, decimal_points_top=0.1,
               models_use=models_use, save_csv_files=False)
-#storage_df_unsorted, storage_df_sorted = ht.runFullGridSearch_SVM_C_Epsilon_Gamma_Coef0(C_input_data, epsilon_input_data, gamma_input_data, coef0_input_data)
-#storage_df_unsorted, storage_df_sorted = ht.runFullGridSearch_SVM_C_Epsilon_Gamma(C_input_data, epsilon_input_data, gamma_input_data)
-#storage_df_unsorted, storage_df_sorted = ht.runFullGridSearch_GPR_Noise_SigF_Length(noise_input_data, sigF_input_data, length_input_data)
-#storage_df_unsorted, storage_df_sorted = ht.runFullGridSearch_GPR_Noise_SigF_Length_Alpha(noise_input_data, sigF_input_data, length_input_data, alpha_input_data)
 
-storage_df, arrays = ht.runSingleGridSearch_AL_SVM_C_Epsilon(C_range, epsilon_range, 'figure')
+storage_df_unsorted, storage_df_sorted = ht.runFullGridSearch_AL_SVM_C_Epsilon(C_input_data, epsilon_input_data)
+#storage_df_unsorted, storage_df_sorted = ht.runFullGridSearch_AL_SVM_C_Epsilon_Gamma(C_input_data, epsilon_input_data, gamma_input_data)
+#storage_df_unsorted, storage_df_sorted = ht.runFullGridSearch_AL_SVM_C_Epsilon_Gamma_Coef0(C_input_data, epsilon_input_data, gamma_input_data, coef0_input_data)
+#storage_df_unsorted, storage_df_sorted = ht.runFullGridSearch_AL_GPR_Noise_SigF_Length(noise_input_data, sigF_input_data, length_input_data)
+#storage_df_unsorted, storage_df_sorted = ht.runFullGridSearch_AL_GPR_Noise_SigF_Length_Alpha(noise_input_data, sigF_input_data, length_input_data, alpha_input_data)
 
-"""
+#storage_df, arrays = ht.runSingleGridSearch_AL_SVM_C_Epsilon(C_range, epsilon_range, 'figure')
+
+
 best_data = storage_df_sorted.iloc[0, :]
 C_inp = best_data['C']
 epsilon_inp = best_data['Epsilon']
@@ -96,6 +98,6 @@ reg = Regression(X1, Y, C=C_inp, epsilon=epsilon_inp, gamma=gamma_inp, coef0=coe
                  Nk=5, N=1, goodIDs=goodIDs, seed=seed, RemoveNaN=True, StandardizeX=True, models_use=models_use,
                  giveKFdata=True)
 results, bestPred, kFold_data = reg.RegressionCVMult()
-"""
+
 
 print('Completed')

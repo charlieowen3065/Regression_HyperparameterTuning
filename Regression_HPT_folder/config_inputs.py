@@ -1,7 +1,7 @@
 import numpy as np
 
 run_findTopInputs = True
-parm_var = False
+parm_var = True
 locData_var = False
 test_train_split_var = False
 # When true, the data is first split into a test/train, then the kF-CV is preformed on the train-data
@@ -9,24 +9,24 @@ test_train_split_var = False
 N = 1
 Nk = 5
 # Which properties to run
-props_to_run = [0, 1, 2, 3, 4, 5, 6]
-#props_to_run = [3]
+#props_to_run = [0, 1, 2, 3, 4, 5, 6]
+props_to_run = [0]
 prop_keys = ['RD', 'M', 'YS', 'WH', 'EF', 'UE', 'TS']
 # Which models to run
-models_to_run = [0, 1, 2, 3, 4, 5, 6, 7]
-#models_to_run = [0, 1]
+#models_to_run = [0, 1, 2, 3, 4, 5, 6, 7]
+models_to_run = [1]
 # Which Features to input
-feature_num = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
-#feature_num = [0, 1, 12]
+#feature_num = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+feature_num = [0, 1, 12]
 # Which cases to use
 #case_use = ['org', 'diff', 'ratio']
 case_use = ['org']
 # Combo Array
-maxNumCombos = 5
+maxNumCombos = 2
 combo_array = np.arange(start=2, stop=maxNumCombos+1, step=1)
 num_fts_per_sublist = 100
 
-numTopFeatures = 8
+numTopFeatures = 1
 
 prop_names = ["Relative_Density", "Modulus", "Yield_Strength", "Work_Hardening_Exponent", "Elongation_to_Fracture",
               "Uniform_Elongation_from_MAX", "Tensile_Strength_from_MAX"]
@@ -43,58 +43,58 @@ heatmap_inputs['decimal_points_int'] = dict()
 heatmap_inputs['decimal_points_top'] = dict()
 # SVM_Linear
 mdl = 0
-heatmap_inputs['gridLength'][model_names[mdl]] = 20
-heatmap_inputs['numZooms'][model_names[mdl]] = 3
-heatmap_inputs['numLayers'][model_names[mdl]] = 4
+heatmap_inputs['gridLength'][model_names[mdl]] = 10
+heatmap_inputs['numZooms'][model_names[mdl]] = 2
+heatmap_inputs['numLayers'][model_names[mdl]] = 2
 heatmap_inputs['decimal_points_int'][model_names[mdl]] = 0.50
 heatmap_inputs['decimal_points_top'][model_names[mdl]] = 0.50
 # SVM_Poly2
 mdl = 1
 heatmap_inputs['gridLength'][model_names[mdl]] = 20
-heatmap_inputs['numZooms'][model_names[mdl]] = 3
-heatmap_inputs['numLayers'][model_names[mdl]] = 4
-heatmap_inputs['decimal_points_int'][model_names[mdl]] = 0.30
-heatmap_inputs['decimal_points_top'][model_names[mdl]] = 0.30
+heatmap_inputs['numZooms'][model_names[mdl]] = 2
+heatmap_inputs['numLayers'][model_names[mdl]] = 2
+heatmap_inputs['decimal_points_int'][model_names[mdl]] = 0.10
+heatmap_inputs['decimal_points_top'][model_names[mdl]] = 0.10
 # SVM_Poly3
 mdl = 2
-heatmap_inputs['gridLength'][model_names[mdl]] = 20
-heatmap_inputs['numZooms'][model_names[mdl]] = 3
-heatmap_inputs['numLayers'][model_names[mdl]] = 4
+heatmap_inputs['gridLength'][model_names[mdl]] = 10
+heatmap_inputs['numZooms'][model_names[mdl]] = 2
+heatmap_inputs['numLayers'][model_names[mdl]] = 2
 heatmap_inputs['decimal_points_int'][model_names[mdl]] = 0.30
 heatmap_inputs['decimal_points_top'][model_names[mdl]] = 0.30
 # SVM_RBF
 mdl = 3
-heatmap_inputs['gridLength'][model_names[mdl]] = 20
-heatmap_inputs['numZooms'][model_names[mdl]] = 3
-heatmap_inputs['numLayers'][model_names[mdl]] = 4
+heatmap_inputs['gridLength'][model_names[mdl]] = 10
+heatmap_inputs['numZooms'][model_names[mdl]] = 2
+heatmap_inputs['numLayers'][model_names[mdl]] = 2
 heatmap_inputs['decimal_points_int'][model_names[mdl]] = 0.50
 heatmap_inputs['decimal_points_top'][model_names[mdl]] = 0.50
 # GPR_RatQuad
 mdl = 4
-heatmap_inputs['gridLength'][model_names[mdl]] = 20
-heatmap_inputs['numZooms'][model_names[mdl]] = 3
-heatmap_inputs['numLayers'][model_names[mdl]] = 4
+heatmap_inputs['gridLength'][model_names[mdl]] = 10
+heatmap_inputs['numZooms'][model_names[mdl]] = 2
+heatmap_inputs['numLayers'][model_names[mdl]] = 2
 heatmap_inputs['decimal_points_int'][model_names[mdl]] = 0.30
 heatmap_inputs['decimal_points_top'][model_names[mdl]] = 0.30
 # GPR_RBF
 mdl = 5
-heatmap_inputs['gridLength'][model_names[mdl]] = 20
-heatmap_inputs['numZooms'][model_names[mdl]] = 3
-heatmap_inputs['numLayers'][model_names[mdl]] = 4
+heatmap_inputs['gridLength'][model_names[mdl]] = 10
+heatmap_inputs['numZooms'][model_names[mdl]] = 2
+heatmap_inputs['numLayers'][model_names[mdl]] = 2
 heatmap_inputs['decimal_points_int'][model_names[mdl]] = 0.30
 heatmap_inputs['decimal_points_top'][model_names[mdl]] = 0.40
 # GPR_Matern32
 mdl = 6
-heatmap_inputs['gridLength'][model_names[mdl]] = 20
-heatmap_inputs['numZooms'][model_names[mdl]] = 3
-heatmap_inputs['numLayers'][model_names[mdl]] = 4
+heatmap_inputs['gridLength'][model_names[mdl]] = 10
+heatmap_inputs['numZooms'][model_names[mdl]] = 2
+heatmap_inputs['numLayers'][model_names[mdl]] = 2
 heatmap_inputs['decimal_points_int'][model_names[mdl]] = 0.30
 heatmap_inputs['decimal_points_top'][model_names[mdl]] = 0.40
 # GPR_Matern52
 mdl = 7
-heatmap_inputs['gridLength'][model_names[mdl]] = 20
-heatmap_inputs['numZooms'][model_names[mdl]] = 3
-heatmap_inputs['numLayers'][model_names[mdl]] = 4
+heatmap_inputs['gridLength'][model_names[mdl]] = 10
+heatmap_inputs['numZooms'][model_names[mdl]] = 2
+heatmap_inputs['numLayers'][model_names[mdl]] = 2
 heatmap_inputs['decimal_points_int'][model_names[mdl]] = 0.30
 heatmap_inputs['decimal_points_top'][model_names[mdl]] = 0.40
 
@@ -108,7 +108,7 @@ split_decimal = 0.3  # the amount of data used for testing
 
 # SEEDS ****************************************************************************************************************
 seeds = [1939855286, 407978056, 1280179023, 1518676132, 916062339, 1178283666, 382075401]
-tr_ts_seeds = [0, 0, 0, 0, 0, 0, 0]
+tr_ts_seeds = ['random', 'random', 'random', 'random', 'random', 'random', 'random']
 
 # Hyperparamter Ranges *************************************************************************************************
 

@@ -1,5 +1,8 @@
 import os
 import shutil
+import sys
+
+from function_files.data_processing import process_test
 
 s = os.path.sep
 
@@ -21,7 +24,9 @@ for case in os.listdir():
                     shutil.copyfile(model_dir + s + 'input_file', feature_dir + s + 'input_file')
                     shutil.copyfile(model_dir + s + 'data_processing.py', feature_dir + s + 'data_processing.py')
 
-                    exec(open("./data_processing.py").read())
+                    #exec(open("./data_processing.py").read())
+                    process_test()
+
 
                     os.chdir('..')
             os.chdir('..')

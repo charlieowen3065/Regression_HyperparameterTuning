@@ -8,7 +8,18 @@ exec(open("./config_inputs.py").read())
 
 os.chdir('data_postprocessing_folder')
 
-
+def format_input_ft_name(inp_ft_name):
+    print("OG: ", inp_ft_name)
+    inp_new = inp_ft_name
+    prop_keys = ['RD', 'M', 'YS', 'WH', 'EF', 'UE', 'TS']
+    for pk in prop_keys:
+        inp_new = inp_new.replace("_"+pk, "")
+    case_keys = ['org', 'diff', 'ratio']
+    for ck in case_keys:
+        inp_new = inp_new.replace("_"+ck, "")
+    inp_new = inp_new.replace("_and_", ", ")
+    inp_new = inp_new.replace("_", " ")
+    return inp_new
 # 
 
 s = os.path.sep
@@ -41,7 +52,7 @@ for case in case_use:
                 data_temp_full = pd.read_csv(filename_temp)
                 data_temp = data_temp_full.iloc[0,:]
                 mdl = 'SVM Linear'
-                inpFt = data_temp['input_features']
+                inpFt = format_input_ft_name(data_temp['input_features'])
                 rmse = data_temp['RMSE']
                 r2 = data_temp['R^2']
                 C = data_temp['C']
@@ -59,7 +70,7 @@ for case in case_use:
                 data_temp_full = pd.read_csv(filename_temp)
                 data_temp = data_temp_full.iloc[0,:]
                 mdl = 'SVM Poly2'
-                inpFt = data_temp['input_features']
+                inpFt = format_input_ft_name(data_temp['input_features'])
                 rmse = data_temp['RMSE']
                 r2 = data_temp['R^2']
                 C = data_temp['C']
@@ -77,7 +88,7 @@ for case in case_use:
                 data_temp_full = pd.read_csv(filename_temp)
                 data_temp = data_temp_full.iloc[0,:]
                 mdl = 'SVM Poly3'
-                inpFt = data_temp['input_features']
+                inpFt = format_input_ft_name(data_temp['input_features'])
                 rmse = data_temp['RMSE']
                 r2 = data_temp['R^2']
                 C = data_temp['C']
@@ -95,7 +106,7 @@ for case in case_use:
                 data_temp_full = pd.read_csv(filename_temp)
                 data_temp = data_temp_full.iloc[0,:]
                 mdl = 'SVM RBF'
-                inpFt = data_temp['input_features']
+                inpFt = format_input_ft_name(data_temp['input_features'])
                 rmse = data_temp['RMSE']
                 r2 = data_temp['R^2']
                 C = data_temp['C']
@@ -120,7 +131,7 @@ for case in case_use:
                 data_temp_full = pd.read_csv(filename_temp)
                 data_temp = data_temp_full.iloc[0,:]
                 mdl = 'GPR Rational Quadratic'
-                inpFt = data_temp['input_features']
+                inpFt = format_input_ft_name(data_temp['input_features'])
                 rmse = data_temp['RMSE']
                 r2 = data_temp['R^2']
                 noise = data_temp['Noise']
@@ -138,7 +149,7 @@ for case in case_use:
                 data_temp_full = pd.read_csv(filename_temp)
                 data_temp = data_temp_full.iloc[0,:]
                 mdl = 'GPR RBF'
-                inpFt = data_temp['input_features']
+                inpFt = format_input_ft_name(data_temp['input_features'])
                 rmse = data_temp['RMSE']
                 r2 = data_temp['R^2']
                 noise = data_temp['Noise']
@@ -156,7 +167,7 @@ for case in case_use:
                 data_temp_full = pd.read_csv(filename_temp)
                 data_temp = data_temp_full.iloc[0,:]
                 mdl = 'GPR Matern 3/2'
-                inpFt = data_temp['input_features']
+                inpFt = format_input_ft_name(data_temp['input_features'])
                 rmse = data_temp['RMSE']
                 r2 = data_temp['R^2']
                 noise = data_temp['Noise']
@@ -174,7 +185,7 @@ for case in case_use:
                 data_temp_full = pd.read_csv(filename_temp)
                 data_temp = data_temp_full.iloc[0,:]
                 mdl = 'GPR Matern 5/2'
-                inpFt = data_temp['input_features']
+                inpFt = format_input_ft_name(data_temp['input_features'])
                 rmse = data_temp['RMSE']
                 r2 = data_temp['R^2']
                 noise = data_temp['Noise']
