@@ -66,8 +66,8 @@ feature_name_list['ratio']['EF'] = []
 feature_name_list['ratio']['UE'] = []
 feature_name_list['ratio']['TS'] = []
 
-
 feat_num = feature_num
+#feat_num = temp_ft_list[models_to_run[0]]
 """
 Feature Data Information
 0.  img_avg

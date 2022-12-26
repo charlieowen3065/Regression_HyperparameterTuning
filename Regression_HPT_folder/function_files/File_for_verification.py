@@ -1,5 +1,7 @@
 # *********************** VERIRICATION OF HEATMAT OUTPUTS BASED ON THE INPUT DATA ************************************ #
 """ METHOD """
+import shutil
+
 """
 This verification test is of the outputs given by the 'Heatmaps' script. 
 
@@ -21,19 +23,24 @@ from scipy.stats import iqr
 
 from Regression import *
 from Heatmaps import *
+from Heatmaps2 import *
 from miscFunctions import *
 os.chdir('..')
 from import_and_organize_data import *
 from config_inputs import *
 
-property_num = 3
+property_num = props_to_run[0]
+model_num = models_to_run[0]
 
 X_list = feature_set_list['org'][prop_keys[property_num]]
 
-X1 = np.concatenate((X_list[0], X_list[2]), axis=1)
-X1 = np.concatenate((X1, parmData), axis=1)
+#X1 = np.concatenate((X_list[0], X_list[2]), axis=1)
+#X1 = np.concatenate((X1, parmData), axis=1)
+X1 = np.concatenate(X_list, axis=1)
 Y = property_data[:, property_num]
 goodIDs = goodId_org[:, property_num]
+sId_use = sId[goodIDs.astype(bool)]
+sTpInt_use = sTpInt[goodIDs.astype(bool)]
 
 mdl_SVM_linear = [1, 0, 0, 0, 0, 0, 0, 0]
 mdl_SVM_poly2 =  [0, 1, 0, 0, 0, 0, 0, 0]
@@ -43,8 +50,10 @@ mdl_GPR_rq =     [0, 0, 0, 0, 1, 0, 0, 0]
 mdl_GPR_rbf =    [0, 0, 0, 0, 0, 1, 0, 0]
 mdl_GPR_m32 =    [0, 0, 0, 0, 0, 0, 1, 0]
 mdl_GPR_m52 =    [0, 0, 0, 0, 0, 0, 0, 1]
+model_use_list = [mdl_SVM_linear, mdl_SVM_poly2, mdl_SVM_poly3, mdl_SVM_rbf, mdl_GPR_rq, mdl_GPR_rbf, mdl_GPR_m32, mdl_GPR_m52]
 
-models_use = mdl_SVM_linear
+models_use = model_use_list[model_num]
+model_name_use = model_names[model_num]
 seed = seeds[property_num]
 
 numLayers = 2
@@ -63,12 +72,34 @@ sigF_input_data = (0.1, 100)
 length_input_data = (0.001, 10)
 alpha_input_data = (0.001, 10)
 
-ht = heatmaps(X1, Y, numLayers=numLayers, numZooms=numZooms, Nk=5, N=1, gridLength=gridLength,
-              RemoveNaN=True, goodIDs=goodIDs, seed=seed,
-              decimal_points_int=0.1, decimal_points_top=0.1,
-              models_use=models_use, save_csv_files=False)
+os.chdir('../../new_AL_folder')
+folder_name = 'Linear_Tests'
+if folder_name in os.listdir():
+    shutil.rmtree(folder_name)
+os.mkdir(folder_name)
+os.chdir(folder_name)
 
-storage_df_unsorted, storage_df_sorted = ht.runFullGridSearch_AL_SVM_C_Epsilon(C_input_data, epsilon_input_data)
+print("HERE: ", os.getcwd())
+
+ht2 = heatmaps2(X1, Y,
+                numLayers=numLayers, numZooms=numZooms, Nk=Nk, N=N, gridLength=10,
+                decimal_points_int=0.05, decimal_points_top=0.10,
+                RemoveNaN=True, goodIDs=goodIDs, seed=seed, models_use=models_use,
+                save_csv_files=True,
+                C_input=C_input_data, epsilon_input=epsilon_input_data, gamma_input='None', coef0_input='None',
+                noise_input='None', sigmaF_input='None', length_input='None', alpha_input='None')
+
+
+storage_df = ht2.runActiveLearning()
+
+
+
+#ht = heatmaps(X1, Y, numLayers=numLayers, numZooms=numZooms, Nk=5, N=1, gridLength=gridLength,
+#              RemoveNaN=True, goodIDs=goodIDs, seed=seed,
+#              decimal_points_int=0.1, decimal_points_top=0.1,
+#              models_use=models_use, save_csv_files=False)
+
+#storage_df_unsorted, storage_df_sorted = ht.runFullGridSearch_AL_SVM_C_Epsilon(C_input_data, epsilon_input_data)
 #storage_df_unsorted, storage_df_sorted = ht.runFullGridSearch_AL_SVM_C_Epsilon_Gamma(C_input_data, epsilon_input_data, gamma_input_data)
 #storage_df_unsorted, storage_df_sorted = ht.runFullGridSearch_AL_SVM_C_Epsilon_Gamma_Coef0(C_input_data, epsilon_input_data, gamma_input_data, coef0_input_data)
 #storage_df_unsorted, storage_df_sorted = ht.runFullGridSearch_AL_GPR_Noise_SigF_Length(noise_input_data, sigF_input_data, length_input_data)
@@ -77,27 +108,90 @@ storage_df_unsorted, storage_df_sorted = ht.runFullGridSearch_AL_SVM_C_Epsilon(C
 #storage_df, arrays = ht.runSingleGridSearch_AL_SVM_C_Epsilon(C_range, epsilon_range, 'figure')
 
 
-best_data = storage_df_sorted.iloc[0, :]
-C_inp = best_data['C']
-epsilon_inp = best_data['Epsilon']
-gamma_inp = best_data['Gamma']
-coef0_inp = best_data['Coef0']
-if coef0_inp == 'N/A':
-    coef0_inp = 1
+#best_data = storage_df_sorted.iloc[0, :]
+#C_inp = best_data['C']
+#epsilon_inp = best_data['Epsilon']
+#gamma_inp = best_data['Gamma']
+#coef0_inp = best_data['Coef0']
+#if coef0_inp == 'N/A':
+#    coef0_inp = 1
 
 #C_inp = 1.13
 #epsilon_inp = 1.935839
 #gamma_inp = 0.06
 
 # EXP1:
-# C=1.4513777518588715
-# Epsilon=1.951526607377184
-# Gamma = 0.05
+"""
+C = 0.243873205608901
+Epsilon = 0.121475234981663
+Gamma = 0.114004404100213
+Coef0 = 6.2102011915197
 
-reg = Regression(X1, Y, C=C_inp, epsilon=epsilon_inp, gamma=gamma_inp, coef0=coef0_inp,
+Noise = 1
+SigmaF = 1
+Scale_Length = 1
+Alpha = 1
+"""
+
+"""
+C = temp_hp_list[model_num][0]
+Epsilon = temp_hp_list[model_num][1]
+Gamma = temp_hp_list[model_num][2]
+Coef0 = temp_hp_list[model_num][3]
+
+Noise = temp_hp_list[model_num][0]
+SigmaF = temp_hp_list[model_num][1]
+Scale_Length = temp_hp_list[model_num][2]
+Alpha = temp_hp_list[model_num][3]
+
+reg = Regression(X1, Y,
+                 C=C, epsilon=Epsilon, gamma=Gamma, coef0=Coef0,
+                 noise=Noise, sigma_F=SigmaF, scale_length=Scale_Length, alpha=Alpha,
                  Nk=5, N=1, goodIDs=goodIDs, seed=seed, RemoveNaN=True, StandardizeX=True, models_use=models_use,
                  giveKFdata=True)
 results, bestPred, kFold_data = reg.RegressionCVMult()
 
+rmse_temp = results['rmse'].loc[model_name_use]
+r2_temp = results['r2'].loc[model_name_use]
+Yp_use = results['Yp'][model_name_use]['variation_#1']
+Npts = len(Yp_use)
 
+mf = miscFunctions()
+train_idx, test_idx = mf.getKfoldSplits(X1, Nk=5, seed=seed)
+
+# Create DataFrame with final data
+col_names = ['sId', 'sTpInt', 'Partition', 'Y_true', 'Y_pred']
+data_zeros = np.zeros((Npts+1, len(col_names)))
+final_df = pd.DataFrame(data=data_zeros, columns=col_names)
+for i in range(Npts):
+    sId_temp = sId_use[i][0]
+    sTpInt_temp = sTpInt_use[i][0]
+    Yt_temp = Y[i][0]
+    Yp_temp = Yp_use[i][0]
+    for p in range(Nk):
+        if i in test_idx[0]:
+            partition_temp = 1
+        elif i in test_idx[1]:
+            partition_temp = 2
+        elif i in test_idx[2]:
+            partition_temp = 3
+        elif i in test_idx[3]:
+            partition_temp = 4
+        elif i in test_idx[4]:
+            partition_temp = 5
+
+    res = [int(sId_temp), int(sTpInt_temp), int(partition_temp), Yt_temp, Yp_temp]
+
+    final_df.iloc[i, :] = res
+
+metrics_use = ['Metics: ', 'RMSE', float(rmse_temp),"R^2", float(r2_temp)]
+print(metrics_use)
+final_df.iloc[-1, :] = metrics_use
+
+os.chdir('../../Final_pred-2022_12_23/'+str(prop_names[property_num]))
+filename = prop_names[property_num]+"_and_"+model_names[model_num]+".csv"
+final_df.to_csv(filename)
+
+print("HERE: ", os.getcwd())
+"""
 print('Completed')

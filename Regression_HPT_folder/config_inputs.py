@@ -10,14 +10,54 @@ N = 1
 Nk = 5
 # Which properties to run
 #props_to_run = [0, 1, 2, 3, 4, 5, 6]
-props_to_run = [0]
+props_to_run = [3]
 prop_keys = ['RD', 'M', 'YS', 'WH', 'EF', 'UE', 'TS']
 # Which models to run
 #models_to_run = [0, 1, 2, 3, 4, 5, 6, 7]
-models_to_run = [1]
+models_to_run = [0]
 # Which Features to input
 #feature_num = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
-feature_num = [0, 1, 12]
+feature_num = [7, 8, 12, 13]
+"""
+Feature Data Information
+0.  img_avg
+1.  img_max
+2.  img_min
+3.  img_std
+4.  optical_img_avg
+5.  optical_img_max
+6.  optical_img_min
+7.  optical_img_std
+8.  optical_stat_avg
+9.  optical_stat_max
+10. optical_stat_min
+11. optical_stat_std
+12. stat_avg
+13. stat_max
+14. stat_min
+15. stat_std  
+"""
+"""
+lin_ft = [1,5,8,9,14]
+p2_ft = [1,5,9,11,13]
+p3_ft = [0,7,8,12,13]
+rbf_ft = [1,5]
+g_rq_ft = [0]
+g_rbf_ft = [0,1,2,5,13]
+g_m32_ft = [0,3,5,9,12]
+g_m52_ft_ft = [0,1,2,5,8]
+temp_ft_list = [lin_ft, p2_ft, p3_ft, rbf_ft, g_rq_ft, g_rbf_ft, g_m32_ft, g_m52_ft_ft]
+
+lin_hp = [3.474942119, 0.321831647,1,1]
+p2_hp = [0.070275648, 0.24829284, 0.368576132, 1.605777778]
+p3_hp = [38.74939971, 0.419330129, 1.600182368, 5.254246914]
+rbf_hp = [5.833236872, 0.818634267, 0.065418574, 1]
+g_rq_hp = [1,1,1,1]
+g_rbf_hp = [125.9079372, 0.599654098, 0.805512952, 1]
+g_m32_hp = [19.44995466, 0.668468106, 1.021848106,1]
+g_m52_hp = [496.5528519, 2.023380774, 0.756235125,1]
+temp_hp_list = [lin_hp, p2_hp, p3_hp, rbf_hp, g_rq_hp, g_rbf_hp, g_m32_hp, g_m52_hp]
+"""
 # Which cases to use
 #case_use = ['org', 'diff', 'ratio']
 case_use = ['org']
