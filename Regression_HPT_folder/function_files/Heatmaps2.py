@@ -79,179 +79,6 @@ class heatmaps2():
 
         self.model_type = self.determine_model_type()
 
-    def convert_to_base_b(self, n, base):
-        # Converts n from base 10 to base 'b', and the output is the new value in a tring format
-        # ** only valid for b <= 10 **
-
-        truth_var = False
-        current_n = n
-        new_n = []
-        while truth_var == False:
-            int_n = int(current_n / base)
-            remainder_n = current_n % base
-            new_n.append(remainder_n)
-            current_n = int_n
-            if current_n == 0:
-                truth_var = True
-        new_n.reverse()
-        new_n_string = ''
-        for i in new_n:
-            new_n_string = new_n_string + str(i)
-
-        return new_n_string
-
-    def figureNumbers(self, numLayers, numZooms):
-        figure_names_list = []
-
-        name_start = "Figure "
-        o = '.'
-        base = numZooms + 1
-
-        # First layer = 1.0.0.(n).0
-        # Starts with a hard-code of the first value
-        first_value = 'Figure 1'
-        for i in range(numLayers - 1):
-            first_value += o + '0'
-        figure_names_list.append(first_value)
-
-        # The rest of the layers
-        for layer in range(numLayers - 1):  # Iterates over the number of layers - 1
-            layer += 1  # starts on layer 2
-
-            base_10_values = []
-
-            starting_value = 0  # this value will be 11..(n)..11
-            for i in range(layer + 1):
-                starting_value += (base ** i)  # 11..(n)..11 = [b^0 + b^1 + b^2 + ... + b^n]
-                # This value will be in base10 -> all values will be kept in base10 until
-                # they are added to the list, along with the trailing zeros.
-            base_10_values.append(starting_value)
-            j = 1
-            # for i in range(1, numZooms**layer):
-            while True:
-                base10_value_temp = starting_value + j
-                j += 1
-                base_b_value_temp = self.convert_to_base_b(base10_value_temp, base)
-                if int(base_b_value_temp[0]) > 1:
-                    break
-                if '0' not in base_b_value_temp:
-                    base_10_values.append(base10_value_temp)
-
-            for base10_value in base_10_values:
-                base_b_value = self.convert_to_base_b(base10_value, base)
-                new_fig_name = 'Figure '
-                for str_i in base_b_value:
-                    new_fig_name += str_i + o
-                if numLayers - layer != 0:
-                    for i in range(numLayers - layer - 1):
-                        new_fig_name += '0' + o
-                figure_names_list.append(new_fig_name)
-
-        return figure_names_list
-
-    def intake_initial_data(self, C_range, epsilon_range, gamma_range, coef0_range,
-                            noise_range, sigF_range, length_range, alpha_range):
-
-        gL = self.gridLength
-
-        # Initializes Boolean Variables --------------------------------------------------------------------------------
-        C_var = False   # HP: C
-        E_var = False   # HP: Epsilon
-        G_var = False   # HP: Gamma
-        C0_var = False  # HP: Coef0
-        N_var = False   # HP: Noise
-        S_var = False   # HP: Sigma_F
-        L_var = False   # HP: Scale-Length
-        A_var = False   # HP: Alpha
-
-        # Checks each range-value --------------------------------------------------------------------------------------
-        # SVM
-        if C_range != 'None':
-            C_var = True
-        if epsilon_range != 'None':
-            E_var = True
-        if gamma_range != 'None':
-            G_var = True
-        if coef0_range != 'None':
-            C0_var = True
-        # GPR
-        if noise_range != 'None':
-            N_var = True
-        if sigF_range != 'None':
-            S_var = True
-        if length_range != 'None':
-            L_var = True
-        if alpha_range != 'None':
-            A_var = True
-
-        # Determines model type ----------------------------------------------------------------------------------------
-        model_type = 'None'
-        # SVM
-        if (C_var) & (E_var) & (not G_var) & (not C0_var):
-            model_type = "SVM_Type1"  # SVM_Linear
-        elif (C_var) & (E_var) & (G_var) & (not C0_var):
-            model_type = "SVM_Type2"  # SVM_RBF
-        elif (C_var) & (E_var) & (G_var) & (C0_var):
-            model_type = "SVM_Type3"  # SVM_Poly2, SVM_Poly3
-        # GPR
-        elif (N_var) & (S_var) & (L_var) & (not A_var):
-            model_type = "GPR_Type1"  # GPR RBF, Matern 3/2, Matern 5/2
-        elif (N_var) & (S_var) & (L_var) & (A_var):
-            model_type = "GPR_Type2"  # GPR_RatQuad
-        else:
-            print("LOGICAL ERROR ~ Charlie")
-
-        # Distance Reference Values ------------------------------------------------------------------------------------
-        """ OUTPUT """
-        """
-        [(tupleHP1), (tupleHP1), ... ]
-         - tupleHP-N:
-            (a, b)
-            a: gridLength / (HP[-1] - HP[0])
-            b: (gridLength - HP[-1]) / (HP[-1] - HP[0])        
-        """
-        ItoV_eq_const = []
-        numHPs = 0
-        if (model_type == "SVM_Type1") | (model_type == "SVM_Type2") | (model_type == "SVM_Type3"):
-            a_C = gL / (C_range[-1] - C_range[0])
-            b_C = (gL - C_range[0]) / (C_range[-1] - C_range[0])
-            ItoV_eq_const.append((a_C, b_C))
-            numHPs += 1
-            a_e = gL / (epsilon_range[-1] - epsilon_range[0])
-            b_e = (gL - epsilon_range[0]) / (epsilon_range[-1] - epsilon_range[0])
-            ItoV_eq_const.append((a_e, b_e))
-            numHPs += 1
-            if (model_type == "SVM_Type2") | (model_type == "SVM_Type3"):
-                a_g = gL / (gamma_range[-1] - gamma_range[0])
-                b_g = (gL - gamma_range[0]) / (gamma_range[-1] - gamma_range[0])
-                ItoV_eq_const.append((a_g, b_g))
-                numHPs += 1
-                if model_type == "SVM_Type3":
-                    a_c0 = gL / (coef0_range[-1] - coef0_range[0])
-                    b_c0 = (gL - coef0_range[0]) / (coef0_range[-1] - coef0_range[0])
-                    ItoV_eq_const.append((a_c0, b_c0))
-                    numHPs += 1
-
-        elif (model_type == "GPR_Type1") | (model_type == "GPR_Type2"):
-            a_n = gL / (noise_range[-1] - noise_range[0])
-            b_n = (gL - noise_range[0]) / (noise_range[-1] - noise_range[0])
-            ItoV_eq_const.append((a_n, b_n))
-            numHPs += 1
-            a_l = gL / (length_range[-1] - length_range[0])
-            b_l = (gL - length_range[0]) / (length_range[-1] - length_range[0])
-            ItoV_eq_const.append((a_l, b_l))
-            numHPs += 1
-            a_s = gL / (sigF_range[-1] - sigF_range[0])
-            b_s = (gL - sigF_range[0]) / (sigF_range[-1] - sigF_range[0])
-            ItoV_eq_const.append((a_s, b_s))
-            numHPs += 1
-            if model_type == "GPR_Type2":
-                a_a = gL / (alpha_range[-1] - alpha_range[0])
-                b_a = (gL - alpha_range[0]) / (alpha_range[-1] - alpha_range[0])
-                ItoV_eq_const.append((a_a, b_a))
-                numHPs += 1
-
-        return model_type, ItoV_eq_const, numHPs
 
     def inputs_dist_function(self, numHPs, dec, model_type, ItoV_eq_const, model_data_old):
         Npts_tot = self.gridLength ** numHPs
@@ -287,32 +114,6 @@ class heatmaps2():
                 new_input_idx.append(pt)
 
         return new_input_idx
-
-    def initial_calculations(self, model_type, inputs):
-
-        False
-
-    def runSingleGridSearch_AL(self, fig_idx, model_data, ):
-
-        model_data_old_inputs = model_data[0]
-        model_data_old_outputs = model_data[1]
-
-        # INPUTS FROM CLASS ATRIBUTES ----------------------------------------------------------------------------------
-        X_use = self.X_inp
-        Y_use = self.Y_inp
-        removeNaN_var = self.RemoveNaN_var
-        goodIDs = self.goodIDs
-        seed = self.seed
-        models_use = self.models_use
-        mdl_name = self.mdl_name
-        decimal_points_int = self.decimal_points_int
-        decimal_points_top = self.decimal_points_top
-        gridLength = self.gridLength
-
-        # Detemines model type -----------------------------------------------------------------------------------------
-        model_type, ItoV_eq_const, numHPs = self.intake_initial_data(self, C_range, epsilon_range, gamma_range, coef0_range, noise_range, sigF_range, length_range, alpha_range)
-
-        new_input_idx = self.inputs_dist_function(numHPs, decimal_points_int, model_type, ItoV_eq_const, model_data_old_inputs)
 
 
     """ New Active Learning Model """
@@ -2127,8 +1928,8 @@ class heatmaps2():
             epsilon_range = np.linspace(self.epsilon_input[0], self.epsilon_input[1], self.gridLength)
 
             mvmt_decimal = 0.3
-            x_int_mvmt = (C_range[-1] - C_range[1]) * mvmt_decimal
-            y_int_mvmt = (epsilon_range[-1] - epsilon_range[1]) * mvmt_decimal
+            x_int_mvmt = (C_range[-1] - C_range[1]) * mvmt_decimal / 2
+            y_int_mvmt = (epsilon_range[-1] - epsilon_range[1]) * mvmt_decimal / 2
 
             top_points = np.unravel_index(np.argsort(min_error_array.ravel())[:num_top_points], min_error_array.shape)
             list_of_vertices = []
@@ -2188,9 +1989,9 @@ class heatmaps2():
             gamma_range = np.linspace(self.gamma_input[0], self.gamma_input[1], self.gridLength)
 
             mvmt_decimal = 0.3
-            x_int_mvmt = (C_range[-1] - C_range[1]) * mvmt_decimal
-            y_int_mvmt = (epsilon_range[-1] - epsilon_range[1]) * mvmt_decimal
-            z_int_mvmt = (gamma_range[-1] - gamma_range[1]) * mvmt_decimal
+            x_int_mvmt = (C_range[-1] - C_range[1]) * mvmt_decimal / 2
+            y_int_mvmt = (epsilon_range[-1] - epsilon_range[1]) * mvmt_decimal / 2
+            z_int_mvmt = (gamma_range[-1] - gamma_range[1]) * mvmt_decimal / 2
 
             top_points = np.unravel_index(np.argsort(min_error_array.ravel())[:num_top_points], min_error_array.shape)
             list_of_vertices = []
@@ -2261,10 +2062,10 @@ class heatmaps2():
             coef0_range = np.linspace(self.coef0_input[0], self.coef0_input[1], self.gridLength)
 
             mvmt_decimal = 0.3
-            x_int_mvmt = (C_range[-1] - C_range[1]) * mvmt_decimal
-            y_int_mvmt = (epsilon_range[-1] - epsilon_range[1]) * mvmt_decimal
-            z_int_mvmt = (gamma_range[-1] - gamma_range[1]) * mvmt_decimal
-            i_int_mvmt = (coef0_range[-1] - coef0_range[1]) * mvmt_decimal
+            x_int_mvmt = (C_range[-1] - C_range[1]) * mvmt_decimal / 2
+            y_int_mvmt = (epsilon_range[-1] - epsilon_range[1]) * mvmt_decimal / 2
+            z_int_mvmt = (gamma_range[-1] - gamma_range[1]) * mvmt_decimal / 2
+            i_int_mvmt = (coef0_range[-1] - coef0_range[1]) * mvmt_decimal / 2
 
             top_points = np.unravel_index(np.argsort(min_error_array.ravel())[:num_top_points], min_error_array.shape)
             list_of_vertices = []
@@ -2346,9 +2147,9 @@ class heatmaps2():
             length_range = np.linspace(self.length_input[0], self.length_input[1], self.gridLength)
 
             mvmt_decimal = 0.3
-            x_int_mvmt = (noise_range[-1] - noise_range[1]) * mvmt_decimal
-            y_int_mvmt = (sigmaF_range[-1] - sigmaF_range[1]) * mvmt_decimal
-            z_int_mvmt = (length_range[-1] - length_range[1]) * mvmt_decimal
+            x_int_mvmt = (noise_range[-1] - noise_range[1]) * mvmt_decimal / 2
+            y_int_mvmt = (sigmaF_range[-1] - sigmaF_range[1]) * mvmt_decimal / 2
+            z_int_mvmt = (length_range[-1] - length_range[1]) * mvmt_decimal / 2
 
             top_points = np.unravel_index(np.argsort(min_error_array.ravel())[:num_top_points], min_error_array.shape)
             list_of_vertices = []
@@ -2418,10 +2219,10 @@ class heatmaps2():
             alpha_range = np.linspace(self.alpha_input[0], self.alpha_input[1], self.gridLength)
 
             mvmt_decimal = 0.3
-            x_int_mvmt = (noise_range[-1] - noise_range[1]) * mvmt_decimal
-            y_int_mvmt = (sigmaF_range[-1] - sigmaF_range[1]) * mvmt_decimal
-            z_int_mvmt = (length_range[-1] - length_range[1]) * mvmt_decimal
-            i_int_mvmt = (alpha_range[-1] - alpha_range[1]) * mvmt_decimal
+            x_int_mvmt = (noise_range[-1] - noise_range[1]) * mvmt_decimal / 2
+            y_int_mvmt = (sigmaF_range[-1] - sigmaF_range[1]) * mvmt_decimal / 2
+            z_int_mvmt = (length_range[-1] - length_range[1]) * mvmt_decimal / 2
+            i_int_mvmt = (alpha_range[-1] - alpha_range[1]) * mvmt_decimal / 2
 
             top_points = np.unravel_index(np.argsort(min_error_array.ravel())[:num_top_points], min_error_array.shape)
             list_of_vertices = []
@@ -2572,6 +2373,7 @@ class heatmaps2():
         storage_df.to_csv("run_" + str(stor_num_counter) + "_HD_final_calcs.csv")
 
         return storage_df, model_data_final
+
 
     def runActiveLearning(self):
 
