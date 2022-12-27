@@ -20,7 +20,7 @@ for case in os.listdir():
                     os.chdir(feature)
 
                     feature_dir = os.getcwd()
-                    shutil.copyfile(model_dir+s+'Heatmaps.py', feature_dir+s+'Heatmaps.py')
+                    shutil.copyfile(model_dir+s+'Heatmaps_old.py', feature_dir+s+'Heatmaps_old.py')
                     shutil.copyfile(model_dir + s + 'input_file', feature_dir + s + 'input_file')
                     shutil.copyfile(model_dir + s + 'data_processing.py', feature_dir + s + 'data_processing.py')
 

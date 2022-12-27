@@ -22,8 +22,8 @@ from sklearn.gaussian_process.kernels import Matern, WhiteKernel, ConstantKernel
 from scipy.stats import iqr
 
 from Regression import *
+from Heatmaps_old import *
 from Heatmaps import *
-from Heatmaps2 import *
 from miscFunctions import *
 os.chdir('..')
 from import_and_organize_data import *
@@ -81,7 +81,7 @@ os.chdir(folder_name)
 
 print("HERE: ", os.getcwd())
 
-ht2 = heatmaps2(X1, Y, Nk=Nk, N=N,
+ht2 = heatmaps(X1, Y, Nk=Nk, N=N,
                 num_HP_zones_AL=1, num_runs_AL=1,
                 numLayers_GS=2, numZooms_GS=2,
                 gridLength_AL=8, gridLength_GS=5,

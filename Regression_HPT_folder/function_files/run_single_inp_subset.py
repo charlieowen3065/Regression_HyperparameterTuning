@@ -31,7 +31,7 @@ sys.path.append(os.path.abspath(main_path))
 from config_inputs import parm_var, locData_var, num_fts_per_sublist
 sys.path.append(os.path.abspath(main_path+'/function_files/'))
 from Regression import Regression
-from Heatmaps import heatmaps
+from Heatmaps_old import heatmaps
 sys.path.append(os.path.abspath(current_path))
 # **********************************************************************************************************************
 

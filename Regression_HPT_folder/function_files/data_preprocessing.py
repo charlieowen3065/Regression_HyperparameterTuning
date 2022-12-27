@@ -20,7 +20,7 @@ class data_preprocessing():
         s = os.path.sep
         #os.system('cp '+main_path+s+'function_files'+s+'findTopFeatures.py findTopFeatures.py')
         shutil.copyfile(main_path + s +'function_files' + s +'findTopInputs.py', 'findTopInputs.py')
-        shutil.copyfile(main_path + s + 'function_files' + s + 'Heatmaps.py', 'Heatmaps.py')
+        shutil.copyfile(main_path + s + 'function_files' + s + 'Heatmaps_old.py', 'Heatmaps_old.py')
         shutil.copyfile(main_path + s + 'function_files' + s + 'data_processing.py', 'data_processing.py')
         shutil.copyfile(main_path + s + 'slurm_scripts' + s + 'data_processing.sub', 'data_processing.sub')
 

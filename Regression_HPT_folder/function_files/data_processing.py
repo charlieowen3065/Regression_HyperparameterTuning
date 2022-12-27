@@ -26,7 +26,7 @@ def process_test():
     from miscFunctions import miscFunctions
     mf = miscFunctions()
     from Regression import Regression
-    from Heatmaps import heatmaps
+    from Heatmaps_old import heatmaps
     sys.path.append(os.path.abspath(current_path))
 
     # ******************************************************************************************************************** #
