@@ -22,31 +22,36 @@ def process_test():
 
     main_path = input_dict['main_path']
     current_path = os.getcwd()
-    sys.path.append(os.path.abspath(main_path+'/function_files/'))
+    sys.path.append(os.path.abspath(main_path + '/function_files/'))
     from miscFunctions import miscFunctions
     mf = miscFunctions()
     from Regression import Regression
-    from Heatmaps_old import heatmaps
+    from Heatmaps import heatmaps
     sys.path.append(os.path.abspath(current_path))
 
     # ******************************************************************************************************************** #
-
 
     X_int = np.genfromtxt('feature_data.csv', delimiter=',')
     Y_int = input_dict['Y_inp']
     model_use = input_dict['models_use']
     model_type = input_dict['model_type']
     model_name = input_dict['model_name']
-    numLayers = input_dict['numLayers']
-    numZooms = input_dict['numZooms']
     N = input_dict['N']
     Nk = input_dict['Nk']
-    gridLength = input_dict['gridLength']
-    decimal_points_int = input_dict['decimal_points_int']
-    decimal_points_top = input_dict['decimal_points_top']
     seed = input_dict['seed']
     goodIds = input_dict['goodIDs']
     hyperparameters = input_dict['hyperparameters']
+
+    gridLength_GS = input_dict['gridLength_GS']
+    numZooms_GS = input_dict['numZooms_GS']
+    numLayers_GS = input_dict['numLayers_GS']
+    decimal_point_GS = input_dict['decimal_point_GS']
+    gridLength_AL = input_dict['gridLength_AL']
+    num_HP_zones_AL = input_dict['num_HP_zones_AL']
+    num_runs_AL = input_dict['num_runs_AL']
+    decimal_points_int = input_dict['decimal_points_int']
+    decimal_points_top = input_dict['decimal_points_top']
+
 
     test_train_split_var = input_dict['test_train_split_var']
     split_decimal = input_dict['split_decimal']
@@ -58,29 +63,24 @@ def process_test():
         X_noNaN, Y_noNaN = mf.RemoveNaN(X_int, Y_int, goodIds=goodIds)
 
         if tr_ts_seed == 'random':
-            tr_ts_seed = random.randint(1, 2**31)
+            tr_ts_seed = random.randint(1, 2 ** 31)
             print("tr_ts_seed: ", tr_ts_seed)
 
-        X_train, X_test, Y_train, Y_test = train_test_split(X_noNaN, Y_noNaN, test_size=split_decimal, random_state=tr_ts_seed)
+        X_train, X_test, Y_train, Y_test = train_test_split(X_noNaN, Y_noNaN, test_size=split_decimal,
+                                                            random_state=tr_ts_seed)
 
         X_input = X_train
         Y_input = Y_train
 
-        ht = heatmaps(X_input, Y_input,
-                      N=N, Nk=Nk,
-                      numLayers=numLayers, numZooms=numZooms, gridLength=gridLength,
-                      decimal_points_int=decimal_points_int, decimal_points_top=decimal_points_top,
-                      RemoveNaN=False, goodIDs=None, seed=seed, models_use=model_use)
+        RemoveNaN_var = False
+        goodIds_var = None
 
     else:
         X_input = X_int
         Y_input = Y_int
 
-        ht = heatmaps(X_input, Y_input,
-                      N=N, Nk=Nk,
-                      numLayers=numLayers, numZooms=numZooms, gridLength=gridLength,
-                      decimal_points_int=decimal_points_int, decimal_points_top=decimal_points_top,
-                      RemoveNaN=True, goodIDs=goodIds, seed=seed, models_use=model_use)
+        RemoveNaN_var = True
+        goodIds_var = goodIds
 
     if 'Heatmaps' in os.listdir():
         shutil.rmtree('Heatmaps')
@@ -92,7 +92,18 @@ def process_test():
         C_input_data = hyperparameters['C']
         epsilon_input_data = hyperparameters['e']
 
-        ht.runFullGridSearch_AL_SVM_C_Epsilon(C_input_data, epsilon_input_data)
+        ht = heatmaps(X_input, Y_input, Nk=Nk, N=N,
+                      num_HP_zones_AL=num_HP_zones_AL, num_runs_AL=num_runs_AL,
+                      numLayers_GS=numLayers_GS, numZooms_GS=numZooms_GS,
+                      gridLength_AL=gridLength_AL, gridLength_GS=gridLength_GS,
+                      decimal_points_int=decimal_points_int, decimal_points_top=decimal_points_top,
+                      decimal_point_GS=decimal_point_GS,
+                      RemoveNaN=RemoveNaN_var, goodIDs=goodIds_var, seed=seed, models_use=model_use,
+                      save_csv_files=True,
+                      C_input=C_input_data, epsilon_input=epsilon_input_data, gamma_input='None', coef0_input='None',
+                      noise_input='None', sigmaF_input='None', length_input='None', alpha_input='None')
+
+        ht.runActiveLearning()
 
     elif model_use[1]:  # POLY-2
         C_input_data = hyperparameters['C']
@@ -100,7 +111,18 @@ def process_test():
         gamma_input_data = hyperparameters['g']
         coef0_input_data = hyperparameters['c0']
 
-        ht.runFullGridSearch_AL_SVM_C_Epsilon_Gamma_Coef0(C_input_data, epsilon_input_data, gamma_input_data, coef0_input_data)
+        ht = heatmaps(X_input, Y_input, Nk=Nk, N=N,
+                      num_HP_zones_AL=num_HP_zones_AL, num_runs_AL=num_runs_AL,
+                      numLayers_GS=numLayers_GS, numZooms_GS=numZooms_GS,
+                      gridLength_AL=gridLength_AL, gridLength_GS=gridLength_GS,
+                      decimal_points_int=decimal_points_int, decimal_points_top=decimal_points_top,
+                      decimal_point_GS=decimal_point_GS,
+                      RemoveNaN=RemoveNaN_var, goodIDs=goodIds_var, seed=seed, models_use=model_use,
+                      save_csv_files=True,
+                      C_input=C_input_data, epsilon_input=epsilon_input_data, gamma_input=gamma_input_data, coef0_input=coef0_input_data,
+                      noise_input='None', sigmaF_input='None', length_input='None', alpha_input='None')
+
+        ht.runActiveLearning()
 
     elif model_use[2]:  # POLY-3
         C_input_data = hyperparameters['C']
@@ -108,14 +130,37 @@ def process_test():
         gamma_input_data = hyperparameters['g']
         coef0_input_data = hyperparameters['c0']
 
-        ht.runFullGridSearch_AL_SVM_C_Epsilon_Gamma_Coef0(C_input_data, epsilon_input_data, gamma_input_data, coef0_input_data)
+        ht = heatmaps(X_input, Y_input, Nk=Nk, N=N,
+                      num_HP_zones_AL=num_HP_zones_AL, num_runs_AL=num_runs_AL,
+                      numLayers_GS=numLayers_GS, numZooms_GS=numZooms_GS,
+                      gridLength_AL=gridLength_AL, gridLength_GS=gridLength_GS,
+                      decimal_points_int=decimal_points_int, decimal_points_top=decimal_points_top,
+                      decimal_point_GS=decimal_point_GS,
+                      RemoveNaN=RemoveNaN_var, goodIDs=goodIds_var, seed=seed, models_use=model_use,
+                      save_csv_files=True,
+                      C_input=C_input_data, epsilon_input=epsilon_input_data, gamma_input=gamma_input_data,
+                      coef0_input=coef0_input_data,
+                      noise_input='None', sigmaF_input='None', length_input='None', alpha_input='None')
+
+        ht.runActiveLearning()
 
     elif model_use[3]:  # RBF
         C_input_data = hyperparameters['C']
         epsilon_input_data = hyperparameters['e']
         gamma_input_data = hyperparameters['g']
 
-        ht.runFullGridSearch_AL_SVM_C_Epsilon_Gamma(C_input_data, epsilon_input_data, gamma_input_data)
+        ht = heatmaps(X_input, Y_input, Nk=Nk, N=N,
+                      num_HP_zones_AL=num_HP_zones_AL, num_runs_AL=num_runs_AL,
+                      numLayers_GS=numLayers_GS, numZooms_GS=numZooms_GS,
+                      gridLength_AL=gridLength_AL, gridLength_GS=gridLength_GS,
+                      decimal_points_int=decimal_points_int, decimal_points_top=decimal_points_top,
+                      decimal_point_GS=decimal_point_GS,
+                      RemoveNaN=RemoveNaN_var, goodIDs=goodIds_var, seed=seed, models_use=model_use,
+                      save_csv_files=True,
+                      C_input=C_input_data, epsilon_input=epsilon_input_data, gamma_input=gamma_input_data, coef0_input='None',
+                      noise_input='None', sigmaF_input='None', length_input='None', alpha_input='None')
+
+        ht.runActiveLearning()
 
     # -------------------------------------- GPR --------------------------------------------------------------------------#
 
@@ -125,28 +170,75 @@ def process_test():
         length_input_data = hyperparameters['scale_length']
         alpha_input_data = hyperparameters['alpha']
 
-        ht.runFullGridSearch_AL_GPR_Noise_SigF_Length_Alpha(noise_input_data, sigF_input_data, length_input_data, alpha_input_data)
+        ht = heatmaps(X_input, Y_input, Nk=Nk, N=N,
+                      num_HP_zones_AL=num_HP_zones_AL, num_runs_AL=num_runs_AL,
+                      numLayers_GS=numLayers_GS, numZooms_GS=numZooms_GS,
+                      gridLength_AL=gridLength_AL, gridLength_GS=gridLength_GS,
+                      decimal_points_int=decimal_points_int, decimal_points_top=decimal_points_top,
+                      decimal_point_GS=decimal_point_GS,
+                      RemoveNaN=RemoveNaN_var, goodIDs=goodIds_var, seed=seed, models_use=model_use,
+                      save_csv_files=True,
+                      C_input='None', epsilon_input='None', gamma_input='None', coef0_input='None',
+                      noise_input=noise_input_data, sigmaF_input=sigF_input_data, length_input=length_input_data, alpha_input=alpha_input_data)
+
+        ht.runActiveLearning()
 
     elif model_use[5]:  # RBF
         noise_input_data = hyperparameters['noise']
         sigF_input_data = hyperparameters['sigmaF']
         length_input_data = hyperparameters['scale_length']
 
-        ht.runFullGridSearch_AL_GPR_Noise_SigF_Length(noise_input_data, sigF_input_data, length_input_data)
+        ht = heatmaps(X_input, Y_input, Nk=Nk, N=N,
+                      num_HP_zones_AL=num_HP_zones_AL, num_runs_AL=num_runs_AL,
+                      numLayers_GS=numLayers_GS, numZooms_GS=numZooms_GS,
+                      gridLength_AL=gridLength_AL, gridLength_GS=gridLength_GS,
+                      decimal_points_int=decimal_points_int, decimal_points_top=decimal_points_top,
+                      decimal_point_GS=decimal_point_GS,
+                      RemoveNaN=RemoveNaN_var, goodIDs=goodIds_var, seed=seed, models_use=model_use,
+                      save_csv_files=True,
+                      C_input='None', epsilon_input='None', gamma_input='None', coef0_input='None',
+                      noise_input=noise_input_data, sigmaF_input=sigF_input_data, length_input=length_input_data,
+                      alpha_input='None')
+
+        ht.runActiveLearning()
 
     elif model_use[6]:  # Matern 3/2
         noise_input_data = hyperparameters['noise']
         sigF_input_data = hyperparameters['sigmaF']
         length_input_data = hyperparameters['scale_length']
 
-        ht.runFullGridSearch_AL_GPR_Noise_SigF_Length(noise_input_data, sigF_input_data, length_input_data)
+        ht = heatmaps(X_input, Y_input, Nk=Nk, N=N,
+                      num_HP_zones_AL=num_HP_zones_AL, num_runs_AL=num_runs_AL,
+                      numLayers_GS=numLayers_GS, numZooms_GS=numZooms_GS,
+                      gridLength_AL=gridLength_AL, gridLength_GS=gridLength_GS,
+                      decimal_points_int=decimal_points_int, decimal_points_top=decimal_points_top,
+                      decimal_point_GS=decimal_point_GS,
+                      RemoveNaN=RemoveNaN_var, goodIDs=goodIds_var, seed=seed, models_use=model_use,
+                      save_csv_files=True,
+                      C_input='None', epsilon_input='None', gamma_input='None', coef0_input='None',
+                      noise_input=noise_input_data, sigmaF_input=sigF_input_data, length_input=length_input_data,
+                      alpha_input='None')
+
+        ht.runActiveLearning()
 
     elif model_use[7]:  # Matern 5/2
         noise_input_data = hyperparameters['noise']
         sigF_input_data = hyperparameters['sigmaF']
         length_input_data = hyperparameters['scale_length']
 
-        ht.runFullGridSearch_AL_GPR_Noise_SigF_Length(noise_input_data, sigF_input_data, length_input_data)
+        ht = heatmaps(X_input, Y_input, Nk=Nk, N=N,
+                      num_HP_zones_AL=num_HP_zones_AL, num_runs_AL=num_runs_AL,
+                      numLayers_GS=numLayers_GS, numZooms_GS=numZooms_GS,
+                      gridLength_AL=gridLength_AL, gridLength_GS=gridLength_GS,
+                      decimal_points_int=decimal_points_int, decimal_points_top=decimal_points_top,
+                      decimal_point_GS=decimal_point_GS,
+                      RemoveNaN=RemoveNaN_var, goodIDs=goodIds_var, seed=seed, models_use=model_use,
+                      save_csv_files=True,
+                      C_input='None', epsilon_input='None', gamma_input='None', coef0_input='None',
+                      noise_input=noise_input_data, sigmaF_input=sigF_input_data, length_input=length_input_data,
+                      alpha_input='None')
+
+        ht.runActiveLearning()
 
     if test_train_split_var:
 
@@ -162,14 +254,13 @@ def process_test():
         top_models_df = pd.DataFrame(columns=col_names)
 
         for i in range(2):
-            sorted_data_df = pd.read_csv("0-Data_"+model_name+"_Sorted.csv")
+            sorted_data_df = pd.read_csv("0-Data_" + model_name + "_Sorted.csv")
             best_model_data = sorted_data_df.iloc[i, :]
 
             BM_RMSE = best_model_data['RMSE']
             BM_R2 = best_model_data['R^2']
             BM_Cor = best_model_data['Cor']
             BM_avgTR_to_finalTR_Error = best_model_data['avgTR to Final Error']
-
 
             if model_type == 'SVM':
                 C = best_model_data['C']
@@ -197,7 +288,8 @@ def process_test():
                 Gamma = 1
 
             reg = Regression(X_test, Y_test, models_use=model_use, seed=seed, RemoveNaN=False,
-                             C=C, epsilon=Epsilon, gamma=Gamma, coef0=Coef0, noise=Noise, sigma_F=Sigma_F, scale_length=Scale_Length, alpha=Alpha)
+                             C=C, epsilon=Epsilon, gamma=Gamma, coef0=Coef0, noise=Noise, sigma_F=Sigma_F,
+                             scale_length=Scale_Length, alpha=Alpha)
 
             results = reg.Regression_test_multProp(X_train, X_test, Y_train, Y_test)
 
@@ -216,6 +308,5 @@ def process_test():
 
         top_models_df = top_models_df.sort_values(by=["RMSE"], ascending=True)
         top_models_df.to_csv('Best_Models.csv')
-
 
     os.chdir('..')

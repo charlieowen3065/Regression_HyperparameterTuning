@@ -3905,6 +3905,8 @@ class heatmaps():
             list_of_points = []
             list_of_gL = []
             while (i < numZooms) & (pt < 2*numZooms):
+                print("i: ", i)
+                print("pt: ", pt)
                 x = storage_df.iloc[pt, :]['C']
                 y = storage_df.iloc[pt, :]['Epsilon']
                 pt += 1

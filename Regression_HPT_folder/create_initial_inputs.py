@@ -18,9 +18,6 @@ main_path = os.getcwd()
 input_dict = dict()
 input_dict['N'] = N
 input_dict['Nk'] = Nk
-#input_dict['numLayers'] = numLayers
-#input_dict['numZooms'] = numZooms
-#input_dict['gridLength'] = gridLength
 input_dict['main_path'] = main_path
 input_dict['combo_array'] = combo_array
 input_dict['numTopFeatures'] = numTopFeatures
@@ -81,13 +78,17 @@ for case in case_use:
             models_use_current = model_use_logArray[mdl_idx, :]
             model_type_current = model_types[mdl_idx]
             model_name_current = model_names[mdl_idx]
-            
-            gridLength = heatmap_inputs['gridLength'][mdl_current]
-            numZooms = heatmap_inputs['numZooms'][mdl_current]
-            numLayers = heatmap_inputs['numLayers'][mdl_current]
-            decimal_points_int = heatmap_inputs['decimal_points_int'][mdl_current]
-            decimal_points_top = heatmap_inputs['decimal_points_top'][mdl_current]
-    
+
+            gridLength_GS = heatmap_inputs['gridLength_GS'][model_name_current]
+            numZooms_GS = heatmap_inputs['numZooms_GS'][model_name_current]
+            numLayers_GS = heatmap_inputs['numLayers_GS'][model_name_current]
+            decimal_point_GS = heatmap_inputs['decimal_point_GS'][model_name_current]
+            gridLength_AL = heatmap_inputs['gridLength_AL'][model_name_current]
+            num_HP_zones_AL = heatmap_inputs['num_HP_zones_AL'][model_name_current]
+            num_runs_AL = heatmap_inputs['num_runs_AL'][model_name_current]
+            decimal_points_int = heatmap_inputs['decimal_points_int'][model_name_current]
+            decimal_points_top = heatmap_inputs['decimal_points_top'][model_name_current]
+
             input_dict['Y_inp'] = Y_inp
             input_dict['X_list'] = X_data
             input_dict['seed'] = seeds[prop_idx]
@@ -98,9 +99,13 @@ for case in case_use:
             input_dict['models_use'] = models_use_current
             input_dict['model_name'] = model_name_current
             input_dict['model_type'] = model_type_current
-            input_dict['gridLength'] = gridLength
-            input_dict['numZooms'] = numZooms
-            input_dict['numLayers'] = numLayers
+            input_dict['gridLength_GS'] = gridLength_GS
+            input_dict['numZooms_GS'] = numZooms_GS
+            input_dict['numLayers_GS'] = numLayers_GS
+            input_dict['decimal_point_GS'] = decimal_point_GS
+            input_dict['gridLength_AL'] = gridLength_AL
+            input_dict['num_HP_zones_AL'] = num_HP_zones_AL
+            input_dict['num_runs_AL'] = num_runs_AL
             input_dict['decimal_points_int'] = decimal_points_int
             input_dict['decimal_points_top'] = decimal_points_top
 

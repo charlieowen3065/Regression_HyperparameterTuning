@@ -32,7 +32,7 @@ sys.path.append(os.path.abspath(current_path))
 
 # ******************************************************************************************************************** #
 
-class heatmaps():
+class heatmaps_old():
     def __init__(self, X_inp, Y_inp,
                  numLayers=3, numZooms=3, Nk=5, N=1, gridLength=10,
                  decimal_points_int=0.25, decimal_points_top=0.25,
