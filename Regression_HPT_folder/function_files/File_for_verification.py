@@ -73,7 +73,7 @@ length_input_data = (0.001, 10)
 alpha_input_data = (0.001, 10)
 
 os.chdir('../../new_AL_folder')
-folder_name = 'Linear_Tests'
+folder_name = 'Linear_Full_Tests'
 if folder_name in os.listdir():
     shutil.rmtree(folder_name)
 os.mkdir(folder_name)
@@ -81,16 +81,20 @@ os.chdir(folder_name)
 
 print("HERE: ", os.getcwd())
 
-ht2 = heatmaps2(X1, Y,
-                numLayers=numLayers, numZooms=numZooms, Nk=Nk, N=N, gridLength=10,
-                decimal_points_int=0.05, decimal_points_top=0.10,
+ht2 = heatmaps2(X1, Y, Nk=Nk, N=N,
+                num_HP_zones_AL=1, num_runs_AL=1,
+                numLayers_GS=2, numZooms_GS=2,
+                gridLength_AL=8, gridLength_GS=5,
+                decimal_points_int=0.05, decimal_points_top=0.1,
+                decimal_point_GS=0.1,
                 RemoveNaN=True, goodIDs=goodIDs, seed=seed, models_use=models_use,
                 save_csv_files=True,
                 C_input=C_input_data, epsilon_input=epsilon_input_data, gamma_input='None', coef0_input='None',
                 noise_input='None', sigmaF_input='None', length_input='None', alpha_input='None')
 
-
 storage_df = ht2.runActiveLearning()
+
+
 
 
 

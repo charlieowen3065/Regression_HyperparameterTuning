@@ -106,8 +106,8 @@ class miscFunctions():
             sum1 += (Y_true[i] - meanYt) * (Y_pred[i] - meanYp)
             sum2 += (Y_true[i] - meanYt) ** 2
             sum3 += (Y_pred[i] - meanYp) ** 2
-        #Cor = sum1 / np.sqrt(sum2 * sum3)
-        Cor = np.corrcoef(Y_true, Y_pred)[0][1]
+        Cor = sum1 / np.sqrt(sum2 * sum3)
+        #Cor = np.corrcoef(Y_true, Y_pred)[0][1]
 
         return RMSE, R2, Cor
 
