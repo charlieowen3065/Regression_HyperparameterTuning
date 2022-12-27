@@ -3905,8 +3905,6 @@ class heatmaps():
             list_of_points = []
             list_of_gL = []
             while (i < numZooms) & (pt < 2*numZooms):
-                print("i: ", i)
-                print("pt: ", pt)
                 x = storage_df.iloc[pt, :]['C']
                 y = storage_df.iloc[pt, :]['Epsilon']
                 pt += 1
@@ -3951,8 +3949,8 @@ class heatmaps():
                         list_of_gL.append(gridLength)
                         i += 1
                     else:
-                        list_of_points[i] = [x_range, y_range]
-                        list_of_gL[i] = mesh_increase * list_of_gL[i]
+                        list_of_points[i-1] = [x_range, y_range]
+                        list_of_gL[i-1] = mesh_increase * list_of_gL[i-1]
 
         elif model_type == 'SVM_Type2':
             C_int_range = np.linspace(self.C_input[0], self.C_input[1], gridLength)
@@ -4020,9 +4018,10 @@ class heatmaps():
                     if add_i:
                         list_of_points.append([x_range, y_range, z_range])
                         list_of_gL.append(gridLength)
+                        i += 1
                     else:
-                        list_of_points[place] = [x_range, y_range, z_range]
-                        list_of_gL[place] = mesh_increase * list_of_gL[place]
+                        list_of_points[i-1] = [x_range, y_range, z_range]
+                        list_of_gL[i-1] = mesh_increase * list_of_gL[i-1]
 
         elif model_type == 'SVM_Type3':
             C_int_range = np.linspace(self.C_input[0], self.C_input[1], gridLength)
@@ -4102,9 +4101,10 @@ class heatmaps():
                     if add_i:
                         list_of_points.append([x_range, y_range, z_range, u_range])
                         list_of_gL.append(gridLength)
+                        i += 1
                     else:
-                        list_of_points[place] = [x_range, y_range, z_range, u_range]
-                        list_of_gL[place] = mesh_increase * list_of_gL[place]
+                        list_of_points[i-1] = [x_range, y_range, z_range, u_range]
+                        list_of_gL[i-1] = mesh_increase * list_of_gL[i-1]
 
         elif model_type == 'GPR_Type1':
             noise_int_range = np.linspace(self.noise_input[0], self.noise_input[1], gridLength)
@@ -4120,9 +4120,9 @@ class heatmaps():
             list_of_points = []
             list_of_gL = []
             while (i < numZooms) & (pt < 2*numZooms):
-                x = storage_df.iloc[pt, :]['C']
-                y = storage_df.iloc[pt, :]['Epsilon']
-                z = storage_df.iloc[pt, :]['Gamma']
+                x = storage_df.iloc[pt, :]['Noise']
+                y = storage_df.iloc[pt, :]['SigmaF']
+                z = storage_df.iloc[pt, :]['Length']
                 pt += 1
 
                 x_max = x + x_mvmt
@@ -4172,9 +4172,10 @@ class heatmaps():
                     if add_i:
                         list_of_points.append([x_range, y_range, z_range])
                         list_of_gL.append(gridLength)
+                        i += 1
                     else:
-                        list_of_points[place] = [x_range, y_range, z_range]
-                        list_of_gL[place] = mesh_increase * list_of_gL[place]
+                        list_of_points[i-1] = [x_range, y_range, z_range]
+                        list_of_gL[i-1] = mesh_increase * list_of_gL[i-1]
 
         elif model_type == 'GPR_Type2':
             noise_int_range = np.linspace(self.noise_input[0], self.noise_input[1], gridLength)
@@ -4192,10 +4193,10 @@ class heatmaps():
             list_of_points = []
             list_of_gL = []
             while (i < numZooms) & (pt < 2*numZooms):
-                x = storage_df.iloc[pt, :]['C']
-                y = storage_df.iloc[pt, :]['Epsilon']
-                z = storage_df.iloc[pt, :]['Gamma']
-                u = storage_df.iloc[pt, :]['Coef0']
+                x = storage_df.iloc[pt, :]['Noise']
+                y = storage_df.iloc[pt, :]['SigmaF']
+                z = storage_df.iloc[pt, :]['Length']
+                u = storage_df.iloc[pt, :]['Alpha']
                 pt += 1
 
                 x_max = x + x_mvmt
@@ -4254,9 +4255,10 @@ class heatmaps():
                     if add_i:
                         list_of_points.append([x_range, y_range, z_range, u_range])
                         list_of_gL.append(gridLength)
+                        i += 1
                     else:
-                        list_of_points[place] = [x_range, y_range, z_range, u_range]
-                        list_of_gL[place] = mesh_increase * list_of_gL[place]
+                        list_of_points[i-1] = [x_range, y_range, z_range, u_range]
+                        list_of_gL[i-1] = mesh_increase * list_of_gL[i-1]
 
         else:
             print("Error in Model-Type: ", model_type)

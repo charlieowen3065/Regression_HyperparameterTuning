@@ -73,7 +73,7 @@ length_input_data = (0.001, 10)
 alpha_input_data = (0.001, 10)
 
 os.chdir('../../new_AL_folder')
-folder_name = 'Linear_Full_Tests'
+folder_name = 'GPR_Matern52_Full_Tests'
 if folder_name in os.listdir():
     shutil.rmtree(folder_name)
 os.mkdir(folder_name)
@@ -89,8 +89,8 @@ ht2 = heatmaps(X1, Y, Nk=Nk, N=N,
                 decimal_point_GS=0.1,
                 RemoveNaN=True, goodIDs=goodIDs, seed=seed, models_use=models_use,
                 save_csv_files=True,
-                C_input=C_input_data, epsilon_input=epsilon_input_data, gamma_input='None', coef0_input='None',
-                noise_input='None', sigmaF_input='None', length_input='None', alpha_input='None')
+                C_input='None', epsilon_input='None', gamma_input='None', coef0_input='None',
+                noise_input=noise_input_data, sigmaF_input=sigF_input_data, length_input=length_input_data, alpha_input='None')
 
 storage_df = ht2.runActiveLearning()
 
