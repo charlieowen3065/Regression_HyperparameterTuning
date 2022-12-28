@@ -31,8 +31,8 @@ class data_preprocessing():
 
         Nk = input_dict['Nk']
         N = input_dict['N']
-        numLayers = input_dict['numLayers']
-        numZooms = input_dict['numZooms']
+        numLayers = input_dict['numLayers_GS']
+        numZooms = input_dict['numZooms_GS']
         combo_array = input_dict['combo_array']
         numTopFeatures = input_dict['numTopFeatures']
         feature_names = input_dict['feature_names']
