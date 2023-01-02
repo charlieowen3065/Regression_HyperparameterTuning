@@ -73,7 +73,7 @@ length_input_data = (0.001, 10)
 alpha_input_data = (0.001, 10)
 
 os.chdir('../../new_AL_folder')
-folder_name = 'GPR_Matern52_Full_Tests'
+folder_name = 'SVM_RBF_New_Tests'
 if folder_name in os.listdir():
     shutil.rmtree(folder_name)
 os.mkdir(folder_name)
@@ -82,15 +82,15 @@ os.chdir(folder_name)
 print("HERE: ", os.getcwd())
 
 ht2 = heatmaps(X1, Y, Nk=Nk, N=N,
-                num_HP_zones_AL=1, num_runs_AL=1,
+                num_HP_zones_AL=4, num_runs_AL=4,
                 numLayers_GS=2, numZooms_GS=2,
                 gridLength_AL=8, gridLength_GS=5,
                 decimal_points_int=0.05, decimal_points_top=0.1,
                 decimal_point_GS=0.1,
                 RemoveNaN=True, goodIDs=goodIDs, seed=seed, models_use=models_use,
                 save_csv_files=True,
-                C_input='None', epsilon_input='None', gamma_input='None', coef0_input='None',
-                noise_input=noise_input_data, sigmaF_input=sigF_input_data, length_input=length_input_data, alpha_input='None')
+                C_input=C_input_data, epsilon_input=epsilon_input_data, gamma_input=gamma_input_data, coef0_input='None',
+                noise_input='None', sigmaF_input='None', length_input='None', alpha_input='None')
 
 storage_df = ht2.runActiveLearning()
 

@@ -125,6 +125,10 @@ class heatmaps():
 
         return new_input_idx
 
+    def dist_function(self, ranges, gridLength, coor1, coor2):
+        if self.space_func == np.linspace:
+            False
+
     def convert_to_base_b(self, n, base):
         # Converts n from base 10 to base 'b', and the output is the new value in a tring format
         # ** only valid for b <= 10 **
@@ -973,11 +977,11 @@ class heatmaps():
         if (model_type == 'SVM_Type1') | (model_type == 'SVM_Type2') | (model_type == 'SVM_Type3'):
             df_col_names = ['Figure', 'RMSE', 'R^2', 'Cor', 'C', 'Epsilon', 'Gamma', 'Coef0',
                             'Average Training-RMSE', 'Average Training-R^2', 'Average Training-Cor',
-                            'avgTR to avgTS', 'avgTR to Final Error']
+                            'avgTR to avgTS', 'avgTR to Final Error', 'Model Percent Error']
         elif (model_type == 'GPR_Type1') | (model_type == 'GPR_Type2'):
             df_col_names = ['Figure', 'RMSE', 'R^2', 'Cor', 'Noise', 'SigmaF', 'Length', 'Alpha',
                             'Average Training-RMSE', 'Average Training-R^2', 'Average Training-Cor',
-                            'avgTR to avgTS', 'avgTR to Final Error']
+                            'avgTR to avgTS', 'avgTR to Final Error', 'Model Percent Error']
         else:
             print("MODEL TYPE ERROR: ", model_type)
             return
@@ -1017,6 +1021,8 @@ class heatmaps():
                 HP3 = 1
                 HP4 = 1
 
+            rmse_pred =  sorted_pred_dataframe.iloc[pt, 0]
+
             reg = Regression(X_use, Y_use,
                              C=HP1, epsilon=HP2, gamma=HP3, coef0=HP4,
                              noise=HP1, sigma_F=HP2, scale_length=HP3, alpha=HP4,
@@ -1034,6 +1040,7 @@ class heatmaps():
             rmse = error
             r2 = float(results['r2'].loc[str(mdl_name)])
             cor = float(results['cor'].loc[str(mdl_name)])
+            percent_error = np.sqrt(( (rmse-rmse_pred)/rmse )**2)*100
 
             avg_tr_rmse = float(
                 np.mean(list(kFold_data['tr']['results']['variation_#1']['rmse'][str(mdl_name)])))
@@ -1043,7 +1050,8 @@ class heatmaps():
             # Puts data into storage array
             storage_df.loc[pt] = ['run_'+str(stor_num_counter), rmse, r2, cor, HP1, HP2, HP3, HP4,
                                   avg_tr_rmse, avg_tr_r2, avg_tr_cor,
-                                  ratio_trAvg_tsAvg, ratio_trAvg_final]
+                                  ratio_trAvg_tsAvg, ratio_trAvg_final,
+                                  percent_error]
 
             print("Part III: "+str(pt+1)+" / "+str(num_new_calc_points)+": RMSE, R2 -> ("+str(rmse)+", "+str(r2)+")")
 
@@ -1899,7 +1907,7 @@ class heatmaps():
                 print("Error in 'mdl_num': ", mdl_num)
                 return
             pred_error_df_sorted = pred_error_df.sort_values(by=['Min-Error'], ascending=True)
-            pred_error_df_sorted.to_csv("run_0_initial_predictions.csv")
+            pred_error_df_sorted.to_csv("run_00_initial_predictions.csv")
 
         else:
             print("MODEL TYPE ERROR: ", model_type)
@@ -2739,7 +2747,7 @@ class heatmaps():
                 print("Error in 'mdl_num': ", mdl_num)
                 return
             pred_error_df_sorted = pred_error_df.sort_values(by=['Min-Error'], ascending=True)
-            pred_error_df_sorted.to_csv("run_0_initial_predictions.csv")
+            pred_error_df_sorted.to_csv("run_00_initial_predictions.csv")
 
         else:
             print("MODEL TYPE ERROR: ", model_type)
@@ -3431,7 +3439,7 @@ class heatmaps():
 
 
             list_of_vertices = []
-            list_of_verts_rev = np.flip(list_of_verts)
+            list_of_verts_rev = np.flip(list_of_verts, axis=0)
             for pt in range(num_top_points):
                 print("pt: ", pt)
                 vertices = 'Empty'
@@ -3490,6 +3498,7 @@ class heatmaps():
 
 
             list_of_vertices = []
+            list_of_verts_rev = np.flip(list_of_verts, axis=0)
             for pt in range(num_top_points):
                 print("pt: ", pt)
                 vertices = 'Empty'
@@ -3500,7 +3509,7 @@ class heatmaps():
                 print("(x, y, z): (" + str(x) + ", " + str(y) + ", " + str(z) + ")")
 
                 if len(list_of_verts) != 0:
-                    for vert in list_of_verts:
+                    for vert in list_of_verts_rev:
                         print("vert: ", vert)
                         x_values = vert[0]
                         y_values = vert[1]
@@ -3559,6 +3568,7 @@ class heatmaps():
             i_int_mvmt = (coef0_range[-1] - coef0_range[1]) * mvmt_decimal / 2
 
             list_of_vertices = []
+            list_of_verts_rev = np.flip(list_of_verts, axis=0)
             for pt in range(num_top_points):
                 print("pt: ", pt)
                 vertices = 'Empty'
@@ -3570,7 +3580,7 @@ class heatmaps():
                 print("(x, y, z, i): (" + str(x) + ", " + str(y) + ", " + str(z) + ", " + str(i) + ")")
 
                 if len(list_of_verts) != 0:
-                    for vert in list_of_verts:
+                    for vert in list_of_verts_rev:
                         print("vert: ", vert)
                         x_values = vert[0]
                         y_values = vert[1]
@@ -3637,6 +3647,7 @@ class heatmaps():
             z_int_mvmt = (length_range[-1] - length_range[1]) * mvmt_decimal / 2
 
             list_of_vertices = []
+            list_of_verts_rev = np.flip(list_of_verts, axis=0)
             for pt in range(num_top_points):
                 print("pt: ", pt)
                 vertices = 'Empty'
@@ -3647,7 +3658,7 @@ class heatmaps():
                 print("(x, y, z): (" + str(x) + ", " + str(y) + ", " + str(z) + ")")
 
                 if len(list_of_verts) != 0:
-                    for vert in list_of_verts:
+                    for vert in list_of_verts_rev:
                         print("vert: ", vert)
                         x_values = vert[0]
                         y_values = vert[1]
@@ -3705,6 +3716,7 @@ class heatmaps():
             i_int_mvmt = (alpha_range[-1] - alpha_range[1]) * mvmt_decimal / 2
 
             list_of_vertices = []
+            list_of_verts_rev = np.flip(list_of_verts, axis=0)
             for pt in range(num_top_points):
                 print("pt: ", pt)
                 vertices = 'Empty'
@@ -3716,7 +3728,7 @@ class heatmaps():
                 print("(x, y, z, i): (" + str(x) + ", " + str(y) + ", " + str(z) + ", " + str(i) + ")")
 
                 if len(list_of_verts) != 0:
-                    for vert in list_of_verts:
+                    for vert in list_of_verts_rev:
                         print("vert: ", vert)
                         x_values = vert[0]
                         y_values = vert[1]
@@ -3857,12 +3869,12 @@ class heatmaps():
         """ PART II """
         pred_min_error_array, pred_error_df_sorted = self.PartII_predictions(ranges, model, model_data_P1,
                                                                              run_number)
-        pred_error_df_sorted.to_csv("run_" + str(stor_num_counter) + "_HD_predictions.csv")
+        pred_error_df_sorted.to_csv("run_" + str("%02d" % stor_num_counter) + "_HD_predictions.csv")
 
         """ PART III """
         storage_df, model_data_final = self.PartIII_final_calculations(pred_error_df_sorted, model_data_P1,
                                                                        stor_num_counter)
-        storage_df.to_csv("run_" + str(stor_num_counter) + "_HD_final_calcs.csv")
+        storage_df.to_csv("run_" + str("%02d" % stor_num_counter) + "_HD_final_calcs.csv")
 
         return storage_df, model_data_final
 
@@ -3891,7 +3903,7 @@ class heatmaps():
         gridLength = self.gridLength_GS
         numZooms = self.numZooms_GS
 
-        mesh_increase = 1.5
+        mesh_increase = 1
 
         if model_type == 'SVM_Type1':
             C_int_range = np.linspace(self.C_input[0], self.C_input[1], gridLength)
@@ -4773,7 +4785,7 @@ class heatmaps():
         model_use, model_data, storage_df_int = self.initial_predictions_and_calculations()
         list_of_vertices_current = self.intake_top_layer_calculations_and_determine_new_grids(storage_df_int, full_list_of_verts)
         df_storage_list = []
-
+        print("\n \n \n LIST OF VERT LENGTH: "+str(list_of_vertices_current)+"   \n \n \n ")
         stor_num_counter = 1
         for vert in list_of_vertices_current:
             storage_df_HD, model_data_final = self.high_density_calculations(vert, model_use, model_data, 1, stor_num_counter)
@@ -4785,9 +4797,11 @@ class heatmaps():
             i += 1
             df_storage_unsorted_final = pd.concat([df_storage_unsorted_final, df_storage_list[i]], axis=0)
 
-        for i in range(self.num_runs_AL):
+        for i in range(self.num_runs_AL-1):
             storage_df_TL, model_data = self.top_layer_predictions_and_calculations(model_use, model_data, i+2, stor_num_counter)
             list_of_vertices_current = self.intake_top_layer_calculations_and_determine_new_grids(storage_df_TL, full_list_of_verts)
+
+            print("\n \n \n LIST OF VERT LENGTH: " + str(list_of_vertices_current) + "   \n \n \n ")
 
             for vert in list_of_vertices_current:
                 storage_df_HD, model_data = self.high_density_calculations(vert, model_use, model_data, i+2, stor_num_counter)
