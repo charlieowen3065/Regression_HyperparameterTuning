@@ -3,7 +3,7 @@
 
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --job-name=data-processing-job
+#SBATCH --job-name=single_inp_subset
 #SBATCH --output=inp_data.out
 
 echo "START PROCESSING"

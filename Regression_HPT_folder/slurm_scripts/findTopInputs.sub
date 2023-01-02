@@ -1,9 +1,9 @@
 #!/bin/bash
-# filename: run_processing.sub
+# filename: findTopInputs.sub
 
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --job-name=data-processing-job
+#SBATCH --job-name=findTopInpts
 #SBATCH --output=print-statments-findInpFts.out
 
 echo "START PROCESSING"
