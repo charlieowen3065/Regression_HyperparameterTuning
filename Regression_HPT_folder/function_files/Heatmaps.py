@@ -106,7 +106,7 @@ class heatmaps():
             numHPs = 4
 
         # PART III
-        self.num_new_calc_points = ((self.gridLength_AL)**(numHPs))*self.decimal_points_top
+        self.num_new_calc_points = int(((self.gridLength_AL)**(numHPs))*self.decimal_points_top)
 
 
 
@@ -1081,7 +1081,7 @@ class heatmaps():
             r2 = float(results['r2'].loc[str(mdl_name)])
             cor = float(results['cor'].loc[str(mdl_name)])
             percent_error = np.sqrt(( (rmse-rmse_pred)/rmse )**2)*100
-            if type(percent_error) != float:
+            if type(percent_error) != np.float64:
                 percent_error = percent_error[0]
 
             avg_tr_rmse = float(
@@ -3093,14 +3093,22 @@ class heatmaps():
 
         """ PART II """
         pred_min_error_array, pred_error_df_sorted, pred_array = self.PartII_predictions(ranges_II, model, model_data,
-                                                                             run_number)
+                                                                            run_number)
         pred_error_df_sorted.to_csv("run_" + str(stor_num_counter) + "_TL_predictions.csv")
-        savemat("run_" + str("%02d" % stor_num_counter) + "_TL_predictions.mat",
-                {"run_" + str("%02d" % stor_num_counter) + "_TL_predictions": pred_array})
+        if stor_num_counter == int:
+            savemat("run_" + str("%02d" % stor_num_counter) + "_TL_predictions.mat",
+                    {"run_" + str("%02d" % stor_num_counter) + "_TL_predictions": pred_array})
+        else:
+            savemat("run_" + str(stor_num_counter) + "_TL_predictions.mat",
+                    {"run_" + str(stor_num_counter) + "_TL_predictions": pred_array})
+
         """ PART III """
         storage_df, model_data_final = self.PartIII_final_calculations(pred_error_df_sorted, model_data,
                                                                        stor_num_counter)
-        storage_df.to_csv("run_" + str(stor_num_counter) + "_TL_final_calcs.csv")
+        if stor_num_counter == int:
+            storage_df.to_csv("run_" + str("%02d" % stor_num_counter) + "_TL_final_calcs.csv")
+        else:
+            storage_df.to_csv("run_" + str(stor_num_counter) + "_TL_final_calcs.csv")
 
         return storage_df, model_data_final
 
@@ -4912,7 +4920,7 @@ class heatmaps():
         model_use, model_data, storage_df_int = self.initial_predictions_and_calculations()
         list_of_vertices_current = self.intake_top_layer_calculations_and_determine_new_grids(storage_df_int, full_list_of_verts)
         df_storage_list = []
-        print("\n \n \n LIST OF VERT LENGTH: "+str(list_of_vertices_current)+"   \n \n \n ")
+
         stor_num_counter = 1
         for vert in list_of_vertices_current:
             storage_df_HD, model_data_final = self.high_density_calculations(vert, model_use, model_data, 1, stor_num_counter)
@@ -4927,8 +4935,6 @@ class heatmaps():
         for i in range(self.num_runs_AL-1):
             storage_df_TL, model_data = self.top_layer_predictions_and_calculations(model_use, model_data, i+2, stor_num_counter)
             list_of_vertices_current = self.intake_top_layer_calculations_and_determine_new_grids(storage_df_TL, full_list_of_verts)
-
-            print("\n \n \n LIST OF VERT LENGTH: " + str(list_of_vertices_current) + "   \n \n \n ")
 
             for vert in list_of_vertices_current:
                 storage_df_HD, model_data = self.high_density_calculations(vert, model_use, model_data, i+2, stor_num_counter)

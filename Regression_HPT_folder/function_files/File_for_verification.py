@@ -73,9 +73,9 @@ noise_input_data = (0.001, 10)
 sigF_input_data = (0.1, 100)
 length_input_data = (0.001, 10)
 alpha_input_data = (0.001, 10)
-"""
+
 os.chdir('../../new_AL_folder')
-folder_name = 'SVM_RBF_Tests_2'
+folder_name = 'SVM_Linear_Tests_2'
 if folder_name in os.listdir():
     shutil.rmtree(folder_name)
 os.mkdir(folder_name)
@@ -84,18 +84,18 @@ os.chdir(folder_name)
 print("HERE: ", os.getcwd())
 
 ht2 = heatmaps(X1, Y, Nk=Nk, N=N,
-                num_HP_zones_AL=4, num_runs_AL=4,
+                num_HP_zones_AL=2, num_runs_AL=2,
                 numLayers_GS=2, numZooms_GS=2,
-                gridLength_AL=8, gridLength_GS=5,
-                decimal_points_int=0.05, decimal_points_top=0.1,
+                gridLength_AL=10, gridLength_GS=5,
+                decimal_points_int=0.05, decimal_points_top=0.08,
                 decimal_point_GS=0.1,
                 RemoveNaN=True, goodIDs=goodIDs, seed=seed, models_use=models_use,
                 save_csv_files=True,
-                C_input=C_input_data, epsilon_input=epsilon_input_data, gamma_input=gamma_input_data, coef0_input='None',
+                C_input=C_input_data, epsilon_input=epsilon_input_data, gamma_input='None', coef0_input='None',
                 noise_input='None', sigmaF_input='None', length_input='None', alpha_input='None')
 
 storage_df = ht2.runActiveLearning()
-"""
+
 
 
 
@@ -144,7 +144,7 @@ Alpha = 1
 #                 noise=Noise, sigma_F=SigmaF, scale_length=Scale_Length, alpha=Alpha,
 #                 Nk=5, N=1, goodIDs=goodIDs, seed=seed, RemoveNaN=True, StandardizeX=True, models_use=models_use,
 #                 giveKFdata=True)
-
+"""
 hp_list = temp_hp_list[model_num]
 reg = Regression(X1, Y,
                  C=hp_list[0], epsilon=hp_list[1], gamma=hp_list[2], coef0=hp_list[3],
@@ -166,7 +166,7 @@ df.iloc[:, 2] = kFold_data['ts']['results']['variation_#1']['rmse']
 df.iloc[:, 3] = kFold_data['ts']['results']['variation_#1']['r2']
 df.iloc[:, 4] = [1/ratio_value, 'RMSE', results['rmse'].iloc[0,0], 'R2', results['r2'].iloc[0,0]]
 df.to_csv(filename)
-
+"""
 
 """
 rmse_temp = results['rmse'].loc[model_name_use]
