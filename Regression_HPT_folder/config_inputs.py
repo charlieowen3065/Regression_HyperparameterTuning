@@ -10,15 +10,15 @@ N = 1
 Nk = 5
 # Which properties to run
 #props_to_run = [0, 1, 2, 3, 4, 5, 6]
-props_to_run = [0, 3, 4, 5]
+props_to_run = [0,3,4,5]
 prop_keys = ['RD', 'M', 'YS', 'WH', 'EF', 'UE', 'TS']
 # Which models to run
 #models_to_run = [0, 1, 2, 3, 4, 5, 6, 7]
-models_to_run = [0, 3, 5, 6, 7]
+models_to_run = [0]
 #models_to_run = [3]
 # Which Features to input
-feature_num = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
-#feature_num = [7, 8, 12, 13]
+#feature_num = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+feature_num = [0, 8, 12, 13]
 """
 Feature Data Information
 0.  img_avg
@@ -38,27 +38,27 @@ Feature Data Information
 14. stat_min
 15. stat_std  
 """
-"""
-lin_ft = [1,5,8,9,14]
-p2_ft = [1,5,9,11,13]
-p3_ft = [0,7,8,12,13]
-rbf_ft = [1,5]
-g_rq_ft = [0]
-g_rbf_ft = [0,1,2,5,13]
-g_m32_ft = [0,3,5,9,12]
-g_m52_ft_ft = [0,1,2,5,8]
+
+lin_ft = [2,3,5,8,9]
+p2_ft = [0,7,10,11,13]
+p3_ft = [0,8,9,10,13]
+rbf_ft = [2,3]
+g_rq_ft = [0,1,2,6,14]
+g_rbf_ft = []
+g_m32_ft = []
+g_m52_ft_ft = []
 temp_ft_list = [lin_ft, p2_ft, p3_ft, rbf_ft, g_rq_ft, g_rbf_ft, g_m32_ft, g_m52_ft_ft]
 
-lin_hp = [3.474942119, 0.321831647,1,1]
-p2_hp = [0.070275648, 0.24829284, 0.368576132, 1.605777778]
-p3_hp = [38.74939971, 0.419330129, 1.600182368, 5.254246914]
-rbf_hp = [5.833236872, 0.818634267, 0.065418574, 1]
-g_rq_hp = [1,1,1,1]
-g_rbf_hp = [125.9079372, 0.599654098, 0.805512952, 1]
-g_m32_hp = [19.44995466, 0.668468106, 1.021848106,1]
-g_m52_hp = [496.5528519, 2.023380774, 0.756235125,1]
+lin_hp = [2.266376511,0.552882653,1,1]
+p2_hp = [6.369101898,0.201129454,0.079841298,0.331099398]
+p3_hp = [61.32194578,1.333669558,0.708465021,9.26359561]
+rbf_hp = [13.58067975,1.333502513,0.037531856, 1]
+g_rq_hp = [2021.730873,0.048715244,0.153640802,0.134201248]
+g_rbf_hp = [3.775562975,0.120288721,0.572245129, 1]
+g_m32_hp = [48.25050882,0.32643916,0.717308557,1]
+g_m52_hp = [2.456404192,0.775771305,0.465087723,1]
 temp_hp_list = [lin_hp, p2_hp, p3_hp, rbf_hp, g_rq_hp, g_rbf_hp, g_m32_hp, g_m52_hp]
-"""
+
 # Which cases to use
 #case_use = ['org', 'diff', 'ratio']
 case_use = ['org']
@@ -88,13 +88,13 @@ heatmap_inputs['decimal_points_int'] = dict()
 heatmap_inputs['decimal_points_top'] = dict()
 # SVM_Linear
 mdl = 0
-heatmap_inputs['gridLength_GS'][model_names[mdl]] = 15
+heatmap_inputs['gridLength_GS'][model_names[mdl]] = 12
 heatmap_inputs['numZooms_GS'][model_names[mdl]] = 2
 heatmap_inputs['numLayers_GS'][model_names[mdl]] = 3
 heatmap_inputs['decimal_point_GS'][model_names[mdl]] = 0.1
-heatmap_inputs['gridLength_AL'][model_names[mdl]] = 30
+heatmap_inputs['gridLength_AL'][model_names[mdl]] = 20
 heatmap_inputs['num_HP_zones_AL'][model_names[mdl]] = 3
-heatmap_inputs['num_runs_AL'][model_names[mdl]] = 3
+heatmap_inputs['num_runs_AL'][model_names[mdl]] = 4
 heatmap_inputs['decimal_points_int'][model_names[mdl]] = 0.10
 heatmap_inputs['decimal_points_top'][model_names[mdl]] = 0.20
 # SVM_Poly2

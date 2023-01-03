@@ -42,6 +42,8 @@ goodIDs = goodId_org[:, property_num]
 sId_use = sId[goodIDs.astype(bool)]
 sTpInt_use = sTpInt[goodIDs.astype(bool)]
 
+mdl_num = 0
+
 mdl_SVM_linear = [1, 0, 0, 0, 0, 0, 0, 0]
 mdl_SVM_poly2 =  [0, 1, 0, 0, 0, 0, 0, 0]
 mdl_SVM_poly3 =  [0, 0, 1, 0, 0, 0, 0, 0]
@@ -71,9 +73,9 @@ noise_input_data = (0.001, 10)
 sigF_input_data = (0.1, 100)
 length_input_data = (0.001, 10)
 alpha_input_data = (0.001, 10)
-
+"""
 os.chdir('../../new_AL_folder')
-folder_name = 'SVM_RBF_New_Tests'
+folder_name = 'SVM_RBF_Tests_2'
 if folder_name in os.listdir():
     shutil.rmtree(folder_name)
 os.mkdir(folder_name)
@@ -93,7 +95,7 @@ ht2 = heatmaps(X1, Y, Nk=Nk, N=N,
                 noise_input='None', sigmaF_input='None', length_input='None', alpha_input='None')
 
 storage_df = ht2.runActiveLearning()
-
+"""
 
 
 
@@ -125,7 +127,7 @@ storage_df = ht2.runActiveLearning()
 #gamma_inp = 0.06
 
 # EXP1:
-"""
+
 C = 0.243873205608901
 Epsilon = 0.121475234981663
 Gamma = 0.114004404100213
@@ -135,26 +137,38 @@ Noise = 1
 SigmaF = 1
 Scale_Length = 1
 Alpha = 1
-"""
 
-"""
-C = temp_hp_list[model_num][0]
-Epsilon = temp_hp_list[model_num][1]
-Gamma = temp_hp_list[model_num][2]
-Coef0 = temp_hp_list[model_num][3]
 
-Noise = temp_hp_list[model_num][0]
-SigmaF = temp_hp_list[model_num][1]
-Scale_Length = temp_hp_list[model_num][2]
-Alpha = temp_hp_list[model_num][3]
+#reg = Regression(X1, Y,
+#                 C=C, epsilon=Epsilon, gamma=Gamma, coef0=Coef0,
+#                 noise=Noise, sigma_F=SigmaF, scale_length=Scale_Length, alpha=Alpha,
+#                 Nk=5, N=1, goodIDs=goodIDs, seed=seed, RemoveNaN=True, StandardizeX=True, models_use=models_use,
+#                 giveKFdata=True)
 
+hp_list = temp_hp_list[model_num]
 reg = Regression(X1, Y,
-                 C=C, epsilon=Epsilon, gamma=Gamma, coef0=Coef0,
-                 noise=Noise, sigma_F=SigmaF, scale_length=Scale_Length, alpha=Alpha,
+                 C=hp_list[0], epsilon=hp_list[1], gamma=hp_list[2], coef0=hp_list[3],
+                 noise=hp_list[0], sigma_F=hp_list[1], scale_length=hp_list[2], alpha=hp_list[3],
                  Nk=5, N=1, goodIDs=goodIDs, seed=seed, RemoveNaN=True, StandardizeX=True, models_use=models_use,
                  giveKFdata=True)
 results, bestPred, kFold_data = reg.RegressionCVMult()
 
+
+os.chdir('../../TR_TS_data')
+filename = prop_names[property_num]+"_"+model_names[model_num]+'.csv'
+zeros = np.zeros((5, 5))
+ratio_value = np.average(kFold_data['tr']['results']['variation_#1']['rmse']) / results['rmse'].iloc[0,0]
+col_names = ['TR_RMSE', "TR_R2", "TS_RMSE", "TS_R2", "Ratio"]
+df = pd.DataFrame(data=zeros, columns=col_names)
+df.iloc[:, 0] = kFold_data['tr']['results']['variation_#1']['rmse']
+df.iloc[:, 1] = kFold_data['tr']['results']['variation_#1']['r2']
+df.iloc[:, 2] = kFold_data['ts']['results']['variation_#1']['rmse']
+df.iloc[:, 3] = kFold_data['ts']['results']['variation_#1']['r2']
+df.iloc[:, 4] = [1/ratio_value, 'RMSE', results['rmse'].iloc[0,0], 'R2', results['r2'].iloc[0,0]]
+df.to_csv(filename)
+
+
+"""
 rmse_temp = results['rmse'].loc[model_name_use]
 r2_temp = results['r2'].loc[model_name_use]
 Yp_use = results['Yp'][model_name_use]['variation_#1']

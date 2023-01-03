@@ -6,6 +6,8 @@ import pickle
 import pandas as pd
 
 import numpy as np
+import scipy.io
+from scipy.io import savemat
 from scipy.stats import iqr
 from sklearn import gaussian_process
 from sklearn.gaussian_process.kernels import Matern, WhiteKernel, ConstantKernel, RationalQuadratic, RBF
@@ -61,6 +63,9 @@ class heatmaps():
         self.decimal_points_int = decimal_points_int
         self.decimal_points_top = decimal_points_top
 
+
+
+
         # Grid Search
         self.numLayers_GS = numLayers_GS
         self.numZooms_GS = numZooms_GS
@@ -88,6 +93,21 @@ class heatmaps():
         self.alpha_input = alpha_input
 
         self.model_type = self.determine_model_type()
+
+        if self.model_type == 'SVM_Type1':
+            numHPs = 2
+        elif self.model_type == 'SVM_Type2':
+            numHPs = 3
+        elif self.model_type == 'SVM_Type3':
+            numHPs = 4
+        elif self.model_type == 'GPR_Type1':
+            numHPs = 3
+        elif self.model_type == 'GPR_Type2':
+            numHPs = 4
+
+        # PART III
+        self.num_new_calc_points = ((self.gridLength_AL)**(numHPs))*self.decimal_points_top
+
 
 
     def inputs_dist_function(self, numHPs, dec, model_type, ItoV_eq_const, model_data_old):
@@ -437,6 +457,8 @@ class heatmaps():
             model_inputs_new = np.zeros((Npts_int_calc, 2))
             model_outputs_new = np.zeros((Npts_int_calc, 1))
 
+            int_array = np.zeros((numC, numE))
+
             # Running All Combinations
             count = 0
             for C_idx in range(numC):
@@ -459,11 +481,13 @@ class heatmaps():
                         model_inputs_new[count, 1] = epsilon
                         model_outputs_new[count, 0] = error
 
+                        int_array[C_idx, e_idx] = error
+
                         count += 1
                         print("Count: "+str(count)+" / "+str(Npts_int_calc))
 
             model_data = self.combine_model_data(model_data_int, [model_inputs_new, model_outputs_new])
-            return model_data
+            return model_data, int_array
 
         elif model_type == 'SVM_Type2':
             # Initialize Ranges
@@ -484,6 +508,8 @@ class heatmaps():
 
             model_inputs_new = np.zeros((Npts_int_calc, 3))
             model_outputs_new = np.zeros((Npts_int_calc, 1))
+
+            int_array = np.zeros((numC, numE, numG))
 
             # Running All Combinations
             count = 0
@@ -510,11 +536,13 @@ class heatmaps():
                             model_inputs_new[count, 2] = gamma
                             model_outputs_new[count, 0] = error
 
+                            int_array[C_idx, e_idx, g_idx] = error
+
                             count += 1
                             print("Count: " + str(count) + " / " + str(Npts_int_calc))
 
             model_data = self.combine_model_data(model_data_int, [model_inputs_new, model_outputs_new])
-            return model_data
+            return model_data, int_array
 
         elif model_type == 'SVM_Type3':
             # Initialize Ranges
@@ -537,6 +565,8 @@ class heatmaps():
 
             model_inputs_new = np.zeros((Npts_int_calc, 4))
             model_outputs_new = np.zeros((Npts_int_calc, 1))
+
+            int_array = np.zeros((numC, numE, numG, numC0))
 
             # Running All Combinations
             count = 0
@@ -566,11 +596,13 @@ class heatmaps():
                                 model_inputs_new[count, 3] = c0
                                 model_outputs_new[count, 0] = error
 
+                                int_array[C_idx, e_idx, c0_idx] = error
+
                                 count += 1
                                 print("Count: " + str(count) + " / " + str(Npts_int_calc))
 
             model_data = self.combine_model_data(model_data_int, [model_inputs_new, model_outputs_new])
-            return model_data
+            return model_data, int_array
 
         elif model_type == 'GPR_Type1':
             # Initialize Ranges
@@ -591,6 +623,8 @@ class heatmaps():
 
             model_inputs_new = np.zeros((Npts_int_calc, 3))
             model_outputs_new = np.zeros((Npts_int_calc, 1))
+
+            int_array = np.zeros((numN, numS, numL))
 
             # Running All Combinations
             count = 0
@@ -617,11 +651,13 @@ class heatmaps():
                             model_inputs_new[count, 2] = scale_length
                             model_outputs_new[count, 0] = error
 
+                            int_array[n_idx, s_idx, l_idx] = error
+
                             count += 1
                             print("Count: " + str(count) + " / " + str(Npts_int_calc))
 
             model_data = self.combine_model_data(model_data_int, [model_inputs_new, model_outputs_new])
-            return model_data
+            return model_data, int_array
 
         elif model_type == 'GPR_Type2':
             # Initialize Ranges
@@ -644,6 +680,8 @@ class heatmaps():
 
             model_inputs_new = np.zeros((Npts_int_calc, 4))
             model_outputs_new = np.zeros((Npts_int_calc, 1))
+
+            int_array = np.zeros((numN, numS, numL))
 
             # Running All Combinations
             count = 0
@@ -673,11 +711,13 @@ class heatmaps():
                                 model_inputs_new[count, 3] = alpha
                                 model_outputs_new[count, 0] = error
 
+                                int_array[n_idx, s_idx, l_idx, a_idx] = error
+
                                 count += 1
                                 print("Count: " + str(count) + " / " + str(Npts_int_calc))
 
             model_data = self.combine_model_data(model_data_int, [model_inputs_new, model_outputs_new])
-            return model_data
+            return model_data, int_array
 
         else:
             print("Error in Model-Type: ", model_type)
@@ -739,7 +779,7 @@ class heatmaps():
                     pred_min_error_array[idx_tuple] = min_error
 
             pred_error_df_sorted = pred_error_df.sort_values(by=['Min-Error'], ascending=True)
-            return pred_min_error_array, pred_error_df_sorted
+            return pred_min_error_array, pred_error_df_sorted, pred_min_error_array
 
         elif model_type == 'SVM_Type2':
             # Initialize Ranges
@@ -788,7 +828,7 @@ class heatmaps():
                         pred_min_error_array[idx_tuple] = min_error
 
             pred_error_df_sorted = pred_error_df.sort_values(by=['Min-Error'], ascending=True)
-            return pred_min_error_array, pred_error_df_sorted
+            return pred_min_error_array, pred_error_df_sorted, pred_min_error_array
 
         elif model_type == 'SVM_Type3':
             # Initialize Ranges
@@ -841,7 +881,7 @@ class heatmaps():
                             pred_min_error_array[idx_tuple] = min_error
 
             pred_error_df_sorted = pred_error_df.sort_values(by=['Min-Error'], ascending=True)
-            return pred_min_error_array, pred_error_df_sorted
+            return pred_min_error_array, pred_error_df_sorted, pred_min_error_array
 
         elif model_type == 'GPR_Type1':
             # Initialize Ranges
@@ -890,7 +930,7 @@ class heatmaps():
                         pred_min_error_array[idx_tuple] = min_error
 
             pred_error_df_sorted = pred_error_df.sort_values(by=['Min-Error'], ascending=True)
-            return pred_min_error_array, pred_error_df_sorted
+            return pred_min_error_array, pred_error_df_sorted, pred_min_error_array
 
         elif model_type == 'GPR_Type2':
             # Initialize Ranges
@@ -943,7 +983,7 @@ class heatmaps():
                             pred_min_error_array[idx_tuple] = min_error
 
             pred_error_df_sorted = pred_error_df.sort_values(by=['Min-Error'], ascending=True)
-            return pred_min_error_array, pred_error_df_sorted
+            return pred_min_error_array, pred_error_df_sorted, pred_min_error_array
 
         else:
             print("Error in Model-Type: ", model_type)
@@ -969,7 +1009,7 @@ class heatmaps():
         model_type = self.model_type
 
         Npts = sorted_pred_dataframe.shape[0]
-        num_new_calc_points = int(Npts * decimal_points_top)
+        num_new_calc_points = self.num_new_calc_points
 
         print("Part III -- Started")
 
@@ -1041,6 +1081,8 @@ class heatmaps():
             r2 = float(results['r2'].loc[str(mdl_name)])
             cor = float(results['cor'].loc[str(mdl_name)])
             percent_error = np.sqrt(( (rmse-rmse_pred)/rmse )**2)*100
+            if type(percent_error) != float:
+                percent_error = percent_error[0]
 
             avg_tr_rmse = float(
                 np.mean(list(kFold_data['tr']['results']['variation_#1']['rmse'][str(mdl_name)])))
@@ -1961,6 +2003,8 @@ class heatmaps():
             model_inputs = np.zeros((Npts_int_calc, 2))
             model_outputs = np.zeros((Npts_int_calc, 1))
 
+            int_array = np.zeros((numC, numE))
+
             # Running All
             """ PART I: Initial Calculations """
             count = 0
@@ -1983,6 +2027,8 @@ class heatmaps():
                         model_inputs[count, 0] = C
                         model_inputs[count, 1] = epsilon
                         model_outputs[count, 0] = error
+
+                        int_array[C_idx, e_idx] = error
 
                         count += 1
                         print("initial Count: " + str(count) + " / " + str(Npts_int_calc))
@@ -2115,6 +2161,8 @@ class heatmaps():
             model_inputs = np.zeros((Npts_int_calc, 3))
             model_outputs = np.zeros((Npts_int_calc, 1))
 
+            int_array = np.zeros((numC, numE, numG))
+
             # Running All Combinations
             """ PART I: Initial Calculations """
             count = 0
@@ -2140,6 +2188,8 @@ class heatmaps():
                             model_inputs[count, 1] = epsilon
                             model_inputs[count, 2] = gamma
                             model_outputs[count, 0] = error
+
+                            int_array[C_idx, e_idx, g_idx] = error
 
                             count += 1
                             print("initial Count: " + str(count) + " / " + str(Npts_int_calc))
@@ -2277,6 +2327,8 @@ class heatmaps():
             model_inputs = np.zeros((Npts_int_calc, 4))
             model_outputs = np.zeros((Npts_int_calc, 1))
 
+            int_array = np.zeros((numC, numE, numG, numC0))
+
             # Running All Combinations
             """ PART I: Initial Calculations """
             count = 0
@@ -2305,6 +2357,8 @@ class heatmaps():
                                 model_inputs[count, 2] = gamma
                                 model_inputs[count, 3] = c0
                                 model_outputs[count, 0] = error
+
+                                int_array[C_idx, e_idx, g_idx, c0_idx] = error
 
                                 count += 1
                                 print("initial Count: " + str(count) + " / " + str(Npts_int_calc))
@@ -2442,6 +2496,8 @@ class heatmaps():
             model_inputs = np.zeros((Npts_int_calc, 3))
             model_outputs = np.zeros((Npts_int_calc, 1))
 
+            int_array = np.zeros((numN, numS, numL))
+
             # Running All Combinations
             """ PART I: Initial Calculations """
             count = 0
@@ -2467,6 +2523,8 @@ class heatmaps():
                             model_inputs[count, 1] = sigmaF
                             model_inputs[count, 2] = scale_length
                             model_outputs[count, 0] = error
+
+                            int_array[n_idx, s_idx, l_idx] = error
 
                             count += 1
                             print("initial Count: " + str(count) + " / " + str(Npts_int_calc))
@@ -2604,6 +2662,8 @@ class heatmaps():
             model_inputs = np.zeros((Npts_int_calc, 3))
             model_outputs = np.zeros((Npts_int_calc, 1))
 
+            int_array = np.zeros((numN, numS, numL, numA))
+
             # Running All Combinations
             """ PART I: Initial Calculations """
             count = 0
@@ -2632,6 +2692,8 @@ class heatmaps():
                                 model_inputs[count, 2] = scale_length
                                 model_inputs[count, 3] = alpha
                                 model_outputs[count, 0] = error
+
+                                int_array[n_idx, s_idx, l_idx, a_idx] = error
 
                                 count += 1
                                 print("initial Count: " + str(count) + " / " + str(Npts_int_calc))
@@ -2756,7 +2818,8 @@ class heatmaps():
         print("initial_predictions --  Complete")
 
         model_data = [model_inputs, model_outputs]
-
+        savemat('run_0_initial_array.mat', {'run_0_initial_array': int_array})
+        savemat('run_0_predictions_array.mat', {'run_0_predictions_array': pred_min_error_array})
         # Calculations
         storage_df, model_data_final = self.PartIII_final_calculations(pred_error_df_sorted, model_data, 0)
 
@@ -2938,6 +3001,8 @@ class heatmaps():
         model_type = self.model_type
         gridLength = self.gridLength_AL
 
+        part_II_mesh_increase = 2
+
         if model_type == 'SVM_Type1':
             # Initialize Ranges
             C_input = self.C_input
@@ -2946,6 +3011,10 @@ class heatmaps():
             epsilon_range = np.linspace(epsilon_input[0], epsilon_input[1], gridLength)
 
             ranges = [C_range, epsilon_range]
+
+            C_range_II = np.linspace(C_input[0], C_input[1], gridLength * part_II_mesh_increase)
+            epsilon_range_II = np.linspace(epsilon_input[0], epsilon_input[1], gridLength * part_II_mesh_increase)
+            ranges_II = [C_range_II, epsilon_range_II]
 
         elif model_type == 'SVM_Type2':
             # Initialize Ranges
@@ -2957,6 +3026,11 @@ class heatmaps():
             gamma_range = np.linspace(gamma_input[0], gamma_input[1], gridLength)
 
             ranges = [C_range, epsilon_range, gamma_range]
+
+            C_range_II = np.linspace(C_input[0], C_input[1], gridLength * part_II_mesh_increase)
+            epsilon_range_II = np.linspace(epsilon_input[0], epsilon_input[1], gridLength * part_II_mesh_increase)
+            gamma_range_II = np.linspace(gamma_input[0], gamma_input[1], gridLength * part_II_mesh_increase)
+            ranges_II = [C_range_II, epsilon_range_II, gamma_range_II]
 
         elif model_type == 'SVM_Type3':
             # Initialize Ranges
@@ -2971,6 +3045,12 @@ class heatmaps():
 
             ranges = [C_range, epsilon_range, gamma_range, coef0_range]
 
+            C_range_II = np.linspace(C_input[0], C_input[1], gridLength * part_II_mesh_increase)
+            epsilon_range_II = np.linspace(epsilon_input[0], epsilon_input[1], gridLength * part_II_mesh_increase)
+            gamma_range_II = np.linspace(gamma_input[0], gamma_input[1], gridLength * part_II_mesh_increase)
+            coef0_range_II = np.linspace(coef0_input[0], coef0_input[1], gridLength * part_II_mesh_increase)
+            ranges_II = [C_range_II, epsilon_range_II, gamma_range_II, coef0_range_II]
+
         elif model_type == 'GPR_Type1':
             # Initialize Ranges
             noise_input = self.noise_input
@@ -2982,6 +3062,11 @@ class heatmaps():
 
             """ PART I """
             ranges = [noise_range, sigmaF_range, length_range]
+
+            noise_range_II = np.linspace(noise_input[0], noise_input[1], gridLength * part_II_mesh_increase)
+            sigmaF_range_II = np.linspace(sigmaF_input[0], sigmaF_input[1], gridLength * part_II_mesh_increase)
+            length_range_II = np.linspace(length_input[0], length_input[1], gridLength * part_II_mesh_increase)
+            ranges_II = [noise_range_II, sigmaF_range_II, length_range_II]
 
         elif model_type == 'GPR_Type2':
             # Initialize Ranges
@@ -2996,15 +3081,22 @@ class heatmaps():
 
             ranges = [noise_range, sigmaF_range, length_range, alpha_range]
 
+            noise_range_II = np.linspace(noise_input[0], noise_input[1], gridLength * part_II_mesh_increase)
+            sigmaF_range_II = np.linspace(sigmaF_input[0], sigmaF_input[1], gridLength * part_II_mesh_increase)
+            length_range_II = np.linspace(length_input[0], length_input[1], gridLength * part_II_mesh_increase)
+            alpha_range_II = np.linspace(alpha_input[0], alpha_input[1], gridLength * part_II_mesh_increase)
+            ranges_II = [noise_range_II, sigmaF_range_II, length_range_II, alpha_range_II]
+
         else:
             print("Error in Model-Type: ", model_type)
             return
 
         """ PART II """
-        pred_min_error_array, pred_error_df_sorted = self.PartII_predictions(ranges, model, model_data,
+        pred_min_error_array, pred_error_df_sorted, pred_array = self.PartII_predictions(ranges_II, model, model_data,
                                                                              run_number)
         pred_error_df_sorted.to_csv("run_" + str(stor_num_counter) + "_TL_predictions.csv")
-
+        savemat("run_" + str("%02d" % stor_num_counter) + "_TL_predictions.mat",
+                {"run_" + str("%02d" % stor_num_counter) + "_TL_predictions": pred_array})
         """ PART III """
         storage_df, model_data_final = self.PartIII_final_calculations(pred_error_df_sorted, model_data,
                                                                        stor_num_counter)
@@ -3800,6 +3892,8 @@ class heatmaps():
 
         print("high_density_calculations -- Started")
 
+        part_II_mesh_increase = 2
+
         if model_type == 'SVM_Type1':
             # Initialize Ranges
             C_input = HP_vertex_list[0]
@@ -3808,6 +3902,10 @@ class heatmaps():
             epsilon_range = np.linspace(epsilon_input[0], epsilon_input[1], gridLength)
 
             ranges = [C_range, epsilon_range]
+
+            C_range_II = np.linspace(C_input[0], C_input[1], gridLength * part_II_mesh_increase)
+            epsilon_range_II = np.linspace(epsilon_input[0], epsilon_input[1], gridLength * part_II_mesh_increase)
+            ranges_II = [C_range_II, epsilon_range_II]
 
         elif model_type == 'SVM_Type2':
             # Initialize Ranges
@@ -3819,6 +3917,11 @@ class heatmaps():
             gamma_range = np.linspace(gamma_input[0], gamma_input[1], gridLength)
 
             ranges = [C_range, epsilon_range, gamma_range]
+
+            C_range_II = np.linspace(C_input[0], C_input[1], gridLength * part_II_mesh_increase)
+            epsilon_range_II = np.linspace(epsilon_input[0], epsilon_input[1], gridLength * part_II_mesh_increase)
+            gamma_range_II = np.linspace(gamma_input[0], gamma_input[1], gridLength * part_II_mesh_increase)
+            ranges_II = [C_range_II, epsilon_range_II, gamma_range_II]
 
         elif model_type == 'SVM_Type3':
             # Initialize Ranges
@@ -3833,6 +3936,12 @@ class heatmaps():
 
             ranges = [C_range, epsilon_range, gamma_range, coef0_range]
 
+            C_range_II = np.linspace(C_input[0], C_input[1], gridLength * part_II_mesh_increase)
+            epsilon_range_II = np.linspace(epsilon_input[0], epsilon_input[1], gridLength * part_II_mesh_increase)
+            gamma_range_II = np.linspace(gamma_input[0], gamma_input[1], gridLength * part_II_mesh_increase)
+            coef0_range_II = np.linspace(coef0_input[0], coef0_input[1], gridLength * part_II_mesh_increase)
+            ranges_II = [C_range_II, epsilon_range_II, gamma_range_II, coef0_range_II]
+
         elif model_type == 'GPR_Type1':
             # Initialize Ranges
             noise_input = HP_vertex_list[0]
@@ -3844,6 +3953,11 @@ class heatmaps():
 
             """ PART I """
             ranges = [noise_range, sigmaF_range, length_range]
+
+            noise_range_II = np.linspace(noise_input[0], noise_input[1], gridLength * part_II_mesh_increase)
+            sigmaF_range_II = np.linspace(sigmaF_input[0], sigmaF_input[1], gridLength * part_II_mesh_increase)
+            length_range_II = np.linspace(length_input[0], length_input[1], gridLength * part_II_mesh_increase)
+            ranges_II = [noise_range_II, sigmaF_range_II, length_range_II]
 
         elif model_type == 'GPR_Type2':
             # Initialize Ranges
@@ -3858,19 +3972,27 @@ class heatmaps():
 
             ranges = [noise_range, sigmaF_range, length_range, alpha_range]
 
+            noise_range_II = np.linspace(noise_input[0], noise_input[1], gridLength * part_II_mesh_increase)
+            sigmaF_range_II = np.linspace(sigmaF_input[0], sigmaF_input[1], gridLength * part_II_mesh_increase)
+            length_range_II = np.linspace(length_input[0], length_input[1], gridLength * part_II_mesh_increase)
+            alpha_range_II = np.linspace(alpha_input[0], alpha_input[1], gridLength * part_II_mesh_increase)
+            ranges_II = [noise_range_II, sigmaF_range_II, length_range_II, alpha_range_II]
+
         else:
             print("Error in Model-Type: ", model_type)
             return
 
         # Running All Combinations
         """ PART I """
-        model_data_P1 = self.PartI_intital_calculations(ranges, model_data)
+        model_data_P1, initial_array = self.PartI_intital_calculations(ranges, model_data)
+        savemat("run_" + str("%02d" % stor_num_counter) + "_HD_initial_array.mat",{"run_" + str("%02d" % stor_num_counter) + "_HD_initial_array": initial_array})
 
         """ PART II """
-        pred_min_error_array, pred_error_df_sorted = self.PartII_predictions(ranges, model, model_data_P1,
+
+        pred_min_error_array, pred_error_df_sorted, pred_array = self.PartII_predictions(ranges_II, model, model_data_P1,
                                                                              run_number)
         pred_error_df_sorted.to_csv("run_" + str("%02d" % stor_num_counter) + "_HD_predictions.csv")
-
+        savemat("run_" + str("%02d" % stor_num_counter) + "_HD_predictions.mat", {"run_" + str("%02d" % stor_num_counter) + "_HD_predictions": pred_array})
         """ PART III """
         storage_df, model_data_final = self.PartIII_final_calculations(pred_error_df_sorted, model_data_P1,
                                                                        stor_num_counter)
@@ -4453,6 +4575,11 @@ class heatmaps():
                      tr_r2_array,
                      tr_cor_array,
                      ratio_array]
+
+        mat_dict = {'error': error_array, 'R2': r2_array, 'Cor': cor_array,
+                    'TR_error': tr_error_array, 'TR_r2': tr_r2_array, 'TR_Cor': tr_cor_array,
+                    'Ratio': ratio_array}
+        savemat(figure_name+'.mat', mat_dict)
 
         return np_arrays, storage_df
 
