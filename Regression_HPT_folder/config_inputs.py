@@ -88,15 +88,15 @@ heatmap_inputs['decimal_points_int'] = dict()
 heatmap_inputs['decimal_points_top'] = dict()
 # SVM_Linear
 mdl = 0
-heatmap_inputs['gridLength_GS'][model_names[mdl]] = 12
+heatmap_inputs['gridLength_GS'][model_names[mdl]] = 15
 heatmap_inputs['numZooms_GS'][model_names[mdl]] = 2
 heatmap_inputs['numLayers_GS'][model_names[mdl]] = 3
 heatmap_inputs['decimal_point_GS'][model_names[mdl]] = 0.1
-heatmap_inputs['gridLength_AL'][model_names[mdl]] = 20
+heatmap_inputs['gridLength_AL'][model_names[mdl]] = 30
 heatmap_inputs['num_HP_zones_AL'][model_names[mdl]] = 3
 heatmap_inputs['num_runs_AL'][model_names[mdl]] = 4
-heatmap_inputs['decimal_points_int'][model_names[mdl]] = 0.10
-heatmap_inputs['decimal_points_top'][model_names[mdl]] = 0.20
+heatmap_inputs['decimal_points_int'][model_names[mdl]] = 0.05
+heatmap_inputs['decimal_points_top'][model_names[mdl]] = 0.10
 # SVM_Poly2
 mdl = 1
 heatmap_inputs['gridLength_GS'][model_names[mdl]] = 15

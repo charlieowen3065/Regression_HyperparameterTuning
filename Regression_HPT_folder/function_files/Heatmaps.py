@@ -2003,6 +2003,7 @@ class heatmaps():
             model_inputs = np.zeros((Npts_int_calc, 2))
             model_outputs = np.zeros((Npts_int_calc, 1))
 
+            ranges = [C_range, epsilon_range]
             int_array = np.zeros((numC, numE))
 
             # Running All
@@ -2161,6 +2162,7 @@ class heatmaps():
             model_inputs = np.zeros((Npts_int_calc, 3))
             model_outputs = np.zeros((Npts_int_calc, 1))
 
+            ranges = [C_range, epsilon_range, gamma_range]
             int_array = np.zeros((numC, numE, numG))
 
             # Running All Combinations
@@ -2327,6 +2329,7 @@ class heatmaps():
             model_inputs = np.zeros((Npts_int_calc, 4))
             model_outputs = np.zeros((Npts_int_calc, 1))
 
+            ranges = [C_range, epsilon_range, gamma_range, coef0_range]
             int_array = np.zeros((numC, numE, numG, numC0))
 
             # Running All Combinations
@@ -2496,6 +2499,7 @@ class heatmaps():
             model_inputs = np.zeros((Npts_int_calc, 3))
             model_outputs = np.zeros((Npts_int_calc, 1))
 
+            ranges = [noise_range, sigmaF_range, length_range]
             int_array = np.zeros((numN, numS, numL))
 
             # Running All Combinations
@@ -2662,6 +2666,7 @@ class heatmaps():
             model_inputs = np.zeros((Npts_int_calc, 3))
             model_outputs = np.zeros((Npts_int_calc, 1))
 
+            ranges = [noise_range, sigmaF_range, length_range, alpha_range]
             int_array = np.zeros((numN, numS, numL, numA))
 
             # Running All Combinations
@@ -2818,8 +2823,8 @@ class heatmaps():
         print("initial_predictions --  Complete")
 
         model_data = [model_inputs, model_outputs]
-        savemat('run_0_initial_array.mat', {'run_0_initial_array': int_array})
-        savemat('run_0_predictions_array.mat', {'run_0_predictions_array': pred_min_error_array})
+        savemat('run_0_initial_array.mat', {'run_0_initial_array': int_array, 'Ranges': ranges})
+        savemat('run_0_predictions_array.mat', {'run_0_predictions_array': pred_min_error_array, 'Ranges': ranges})
         # Calculations
         storage_df, model_data_final = self.PartIII_final_calculations(pred_error_df_sorted, model_data, 0)
 
@@ -3095,12 +3100,11 @@ class heatmaps():
         pred_min_error_array, pred_error_df_sorted, pred_array = self.PartII_predictions(ranges_II, model, model_data,
                                                                             run_number)
         pred_error_df_sorted.to_csv("run_" + str(stor_num_counter) + "_TL_predictions.csv")
+        data_dict = {"run_" + str(stor_num_counter) + "_TL_predictions": pred_array, 'Ranges': ranges_II}
         if stor_num_counter == int:
-            savemat("run_" + str("%02d" % stor_num_counter) + "_TL_predictions.mat",
-                    {"run_" + str("%02d" % stor_num_counter) + "_TL_predictions": pred_array})
+            savemat("run_" + str("%02d" % stor_num_counter) + "_TL_predictions.mat", data_dict)
         else:
-            savemat("run_" + str(stor_num_counter) + "_TL_predictions.mat",
-                    {"run_" + str(stor_num_counter) + "_TL_predictions": pred_array})
+            savemat("run_" + str(stor_num_counter) + "_TL_predictions.mat", data_dict)
 
         """ PART III """
         storage_df, model_data_final = self.PartIII_final_calculations(pred_error_df_sorted, model_data,
@@ -3993,14 +3997,16 @@ class heatmaps():
         # Running All Combinations
         """ PART I """
         model_data_P1, initial_array = self.PartI_intital_calculations(ranges, model_data)
-        savemat("run_" + str("%02d" % stor_num_counter) + "_HD_initial_array.mat",{"run_" + str("%02d" % stor_num_counter) + "_HD_initial_array": initial_array})
+        data_dict = {"run_" + str("%02d" % stor_num_counter) + "_HD_initial_array": initial_array, 'Ranges': ranges}
+        savemat("run_" + str("%02d" % stor_num_counter) + "_HD_initial_array.mat", data_dict)
 
         """ PART II """
 
         pred_min_error_array, pred_error_df_sorted, pred_array = self.PartII_predictions(ranges_II, model, model_data_P1,
                                                                              run_number)
         pred_error_df_sorted.to_csv("run_" + str("%02d" % stor_num_counter) + "_HD_predictions.csv")
-        savemat("run_" + str("%02d" % stor_num_counter) + "_HD_predictions.mat", {"run_" + str("%02d" % stor_num_counter) + "_HD_predictions": pred_array})
+        data_dict = {"run_" + str("%02d" % stor_num_counter) + "_HD_predictions": pred_array, "Ranges": ranges_II}
+        savemat("run_" + str("%02d" % stor_num_counter) + "_HD_predictions.mat", data_dict)
         """ PART III """
         storage_df, model_data_final = self.PartIII_final_calculations(pred_error_df_sorted, model_data_P1,
                                                                        stor_num_counter)
@@ -4584,9 +4590,11 @@ class heatmaps():
                      tr_cor_array,
                      ratio_array]
 
+        ranges_list = [HP1_range, HP2_range, HP3_range, HP4_range,]
         mat_dict = {'error': error_array, 'R2': r2_array, 'Cor': cor_array,
                     'TR_error': tr_error_array, 'TR_r2': tr_r2_array, 'TR_Cor': tr_cor_array,
-                    'Ratio': ratio_array}
+                    'Ratio': ratio_array, 'Ranges': ranges_list}
+
         savemat(figure_name+'.mat', mat_dict)
 
         return np_arrays, storage_df
