@@ -55,18 +55,22 @@ for case in os.listdir():
                     
                     if 'Heatmaps' in os.listdir():
                         os.chdir('Heatmaps')
-        
-                        filename_sorted = '0-Data_'+str(mdl[2:])+'_Sorted.csv'
-                        #print("FILE: ", filename_sorted)
-                        if filename_sorted in os.listdir():
-                            dest_path = m_path + s + 'data_postprocessing_folder' + s + 'raw_data' + s + case + s + prop + s + mdl
-                            i_use = str("%01d" % (i))
-                            filename_new = str(i_use)+"_"+str(mdl)+"_"+str(ft_final)+".csv"
-                            shutil.copyfile(filename_sorted, dest_path+s+filename_new)
+                        if 'Full_Heatmaps' in os.listdir():
+                            os.chdir('Full_Heatmaps')
+                            filename_sorted = '0-Data_' + str(mdl[2:]) + '_Sorted.csv'
+                            # print("FILE: ", filename_sorted)
+                            if filename_sorted in os.listdir():
+                                dest_path = m_path + s + 'data_postprocessing_folder' + s + 'raw_data' + s + case + s + prop + s + mdl
+                                i_use = str("%01d" % (i))
+                                filename_new = str(i_use) + "_" + str(mdl) + "_" + str(ft_final) + ".csv"
+                                shutil.copyfile(filename_sorted, dest_path + s + filename_new)
+                            else:
+                                print(str(mdl) + " - " + str(ft_use) + " is not completed")
+
+                            i += 1
+                            os.chdir('..')
                         else:
-                            print(str(mdl)+" - "+str(ft_use)+" is not completed")
-        
-                        i += 1
+                            print(str(mdl) + " - " + str(ft_use) + " Full_Heatmaps not started")
                         os.chdir('..')
                     else:
                         print(str(mdl)+" - "+str(ft_use)+" not started")

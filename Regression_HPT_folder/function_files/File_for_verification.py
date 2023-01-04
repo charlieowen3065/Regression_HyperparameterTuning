@@ -74,6 +74,7 @@ sigF_input_data = (0.1, 100)
 length_input_data = (0.001, 10)
 alpha_input_data = (0.001, 10)
 
+"""
 os.chdir('../../new_AL_folder')
 folder_name = 'SVM_Linear_Tests_2'
 if folder_name in os.listdir():
@@ -96,7 +97,7 @@ ht2 = heatmaps(X1, Y, Nk=Nk, N=N,
 
 storage_df = ht2.runActiveLearning()
 
-
+"""
 
 
 
@@ -144,7 +145,7 @@ Alpha = 1
 #                 noise=Noise, sigma_F=SigmaF, scale_length=Scale_Length, alpha=Alpha,
 #                 Nk=5, N=1, goodIDs=goodIDs, seed=seed, RemoveNaN=True, StandardizeX=True, models_use=models_use,
 #                 giveKFdata=True)
-"""
+
 hp_list = temp_hp_list[model_num]
 reg = Regression(X1, Y,
                  C=hp_list[0], epsilon=hp_list[1], gamma=hp_list[2], coef0=hp_list[3],
@@ -166,7 +167,7 @@ df.iloc[:, 2] = kFold_data['ts']['results']['variation_#1']['rmse']
 df.iloc[:, 3] = kFold_data['ts']['results']['variation_#1']['r2']
 df.iloc[:, 4] = [1/ratio_value, 'RMSE', results['rmse'].iloc[0,0], 'R2', results['r2'].iloc[0,0]]
 df.to_csv(filename)
-"""
+
 
 """
 rmse_temp = results['rmse'].loc[model_name_use]
