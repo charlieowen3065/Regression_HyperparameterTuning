@@ -4915,6 +4915,219 @@ class heatmaps():
                     os.chdir('..')
                 os.chdir('..')
 
+    def find_new_grids_GS(self, storage_df, ranges):
+        model_type = self.model_type
+        gridLength = self.gridLength_GS
+        dec = self.decimal_point_GS
+
+        list_of_new_grids = []
+        list_of_gL = []
+
+        if model_type == 'SVM_Type1':
+            point_list = []
+            for pt in range(self.numZooms_GS):
+                top_data = storage_df.iloc[pt, :]
+                C = top_data['C']
+                e = top_data['Epsilon']
+
+                point_list.append([C, e])
+
+            C_mvmnt = ((ranges[0][0] - ranges[0][1]) * np.sqrt(dec)) / 2
+            e_mvmnt = ((ranges[1][0] - ranges[1][1]) * np.sqrt(dec)) / 2
+
+            for pt in point_list:
+                C = pt[0]
+                e = pt[1]
+
+                C_max = C + C_mvmnt
+                C_min = C - C_mvmnt
+                if C_min < 0:
+                    C_min = self.C_input[1] / 10
+
+                e_max = e + e_mvmnt
+                e_min = e - e_mvmnt
+                if e_min < 0:
+                    e_min = self.epsilon_input[1] / 10
+
+                new_grid = [(C_max, C_min), (e_max, e_min)]
+
+                list_of_new_grids.append(new_grid)
+                list_of_gL.append(gridLength)
+
+        if model_type == 'SVM_Type2':
+            point_list = []
+            for pt in range(self.numZooms_GS):
+                top_data = storage_df.iloc[pt, :]
+                C = top_data['C']
+                e = top_data['Epsilon']
+                g = top_data['Gamma']
+
+                point_list.append([C, e, g])
+
+            C_mvmnt = ((ranges[0][0] - ranges[0][1]) * np.sqrt(dec)) / 2
+            e_mvmnt = ((ranges[1][0] - ranges[1][1]) * np.sqrt(dec)) / 2
+            g_mvmnt = ((ranges[2][0] - ranges[2][1]) * np.sqrt(dec)) / 2
+
+            for pt in point_list:
+                C = pt[0]
+                e = pt[1]
+                g = pt[2]
+
+                C_max = C + C_mvmnt
+                C_min = C - C_mvmnt
+                if C_min < 0:
+                    C_min = self.C_input[1] / 10
+
+                e_max = e + e_mvmnt
+                e_min = e - e_mvmnt
+                if e_min < 0:
+                    e_min = self.epsilon_input[1] / 10
+
+                g_max = g + g_mvmnt
+                g_min = g - g_mvmnt
+                if g_min < 0:
+                    g_min = self.gamma_input[1] / 10
+
+                new_grid = [(C_max, C_min), (e_max, e_min), (g_max, g_min)]
+
+                list_of_new_grids.append(new_grid)
+                list_of_gL.append(gridLength)
+
+        if model_type == 'SVM_Type3':
+            point_list = []
+            for pt in range(self.numZooms_GS):
+                top_data = storage_df.iloc[pt, :]
+                C = top_data['C']
+                e = top_data['Epsilon']
+                g = top_data['Gamma']
+                c0 = top_data['Coef0']
+
+                point_list.append([C, e, g, c0])
+
+            C_mvmnt = ((ranges[0][0] - ranges[0][1]) * np.sqrt(dec)) / 2
+            e_mvmnt = ((ranges[1][0] - ranges[1][1]) * np.sqrt(dec)) / 2
+            g_mvmnt = ((ranges[2][0] - ranges[2][1]) * np.sqrt(dec)) / 2
+            c0_mvmnt = ((ranges[3][0] - ranges[3][1]) * np.sqrt(dec)) / 2
+
+            for pt in point_list:
+                C = pt[0]
+                e = pt[1]
+                g = pt[2]
+                c0 = pt[3]
+
+                C_max = C + C_mvmnt
+                C_min = C - C_mvmnt
+                if C_min < 0:
+                    C_min = self.C_input[1] / 10
+
+                e_max = e + e_mvmnt
+                e_min = e - e_mvmnt
+                if e_min < 0:
+                    e_min = self.epsilon_input[1] / 10
+
+                g_max = g + g_mvmnt
+                g_min = g - g_mvmnt
+                if g_min < 0:
+                    g_min = self.gamma_input[1] / 10
+
+                c0_max = c0 + c0_mvmnt
+                c0_min = c0 - c0_mvmnt
+                if c0_min < 0:
+                    c0_min = self.coef0_input[1] / 10
+
+                new_grid = [(C_max, C_min), (e_max, e_min), (g_max, g_min), (c0_max, c0_min)]
+
+                list_of_new_grids.append(new_grid)
+                list_of_gL.append(gridLength)
+
+        if model_type == 'GPR_Type1':
+            point_list = []
+            for pt in range(self.numZooms_GS):
+                top_data = storage_df.iloc[pt, :]
+                noise = top_data['Noise']
+                sigmaF = top_data['SigmaF']
+                L = top_data['Length']
+
+                point_list.append([noise, sigmaF, L])
+
+            n_mvmnt = ((ranges[0][0] - ranges[0][1]) * np.sqrt(dec)) / 2
+            s_mvmnt = ((ranges[1][0] - ranges[1][1]) * np.sqrt(dec)) / 2
+            l_mvmnt = ((ranges[2][0] - ranges[2][1]) * np.sqrt(dec)) / 2
+
+            for pt in point_list:
+                n = pt[0]
+                s = pt[1]
+                l = pt[2]
+
+                n_max = n + n_mvmnt
+                n_min = n - n_mvmnt
+                if n_min < 0:
+                    n_min = self.noise_input[1] / 10
+
+                s_max = s + s_mvmnt
+                s_min = s - s_mvmnt
+                if s_min < 0:
+                    s_min = self.sigmaF_input[1] / 10
+
+                l_max = l + l_mvmnt
+                l_min = l - l_mvmnt
+                if l_min < 0:
+                    l_min = self.length_input[1] / 10
+
+                new_grid = [(n_max, n_min), (s_max, s_min), (l_max, l_min)]
+
+                list_of_new_grids.append(new_grid)
+                list_of_gL.append(gridLength)
+
+        if model_type == 'GPR_Type2':
+            point_list = []
+            for pt in range(self.numZooms_GS):
+                top_data = storage_df.iloc[pt, :]
+                noise = top_data['Noise']
+                sigmaF = top_data['SigmaF']
+                L = top_data['Length']
+                alpha = top_data['Alpha']
+
+                point_list.append([noise, sigmaF, L, alpha])
+
+            n_mvmnt = ((ranges[0][0] - ranges[0][1]) * np.sqrt(dec)) / 2
+            s_mvmnt = ((ranges[1][0] - ranges[1][1]) * np.sqrt(dec)) / 2
+            l_mvmnt = ((ranges[2][0] - ranges[2][1]) * np.sqrt(dec)) / 2
+            a_mvmnt = ((ranges[3][0] - ranges[3][1]) * np.sqrt(dec)) / 2
+
+            for pt in point_list:
+                n = pt[0]
+                s = pt[1]
+                l = pt[2]
+                a = pt[3]
+
+                n_max = n + n_mvmnt
+                n_min = n - n_mvmnt
+                if n_min < 0:
+                    n_min = self.noise_input[1] / 10
+
+                s_max = s + s_mvmnt
+                s_min = s - s_mvmnt
+                if s_min < 0:
+                    s_min = self.sigmaF_input[1] / 10
+
+                l_max = l + l_mvmnt
+                l_min = l - l_mvmnt
+                if l_min < 0:
+                    l_min = self.length_input[1] / 10
+
+                a_max = a + a_mvmnt
+                a_min = a - a_mvmnt
+                if a_min < 0:
+                    a_min = self.alpha_input[1] / 10
+
+                new_grid = [(n_max, n_min), (s_max, s_min), (l_max, l_min), (a_max, a_min)]
+
+                list_of_new_grids.append(new_grid)
+                list_of_gL.append(gridLength)
+
+        return list_of_new_grids, list_of_gL
+
     #def intake_GS_dataframe(self, storage_df):
 
     def runActiveLearning(self):
@@ -4989,7 +5202,7 @@ class heatmaps():
 
                 np_arrays, storage_df = self.run_single_gridSearch(ranges_use, gridLength_use, figure_names_list[fig_idx])
                 self.create_heatmap_from_np_arrays(np_arrays, ranges_use, gridLength_use, figure_names_list[fig_idx])
-                list_of_range_points, list_of_gL = self.intake_dataframe_and_determine_new_grid_points(storage_df)
+                list_of_range_points, list_of_gL = self.find_new_grids_GS(storage_df, ranges_use)
 
                 for range_pt in list_of_range_points:
                     list_of_ranges_for_next_layer.append(range_pt)
@@ -5006,6 +5219,7 @@ class heatmaps():
 
             unsorted_df_int = pd.concat([unsorted_df_int, df_storage[i]], axis=0)
 
+        unsorted_df_int.to_csv("0_Unsorted_Data_"+self.mdl_name+".csv")
         sorted_df = unsorted_df_int.sort_values(by=["RMSE"], ascending=True)
         sorted_df_cutoff = sorted_df.iloc[0:50, :]
         sorted_filename = "0_Sorted_Data_"+self.mdl_name+".csv"
