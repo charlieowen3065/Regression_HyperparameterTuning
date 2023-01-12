@@ -94,16 +94,35 @@ class heatmaps():
 
         self.model_type = self.determine_model_type()
 
+        self.full_ranges = []
+        self.norm_type = 'norm1'
+
         if self.model_type == 'SVM_Type1':
             numHPs = 2
+            self.full_ranges.append((C_input[0]-C_input[1]))
+            self.full_ranges.append((epsilon_input[0] - epsilon_input[1]))
         elif self.model_type == 'SVM_Type2':
             numHPs = 3
+            self.full_ranges.append((C_input[0] - C_input[1]))
+            self.full_ranges.append((epsilon_input[0] - epsilon_input[1]))
+            self.full_ranges.append((gamma_input[0] - gamma_input[1]))
         elif self.model_type == 'SVM_Type3':
             numHPs = 4
+            self.full_ranges.append((C_input[0] - C_input[1]))
+            self.full_ranges.append((epsilon_input[0] - epsilon_input[1]))
+            self.full_ranges.append((gamma_input[0] - gamma_input[1]))
+            self.full_ranges.append((coef0_input[0] - coef0_input[1]))
         elif self.model_type == 'GPR_Type1':
             numHPs = 3
+            self.full_ranges.append((noise_input[0] - noise_input[1]))
+            self.full_ranges.append((sigmaF_input[0] - sigmaF_input[1]))
+            self.full_ranges.append((length_input[0] - length_input[1]))
         elif self.model_type == 'GPR_Type2':
             numHPs = 4
+            self.full_ranges.append((noise_input[0] - noise_input[1]))
+            self.full_ranges.append((sigmaF_input[0] - sigmaF_input[1]))
+            self.full_ranges.append((length_input[0] - length_input[1]))
+            self.full_ranges.append((alpha_input[0] - alpha_input[1]))
 
         # PART III
         self.num_new_calc_points = int(((self.gridLength_AL)**(numHPs))*self.decimal_points_top)
@@ -487,7 +506,6 @@ class heatmaps():
                         print("Count: "+str(count)+" / "+str(Npts_int_calc))
 
             model_data = self.combine_model_data(model_data_int, [model_inputs_new, model_outputs_new])
-            return model_data, int_array
 
         elif model_type == 'SVM_Type2':
             # Initialize Ranges
@@ -542,7 +560,6 @@ class heatmaps():
                             print("Count: " + str(count) + " / " + str(Npts_int_calc))
 
             model_data = self.combine_model_data(model_data_int, [model_inputs_new, model_outputs_new])
-            return model_data, int_array
 
         elif model_type == 'SVM_Type3':
             # Initialize Ranges
@@ -602,7 +619,6 @@ class heatmaps():
                                 print("Count: " + str(count) + " / " + str(Npts_int_calc))
 
             model_data = self.combine_model_data(model_data_int, [model_inputs_new, model_outputs_new])
-            return model_data, int_array
 
         elif model_type == 'GPR_Type1':
             # Initialize Ranges
@@ -657,7 +673,6 @@ class heatmaps():
                             print("Count: " + str(count) + " / " + str(Npts_int_calc))
 
             model_data = self.combine_model_data(model_data_int, [model_inputs_new, model_outputs_new])
-            return model_data, int_array
 
         elif model_type == 'GPR_Type2':
             # Initialize Ranges
@@ -717,10 +732,12 @@ class heatmaps():
                                 print("Count: " + str(count) + " / " + str(Npts_int_calc))
 
             model_data = self.combine_model_data(model_data_int, [model_inputs_new, model_outputs_new])
-            return model_data, int_array
 
         else:
             print("Error in Model-Type: ", model_type)
+            return
+
+        return model_data, int_array
 
     def PartII_predictions(self, ranges, model_int, model_data, run_number):
         """ Method """
@@ -2034,10 +2051,10 @@ class heatmaps():
                         count += 1
                         print("initial Count: " + str(count) + " / " + str(Npts_int_calc))
 
-            kernel_1 = RationalQuadratic()
-            kernel_2 = RBF()
-            kernel_3 = Matern(nu=3 / 2)
-            kernel_4 = Matern(nu=5 / 2)
+            kernel_1 = RationalQuadratic(alpha_bounds='fixed', length_scale_bounds='fixed')
+            kernel_2 = RBF(length_scale_bounds='fixed')
+            kernel_3 = Matern(nu=3 / 2, length_scale_bounds='fixed')
+            kernel_4 = Matern(nu=5 / 2, length_scale_bounds='fixed')
 
             model_1 = gaussian_process.GaussianProcessRegressor(kernel=kernel_1, copy_X_train=False)
             model_2 = gaussian_process.GaussianProcessRegressor(kernel=kernel_2, copy_X_train=False)
@@ -3890,6 +3907,38 @@ class heatmaps():
         else:
             print("Error in Model-Type: ", model_type)
 
+    def normailze_data_from_model(self, model_inputs_int):
+        model_type = self.model_type
+        Npts = len(model_inputs_int[:, 0])
+        Ninpts = len(model_inputs_int[0, :])
+
+        norm1 = np.zeros((Npts, Ninpts))
+        norm2 = np.zeros((Npts, Ninpts))
+
+        if model_type == "SVM_Type1":
+            C_std = np.std(model_inputs_int[:, 0])
+            C_mean = np.mean(model_inputs_int[:, 0])
+            C_range = self.full_ranges[0]
+
+            e_std = np.std(model_inputs_int[:, 1])
+            e_mean = np.mean(model_inputs_int[:, 1])
+            e_range = self.full_ranges[1]
+
+            for i in range(Npts):
+                C_int = model_inputs_int[i, 0]
+                e_int = model_inputs_int[i, 1]
+
+                C_norm1 = (C_int - C_std) / C_mean
+                e_norm1 = (e_int - e_std) / e_mean
+
+                C_norm2 = C_int / C_range
+                e_norm2 = e_int / e_range
+
+                norm1[i, :] = [C_norm1, e_norm1]
+                norm2[i, :] = [C_norm2, e_norm2]
+
+        return norm1, norm2
+
 
     def high_density_calculations(self, HP_vertex_list, model, model_data, run_number, stor_num_counter):
         """ Method """
@@ -4932,8 +4981,8 @@ class heatmaps():
 
                 point_list.append([C, e])
 
-            C_mvmnt = ((ranges[0][0] - ranges[0][1]) * np.sqrt(dec)) / 2
-            e_mvmnt = ((ranges[1][0] - ranges[1][1]) * np.sqrt(dec)) / 2
+            C_mvmnt = ((ranges[0][1] - ranges[0][0]) * np.sqrt(dec)) / 2
+            e_mvmnt = ((ranges[1][1] - ranges[1][0]) * np.sqrt(dec)) / 2
 
             for pt in point_list:
                 C = pt[0]
@@ -4942,12 +4991,12 @@ class heatmaps():
                 C_max = C + C_mvmnt
                 C_min = C - C_mvmnt
                 if C_min < 0:
-                    C_min = self.C_input[1] / 10
+                    C_min = self.C_input[0] / 10
 
                 e_max = e + e_mvmnt
                 e_min = e - e_mvmnt
                 if e_min < 0:
-                    e_min = self.epsilon_input[1] / 10
+                    e_min = self.epsilon_input[0] / 10
 
                 new_grid = [(C_max, C_min), (e_max, e_min)]
 
@@ -4964,9 +5013,9 @@ class heatmaps():
 
                 point_list.append([C, e, g])
 
-            C_mvmnt = ((ranges[0][0] - ranges[0][1]) * np.sqrt(dec)) / 2
-            e_mvmnt = ((ranges[1][0] - ranges[1][1]) * np.sqrt(dec)) / 2
-            g_mvmnt = ((ranges[2][0] - ranges[2][1]) * np.sqrt(dec)) / 2
+            C_mvmnt = ((ranges[0][1] - ranges[0][0]) * np.sqrt(dec)) / 2
+            e_mvmnt = ((ranges[1][1] - ranges[1][0]) * np.sqrt(dec)) / 2
+            g_mvmnt = ((ranges[2][1] - ranges[2][0]) * np.sqrt(dec)) / 2
 
             for pt in point_list:
                 C = pt[0]
@@ -4976,17 +5025,17 @@ class heatmaps():
                 C_max = C + C_mvmnt
                 C_min = C - C_mvmnt
                 if C_min < 0:
-                    C_min = self.C_input[1] / 10
+                    C_min = self.C_input[0] / 10
 
                 e_max = e + e_mvmnt
                 e_min = e - e_mvmnt
                 if e_min < 0:
-                    e_min = self.epsilon_input[1] / 10
+                    e_min = self.epsilon_input[0] / 10
 
                 g_max = g + g_mvmnt
                 g_min = g - g_mvmnt
                 if g_min < 0:
-                    g_min = self.gamma_input[1] / 10
+                    g_min = self.gamma_input[0] / 10
 
                 new_grid = [(C_max, C_min), (e_max, e_min), (g_max, g_min)]
 
@@ -5004,10 +5053,10 @@ class heatmaps():
 
                 point_list.append([C, e, g, c0])
 
-            C_mvmnt = ((ranges[0][0] - ranges[0][1]) * np.sqrt(dec)) / 2
-            e_mvmnt = ((ranges[1][0] - ranges[1][1]) * np.sqrt(dec)) / 2
-            g_mvmnt = ((ranges[2][0] - ranges[2][1]) * np.sqrt(dec)) / 2
-            c0_mvmnt = ((ranges[3][0] - ranges[3][1]) * np.sqrt(dec)) / 2
+            C_mvmnt = ((ranges[0][1] - ranges[0][0]) * np.sqrt(dec)) / 2
+            e_mvmnt = ((ranges[1][1] - ranges[1][0]) * np.sqrt(dec)) / 2
+            g_mvmnt = ((ranges[2][1] - ranges[2][0]) * np.sqrt(dec)) / 2
+            c0_mvmnt = ((ranges[3][1] - ranges[3][0]) * np.sqrt(dec)) / 2
 
             for pt in point_list:
                 C = pt[0]
@@ -5018,22 +5067,22 @@ class heatmaps():
                 C_max = C + C_mvmnt
                 C_min = C - C_mvmnt
                 if C_min < 0:
-                    C_min = self.C_input[1] / 10
+                    C_min = self.C_input[0] / 10
 
                 e_max = e + e_mvmnt
                 e_min = e - e_mvmnt
                 if e_min < 0:
-                    e_min = self.epsilon_input[1] / 10
+                    e_min = self.epsilon_input[0] / 10
 
                 g_max = g + g_mvmnt
                 g_min = g - g_mvmnt
                 if g_min < 0:
-                    g_min = self.gamma_input[1] / 10
+                    g_min = self.gamma_input[0] / 10
 
                 c0_max = c0 + c0_mvmnt
                 c0_min = c0 - c0_mvmnt
                 if c0_min < 0:
-                    c0_min = self.coef0_input[1] / 10
+                    c0_min = self.coef0_input[0] / 10
 
                 new_grid = [(C_max, C_min), (e_max, e_min), (g_max, g_min), (c0_max, c0_min)]
 
@@ -5050,9 +5099,9 @@ class heatmaps():
 
                 point_list.append([noise, sigmaF, L])
 
-            n_mvmnt = ((ranges[0][0] - ranges[0][1]) * np.sqrt(dec)) / 2
-            s_mvmnt = ((ranges[1][0] - ranges[1][1]) * np.sqrt(dec)) / 2
-            l_mvmnt = ((ranges[2][0] - ranges[2][1]) * np.sqrt(dec)) / 2
+            n_mvmnt = ((ranges[0][1] - ranges[0][0]) * np.sqrt(dec)) / 2
+            s_mvmnt = ((ranges[1][1] - ranges[1][0]) * np.sqrt(dec)) / 2
+            l_mvmnt = ((ranges[2][1] - ranges[2][0]) * np.sqrt(dec)) / 2
 
             for pt in point_list:
                 n = pt[0]
@@ -5062,17 +5111,17 @@ class heatmaps():
                 n_max = n + n_mvmnt
                 n_min = n - n_mvmnt
                 if n_min < 0:
-                    n_min = self.noise_input[1] / 10
+                    n_min = self.noise_input[0] / 10
 
                 s_max = s + s_mvmnt
                 s_min = s - s_mvmnt
                 if s_min < 0:
-                    s_min = self.sigmaF_input[1] / 10
+                    s_min = self.sigmaF_input[0] / 10
 
                 l_max = l + l_mvmnt
                 l_min = l - l_mvmnt
                 if l_min < 0:
-                    l_min = self.length_input[1] / 10
+                    l_min = self.length_input[0] / 10
 
                 new_grid = [(n_max, n_min), (s_max, s_min), (l_max, l_min)]
 
@@ -5090,10 +5139,10 @@ class heatmaps():
 
                 point_list.append([noise, sigmaF, L, alpha])
 
-            n_mvmnt = ((ranges[0][0] - ranges[0][1]) * np.sqrt(dec)) / 2
-            s_mvmnt = ((ranges[1][0] - ranges[1][1]) * np.sqrt(dec)) / 2
-            l_mvmnt = ((ranges[2][0] - ranges[2][1]) * np.sqrt(dec)) / 2
-            a_mvmnt = ((ranges[3][0] - ranges[3][1]) * np.sqrt(dec)) / 2
+            n_mvmnt = ((ranges[0][1] - ranges[0][0]) * np.sqrt(dec)) / 2
+            s_mvmnt = ((ranges[1][1] - ranges[1][0]) * np.sqrt(dec)) / 2
+            l_mvmnt = ((ranges[2][1] - ranges[2][0]) * np.sqrt(dec)) / 2
+            a_mvmnt = ((ranges[3][1] - ranges[3][0]) * np.sqrt(dec)) / 2
 
             for pt in point_list:
                 n = pt[0]
@@ -5104,22 +5153,22 @@ class heatmaps():
                 n_max = n + n_mvmnt
                 n_min = n - n_mvmnt
                 if n_min < 0:
-                    n_min = self.noise_input[1] / 10
+                    n_min = self.noise_input[0] / 10
 
                 s_max = s + s_mvmnt
                 s_min = s - s_mvmnt
                 if s_min < 0:
-                    s_min = self.sigmaF_input[1] / 10
+                    s_min = self.sigmaF_input[0] / 10
 
                 l_max = l + l_mvmnt
                 l_min = l - l_mvmnt
                 if l_min < 0:
-                    l_min = self.length_input[1] / 10
+                    l_min = self.length_input[0] / 10
 
                 a_max = a + a_mvmnt
                 a_min = a - a_mvmnt
                 if a_min < 0:
-                    a_min = self.alpha_input[1] / 10
+                    a_min = self.alpha_input[0] / 10
 
                 new_grid = [(n_max, n_min), (s_max, s_min), (l_max, l_min), (a_max, a_min)]
 
@@ -5230,5 +5279,300 @@ class heatmaps():
         return df_storage_sorted_final
 
 
+    """ RAMAKE SOME FUNCTIONS """
+    
+    def Part_I_Initial_Calculations_REMAKE(self, ranges, model_data_int):
+        # INPUTS FROM CLASS ATRIBUTES ----------------------------------------------------------------------------------
+        X_use = self.X_inp
+        Y_use = self.Y_inp
+        removeNaN_var = self.RemoveNaN_var
+        goodIDs = self.goodIDs
+        seed = self.seed
+        models_use = self.models_use
+        mdl_name = self.mdl_name
+        decimal_points_int = self.decimal_points_int
+        gridLength = self.gridLength_AL
+        model_type = self.model_type
 
+        print("Part I -- Started")
+
+        if model_type == 'SVM_Type1':
+            # Initialize Ranges
+            num_HPs = 2
+            C_range = ranges[0]
+            epsilon_range = ranges[1]
+            numC = len(C_range)
+            numE = len(epsilon_range)
+            # Getting index points
+            Npts = numC * numE
+            indices = np.linspace(0, gridLength - 1, int((Npts * decimal_points_int) ** (1 / num_HPs)),
+                                  dtype=int)
+            points = [(i, j) for i in indices for j in indices]
+            Npts_int_calc = len(points)
+
+            model_inputs_new = np.zeros((Npts_int_calc, 2))
+            model_outputs_new = np.zeros((Npts_int_calc, 1))
+
+            int_array = np.zeros((numC, numE))
+
+            # Running All Combinations
+            count = 0
+            for C_idx in range(numC):
+                C = C_range[C_idx]
+                for e_idx in range(numE):
+                    epsilon = epsilon_range[e_idx]
+
+                    index_current = tuple((C_idx, e_idx))
+                    if index_current in points:
+                        reg = Regression(X_use, Y_use,
+                                         C=C, epsilon=epsilon,
+                                         Nk=5, N=1, goodIDs=goodIDs, seed=seed,
+                                         RemoveNaN=removeNaN_var, StandardizeX=True, models_use=models_use,
+                                         giveKFdata=True)
+                        results, bestPred, kFold_data = reg.RegressionCVMult()
+
+                        error = float(results['rmse'].loc[str(mdl_name)])
+
+                        model_inputs_new[count, 0] = C
+                        model_inputs_new[count, 1] = epsilon
+                        model_outputs_new[count, 0] = error
+
+                        int_array[C_idx, e_idx] = error
+
+                        count += 1
+                        print("Count: " + str(count) + " / " + str(Npts_int_calc))
+
+            model_data = self.combine_model_data(model_data_int, [model_inputs_new, model_outputs_new])
+
+        elif model_type == 'SVM_Type2':
+            # Initialize Ranges
+            num_HPs = 3
+            C_range = ranges[0]
+            epsilon_range = ranges[1]
+            gamma_range = ranges[2]
+            numC = len(C_range)
+            numE = len(epsilon_range)
+            numG = len(gamma_range)
+
+            # Getting index points
+            Npts = numC * numE * numG
+            indices = np.linspace(0, gridLength - 1, int((Npts * decimal_points_int) ** (1 / num_HPs)),
+                                  dtype=int)
+            points = [(i, j, k) for i in indices for j in indices for k in indices]
+            Npts_int_calc = len(points)
+
+            model_inputs_new = np.zeros((Npts_int_calc, 3))
+            model_outputs_new = np.zeros((Npts_int_calc, 1))
+
+            int_array = np.zeros((numC, numE, numG))
+
+            # Running All Combinations
+            count = 0
+            for C_idx in range(numC):
+                C = C_range[C_idx]
+                for e_idx in range(numE):
+                    epsilon = epsilon_range[e_idx]
+                    for g_idx in range(numG):
+                        gamma = gamma_range[g_idx]
+
+                        index_current = tuple((C_idx, e_idx, g_idx))
+                        if index_current in points:
+                            reg = Regression(X_use, Y_use,
+                                             C=C, epsilon=epsilon, gamma=gamma,
+                                             Nk=5, N=1, goodIDs=goodIDs, seed=seed,
+                                             RemoveNaN=removeNaN_var, StandardizeX=True, models_use=models_use,
+                                             giveKFdata=True)
+                            results, bestPred, kFold_data = reg.RegressionCVMult()
+
+                            error = float(results['rmse'].loc[str(mdl_name)])
+
+                            model_inputs_new[count, 0] = C
+                            model_inputs_new[count, 1] = epsilon
+                            model_inputs_new[count, 2] = gamma
+                            model_outputs_new[count, 0] = error
+
+                            int_array[C_idx, e_idx, g_idx] = error
+
+                            count += 1
+                            print("Count: " + str(count) + " / " + str(Npts_int_calc))
+
+            model_data = self.combine_model_data(model_data_int, [model_inputs_new, model_outputs_new])
+
+        elif model_type == 'SVM_Type3':
+            # Initialize Ranges
+            num_HPs = 4
+            C_range = ranges[0]
+            epsilon_range = ranges[1]
+            gamma_range = ranges[2]
+            coef0_range = ranges[3]
+            numC = len(C_range)
+            numE = len(epsilon_range)
+            numG = len(gamma_range)
+            numC0 = len(coef0_range)
+
+            # Getting index points
+            Npts = numC * numE * numG * numC0
+            indices = np.linspace(0, gridLength - 1, int((Npts * decimal_points_int) ** (1 / num_HPs)),
+                                  dtype=int)
+            points = [(i, j, k, m) for i in indices for j in indices for k in indices for m in indices]
+            Npts_int_calc = len(points)
+
+            model_inputs_new = np.zeros((Npts_int_calc, 4))
+            model_outputs_new = np.zeros((Npts_int_calc, 1))
+
+            int_array = np.zeros((numC, numE, numG, numC0))
+
+            # Running All Combinations
+            count = 0
+            for C_idx in range(numC):
+                C = C_range[C_idx]
+                for e_idx in range(numE):
+                    epsilon = epsilon_range[e_idx]
+                    for g_idx in range(numG):
+                        gamma = gamma_range[g_idx]
+                        for c0_idx in range(numC0):
+                            c0 = coef0_range[c0_idx]
+
+                            index_current = tuple((C_idx, e_idx, g_idx))
+                            if index_current in points:
+                                reg = Regression(X_use, Y_use,
+                                                 C=C, epsilon=epsilon, gamma=gamma,
+                                                 Nk=5, N=1, goodIDs=goodIDs, seed=seed,
+                                                 RemoveNaN=removeNaN_var, StandardizeX=True, models_use=models_use,
+                                                 giveKFdata=True)
+                                results, bestPred, kFold_data = reg.RegressionCVMult()
+
+                                error = float(results['rmse'].loc[str(mdl_name)])
+
+                                model_inputs_new[count, 0] = C
+                                model_inputs_new[count, 1] = epsilon
+                                model_inputs_new[count, 2] = gamma
+                                model_inputs_new[count, 3] = c0
+                                model_outputs_new[count, 0] = error
+
+                                int_array[C_idx, e_idx, c0_idx] = error
+
+                                count += 1
+                                print("Count: " + str(count) + " / " + str(Npts_int_calc))
+
+            model_data = self.combine_model_data(model_data_int, [model_inputs_new, model_outputs_new])
+
+        elif model_type == 'GPR_Type1':
+            # Initialize Ranges
+            num_HPs = 3
+            noise_range = ranges[0]
+            sigmaF_range = ranges[1]
+            length_range = ranges[2]
+            numN = len(noise_range)
+            numS = len(sigmaF_range)
+            numL = len(length_range)
+
+            # Getting index points
+            Npts = numN * numS * numL
+            indices = np.linspace(0, gridLength - 1, int((Npts * decimal_points_int) ** (1 / num_HPs)),
+                                  dtype=int)
+            points = [(i, j, k) for i in indices for j in indices for k in indices]
+            Npts_int_calc = len(points)
+
+            model_inputs_new = np.zeros((Npts_int_calc, 3))
+            model_outputs_new = np.zeros((Npts_int_calc, 1))
+
+            int_array = np.zeros((numN, numS, numL))
+
+            # Running All Combinations
+            count = 0
+            for n_idx in range(numN):
+                noise = noise_range[n_idx]
+                for s_idx in range(numS):
+                    sigmaF = sigmaF_range[s_idx]
+                    for l_idx in range(numL):
+                        scale_length = length_range[l_idx]
+
+                        index_current = tuple((n_idx, s_idx, l_idx))
+                        if index_current in points:
+                            reg = Regression(X_use, Y_use,
+                                             noise=noise, sigma_F=sigmaF, scale_length=scale_length,
+                                             Nk=5, N=1, goodIDs=goodIDs, seed=seed,
+                                             RemoveNaN=removeNaN_var, StandardizeX=True, models_use=models_use,
+                                             giveKFdata=True)
+                            results, bestPred, kFold_data = reg.RegressionCVMult()
+
+                            error = float(results['rmse'].loc[str(mdl_name)])
+
+                            model_inputs_new[count, 0] = noise
+                            model_inputs_new[count, 1] = sigmaF
+                            model_inputs_new[count, 2] = scale_length
+                            model_outputs_new[count, 0] = error
+
+                            int_array[n_idx, s_idx, l_idx] = error
+
+                            count += 1
+                            print("Count: " + str(count) + " / " + str(Npts_int_calc))
+
+            model_data = self.combine_model_data(model_data_int, [model_inputs_new, model_outputs_new])
+
+        elif model_type == 'GPR_Type2':
+            # Initialize Ranges
+            num_HPs = 4
+            noise_range = ranges[0]
+            sigmaF_range = ranges[1]
+            length_range = ranges[2]
+            alpha_range = ranges[3]
+            numN = len(noise_range)
+            numS = len(sigmaF_range)
+            numL = len(length_range)
+            numA = len(alpha_range)
+
+            # Getting index points
+            Npts = numN * numS * numL * numA
+            indices = np.linspace(0, gridLength - 1, int((Npts * decimal_points_int) ** (1 / num_HPs)),
+                                  dtype=int)
+            points = [(i, j, k) for i in indices for j in indices for k in indices]
+            Npts_int_calc = len(points)
+
+            model_inputs_new = np.zeros((Npts_int_calc, 4))
+            model_outputs_new = np.zeros((Npts_int_calc, 1))
+
+            int_array = np.zeros((numN, numS, numL))
+
+            # Running All Combinations
+            count = 0
+            for n_idx in range(numN):
+                noise = noise_range[n_idx]
+                for s_idx in range(numS):
+                    sigmaF = sigmaF_range[s_idx]
+                    for l_idx in range(numL):
+                        scale_length = length_range[l_idx]
+                        for a_idx in range(numA):
+                            alpha = alpha_range[a_idx]
+
+                            index_current = tuple((n_idx, s_idx, l_idx))
+                            if index_current in points:
+                                reg = Regression(X_use, Y_use,
+                                                 noise=noise, sigma_F=sigmaF, scale_length=scale_length,
+                                                 Nk=5, N=1, goodIDs=goodIDs, seed=seed,
+                                                 RemoveNaN=removeNaN_var, StandardizeX=True, models_use=models_use,
+                                                 giveKFdata=True)
+                                results, bestPred, kFold_data = reg.RegressionCVMult()
+
+                                error = float(results['rmse'].loc[str(mdl_name)])
+
+                                model_inputs_new[count, 0] = noise
+                                model_inputs_new[count, 1] = sigmaF
+                                model_inputs_new[count, 2] = scale_length
+                                model_inputs_new[count, 3] = alpha
+                                model_outputs_new[count, 0] = error
+
+                                int_array[n_idx, s_idx, l_idx, a_idx] = error
+
+                                count += 1
+                                print("Count: " + str(count) + " / " + str(Npts_int_calc))
+
+            model_data = self.combine_model_data(model_data_int, [model_inputs_new, model_outputs_new])
+
+        else:
+            print("Error in Model-Type: ", model_type)
+            return 
+
+        return model_data, int_array
 

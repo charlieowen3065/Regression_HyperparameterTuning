@@ -39,7 +39,7 @@ print("MAIN PATH: ", os.getcwd())
 class Regression():
     def __init__(self, X_inp, Y_inp,
                  C='default', epsilon='default', gamma=0.2, coef0=1, noise=0.5, sigma_F=0.1, scale_length=1, alpha=1,
-                 Nk=5, N=1, goodIDs=None, seed='random',
+                 Nk=5, N=1, goodIDs=None, seed='random', random_state=10,
                  RemoveNaN=True, StandardizeX=True, models_use='all', giveKFdata=False):
         """ INPUT VARIABLES """
         ################################################################################################################
@@ -118,6 +118,7 @@ class Regression():
         # MODELS -------------------------------------------------------------------------------------------------------
         self.Nk = Nk
         self.N = N
+        self.random_state = random_state
 
         self.models_use = models_use
         self.model_names, self.model_list = self.getModels()
@@ -189,25 +190,25 @@ class Regression():
         model_names.append('SVM_RBF')
         model_list.append(svm.SVR(kernel='rbf', C=self.C, gamma=self.gamma, epsilon=self.epsilon, coef0=self.coef0))
 
-        sig_F_sqrd = ConstantKernel(self.sigma_F ** 2)
-        noise = WhiteKernel(noise_level=self.noise)
-
         """ GAUSSIAN MODELS """
+        sig_F_sqrd = ConstantKernel(constant_value=self.sigma_F ** 2, constant_value_bounds='fixed')
+        noise = WhiteKernel(noise_level=self.noise, noise_level_bounds='fixed')
+
         model_names.append("GPR_RationalQuadratic")
-        kernel_use = (RationalQuadratic(length_scale=self.scale_length, alpha=self.alpha) * sig_F_sqrd) + noise
-        model_list.append(gaussian_process.GaussianProcessRegressor(kernel=kernel_use))
+        kernel_use = (RationalQuadratic(length_scale=self.scale_length, alpha=self.alpha, alpha_bounds='fixed', length_scale_bounds='fixed') * sig_F_sqrd) + noise
+        model_list.append(gaussian_process.GaussianProcessRegressor(kernel=kernel_use, random_state=self.random_state))
 
         model_names.append("GPR_RBF")
-        kernel_use = (RBF(length_scale=self.scale_length) * sig_F_sqrd) + noise
-        model_list.append(gaussian_process.GaussianProcessRegressor(kernel=kernel_use))
+        kernel_use = (RBF(length_scale=self.scale_length, length_scale_bounds='fixed') * sig_F_sqrd) + noise
+        model_list.append(gaussian_process.GaussianProcessRegressor(kernel=kernel_use, random_state=self.random_state))
 
         model_names.append("GPR_Matern32")
-        kernel_use = (Matern(nu=3 / 2, length_scale=self.scale_length) * sig_F_sqrd) + noise
-        model_list.append(gaussian_process.GaussianProcessRegressor(kernel=kernel_use))
+        kernel_use = (Matern(nu=3 / 2, length_scale=self.scale_length, length_scale_bounds='fixed') * sig_F_sqrd) + noise
+        model_list.append(gaussian_process.GaussianProcessRegressor(kernel=kernel_use, random_state=self.random_state))
 
         model_names.append("GPR_Matern52")
-        kernel_use = (Matern(nu=5 / 2, length_scale=self.scale_length) * sig_F_sqrd) + noise
-        model_list.append(gaussian_process.GaussianProcessRegressor(kernel=kernel_use))
+        kernel_use = (Matern(nu=5 / 2, length_scale=self.scale_length, length_scale_bounds='fixed') * sig_F_sqrd) + noise
+        model_list.append(gaussian_process.GaussianProcessRegressor(kernel=kernel_use, random_state=self.random_state))
 
         # CHECKS TO SEE WHICH MODELS TO USE IN THE RUN -----------------------------------------------------------------
         if self.models_use != 'all':

@@ -62,7 +62,7 @@ numLayers = 2
 numZooms = 2
 gridLength = 20
 # SVM
-C_input_data = (0.001, 100)
+C_input_data = (0.001, 0.01)
 C_range = np.linspace(C_input_data[0], C_input_data[1], gridLength)
 epsilon_input_data = (0.001, 0.01)
 epsilon_range = np.linspace(epsilon_input_data[0], epsilon_input_data[1], gridLength)
@@ -74,9 +74,9 @@ sigF_input_data = (0.1, 100)
 length_input_data = (0.001, 10)
 alpha_input_data = (0.001, 10)
 
-"""
+
 os.chdir('../../new_AL_folder')
-folder_name = 'SVM_Linear_Tests_2'
+folder_name = 'SVM_RBF_GS_Update'
 if folder_name in os.listdir():
     shutil.rmtree(folder_name)
 os.mkdir(folder_name)
@@ -86,18 +86,17 @@ print("HERE: ", os.getcwd())
 
 ht2 = heatmaps(X1, Y, Nk=Nk, N=N,
                 num_HP_zones_AL=2, num_runs_AL=2,
-                numLayers_GS=2, numZooms_GS=2,
-                gridLength_AL=10, gridLength_GS=5,
-                decimal_points_int=0.05, decimal_points_top=0.08,
+                numLayers_GS=3, numZooms_GS=2,
+                gridLength_AL=8, gridLength_GS=5,
+                decimal_points_int=0.05, decimal_points_top=0.1,
                 decimal_point_GS=0.1,
                 RemoveNaN=True, goodIDs=goodIDs, seed=seed, models_use=models_use,
                 save_csv_files=True,
-                C_input=C_input_data, epsilon_input=epsilon_input_data, gamma_input='None', coef0_input='None',
-                noise_input='None', sigmaF_input='None', length_input='None', alpha_input='None')
+                C_input='None', epsilon_input='None', gamma_input='None', coef0_input='None',
+                noise_input=noise_input_data, sigmaF_input=sigF_input_data, length_input=length_input_data, alpha_input='None')
 
 storage_df = ht2.runActiveLearning()
 
-"""
 
 
 
@@ -145,7 +144,7 @@ Alpha = 1
 #                 noise=Noise, sigma_F=SigmaF, scale_length=Scale_Length, alpha=Alpha,
 #                 Nk=5, N=1, goodIDs=goodIDs, seed=seed, RemoveNaN=True, StandardizeX=True, models_use=models_use,
 #                 giveKFdata=True)
-
+"""
 hp_list = temp_hp_list[model_num]
 reg = Regression(X1, Y,
                  C=hp_list[0], epsilon=hp_list[1], gamma=hp_list[2], coef0=hp_list[3],
@@ -167,7 +166,7 @@ df.iloc[:, 2] = kFold_data['ts']['results']['variation_#1']['rmse']
 df.iloc[:, 3] = kFold_data['ts']['results']['variation_#1']['r2']
 df.iloc[:, 4] = [1/ratio_value, 'RMSE', results['rmse'].iloc[0,0], 'R2', results['r2'].iloc[0,0]]
 df.to_csv(filename)
-
+"""
 
 """
 rmse_temp = results['rmse'].loc[model_name_use]
@@ -213,4 +212,9 @@ final_df.to_csv(filename)
 
 print("HERE: ", os.getcwd())
 """
+
+a = [1,  # test
+     2,
+     3]
+
 print('Completed')

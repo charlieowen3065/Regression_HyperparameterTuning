@@ -10,11 +10,12 @@ N = 1
 Nk = 5
 # Which properties to run
 #props_to_run = [0, 1, 2, 3, 4, 5, 6]
-props_to_run = [0, 3, 4, 5]
+#props_to_run = [0, 3, 4, 5]
+props_to_run = [0]
 prop_keys = ['RD', 'M', 'YS', 'WH', 'EF', 'UE', 'TS']
 # Which models to run
-models_to_run = [0, 3, 5, 6, 7]
-#models_to_run = [6]
+#models_to_run = [0, 3, 5, 6, 7]
+models_to_run = [5]
 #models_to_run = [3]
 # Which Features to input
 #feature_num = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]  # ALL DATA
