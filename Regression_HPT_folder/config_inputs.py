@@ -11,7 +11,7 @@ Nk = 5
 # Which properties to run
 #props_to_run = [0, 1, 2, 3, 4, 5, 6]
 #props_to_run = [0, 3, 4, 5]
-props_to_run = [0]
+props_to_run = [3]
 prop_keys = ['RD', 'M', 'YS', 'WH', 'EF', 'UE', 'TS']
 # Which models to run
 #models_to_run = [0, 3, 5, 6, 7]

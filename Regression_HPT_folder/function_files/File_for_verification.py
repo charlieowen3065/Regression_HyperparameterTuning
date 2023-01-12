@@ -36,13 +36,13 @@ X_list = feature_set_list['org'][prop_keys[property_num]]
 
 #X1 = np.concatenate((X_list[0], X_list[2]), axis=1)
 #X1 = np.concatenate((X1, parmData), axis=1)
-X1 = np.concatenate(X_list, axis=1)
+X1 = np.concatenate(X_list[0:4], axis=1)
 Y = property_data[:, property_num]
 goodIDs = goodId_org[:, property_num]
 sId_use = sId[goodIDs.astype(bool)]
 sTpInt_use = sTpInt[goodIDs.astype(bool)]
 
-mdl_num = 0
+mdl_num = 5
 
 mdl_SVM_linear = [1, 0, 0, 0, 0, 0, 0, 0]
 mdl_SVM_poly2 =  [0, 1, 0, 0, 0, 0, 0, 0]
@@ -74,7 +74,7 @@ sigF_input_data = (0.1, 100)
 length_input_data = (0.001, 10)
 alpha_input_data = (0.001, 10)
 
-
+"""
 os.chdir('../../new_AL_folder')
 folder_name = 'SVM_RBF_GS_Update'
 if folder_name in os.listdir():
@@ -97,7 +97,7 @@ ht2 = heatmaps(X1, Y, Nk=Nk, N=N,
 
 storage_df = ht2.runActiveLearning()
 
-
+"""
 
 
 #ht = heatmaps(X1, Y, numLayers=numLayers, numZooms=numZooms, Nk=5, N=1, gridLength=gridLength,
@@ -134,16 +134,19 @@ Gamma = 0.114004404100213
 Coef0 = 6.2102011915197
 
 Noise = 1
-SigmaF = 1
+SigmaF = 20
 Scale_Length = 1
 Alpha = 1
 
 
-#reg = Regression(X1, Y,
-#                 C=C, epsilon=Epsilon, gamma=Gamma, coef0=Coef0,
-#                 noise=Noise, sigma_F=SigmaF, scale_length=Scale_Length, alpha=Alpha,
-#                 Nk=5, N=1, goodIDs=goodIDs, seed=seed, RemoveNaN=True, StandardizeX=True, models_use=models_use,
-#                 giveKFdata=True)
+reg = Regression(X1, Y,
+                 C=C, epsilon=Epsilon, gamma=Gamma, coef0=Coef0,
+                 noise=Noise, sigma_F=SigmaF, scale_length=Scale_Length, alpha=Alpha,
+                 Nk=5, N=1, goodIDs=goodIDs, seed=seed, RemoveNaN=True, StandardizeX=True, models_use=models_use,
+                 giveKFdata=True, random_state=10)
+
+results, bestPred, kFold_data = reg.RegressionCVMult()
+
 """
 hp_list = temp_hp_list[model_num]
 reg = Regression(X1, Y,
@@ -213,8 +216,5 @@ final_df.to_csv(filename)
 print("HERE: ", os.getcwd())
 """
 
-a = [1,  # test
-     2,
-     3]
 
 print('Completed')
