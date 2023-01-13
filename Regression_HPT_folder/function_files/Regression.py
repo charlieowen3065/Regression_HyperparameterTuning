@@ -191,23 +191,23 @@ class Regression():
         model_list.append(svm.SVR(kernel='rbf', C=self.C, gamma=self.gamma, epsilon=self.epsilon, coef0=self.coef0))
 
         """ GAUSSIAN MODELS """
-        sig_F_sqrd = ConstantKernel(constant_value=self.sigma_F ** 2, constant_value_bounds='fixed')
-        noise = WhiteKernel(noise_level=self.noise, noise_level_bounds='fixed')
+        sig_F_sqrd = ConstantKernel(constant_value=self.sigma_F ** 2)
+        noise = WhiteKernel(noise_level=self.noise)
 
         model_names.append("GPR_RationalQuadratic")
-        kernel_use = (RationalQuadratic(length_scale=self.scale_length, alpha=self.alpha, alpha_bounds='fixed', length_scale_bounds='fixed') * sig_F_sqrd) + noise
+        kernel_use = (RationalQuadratic(length_scale=self.scale_length, alpha=self.alpha) * sig_F_sqrd) + noise
         model_list.append(gaussian_process.GaussianProcessRegressor(kernel=kernel_use, random_state=self.random_state))
 
         model_names.append("GPR_RBF")
-        kernel_use = (RBF(length_scale=self.scale_length, length_scale_bounds='fixed') * sig_F_sqrd) + noise
+        kernel_use = (RBF(length_scale=self.scale_length) * sig_F_sqrd) + noise
         model_list.append(gaussian_process.GaussianProcessRegressor(kernel=kernel_use, random_state=self.random_state))
 
         model_names.append("GPR_Matern32")
-        kernel_use = (Matern(nu=3 / 2, length_scale=self.scale_length, length_scale_bounds='fixed') * sig_F_sqrd) + noise
+        kernel_use = (Matern(nu=3 / 2, length_scale=self.scale_length) * sig_F_sqrd) + noise
         model_list.append(gaussian_process.GaussianProcessRegressor(kernel=kernel_use, random_state=self.random_state))
 
         model_names.append("GPR_Matern52")
-        kernel_use = (Matern(nu=5 / 2, length_scale=self.scale_length, length_scale_bounds='fixed') * sig_F_sqrd) + noise
+        kernel_use = (Matern(nu=5 / 2, length_scale=self.scale_length) * sig_F_sqrd) + noise
         model_list.append(gaussian_process.GaussianProcessRegressor(kernel=kernel_use, random_state=self.random_state))
 
         # CHECKS TO SEE WHICH MODELS TO USE IN THE RUN -----------------------------------------------------------------

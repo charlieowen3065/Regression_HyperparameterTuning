@@ -36,7 +36,8 @@ X_list = feature_set_list['org'][prop_keys[property_num]]
 
 #X1 = np.concatenate((X_list[0], X_list[2]), axis=1)
 #X1 = np.concatenate((X1, parmData), axis=1)
-X1 = np.concatenate(X_list[0:4], axis=1)
+#X1 = np.concatenate(X_list[(0,1,2,12), :, :], axis=1)
+X1 = np.concatenate([X_list[0], X_list[1], X_list[2], X_list[4]], axis=1)
 Y = property_data[:, property_num]
 goodIDs = goodId_org[:, property_num]
 sId_use = sId[goodIDs.astype(bool)]
@@ -133,9 +134,9 @@ Epsilon = 0.121475234981663
 Gamma = 0.114004404100213
 Coef0 = 6.2102011915197
 
-Noise = 1
-SigmaF = 20
-Scale_Length = 1
+Noise = 3.750925
+SigmaF = 0.313923116995073
+Scale_Length = 0.400375454433497
 Alpha = 1
 
 
@@ -143,7 +144,7 @@ reg = Regression(X1, Y,
                  C=C, epsilon=Epsilon, gamma=Gamma, coef0=Coef0,
                  noise=Noise, sigma_F=SigmaF, scale_length=Scale_Length, alpha=Alpha,
                  Nk=5, N=1, goodIDs=goodIDs, seed=seed, RemoveNaN=True, StandardizeX=True, models_use=models_use,
-                 giveKFdata=True, random_state=10)
+                 giveKFdata=True, random_state=1000)
 
 results, bestPred, kFold_data = reg.RegressionCVMult()
 
